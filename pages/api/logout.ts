@@ -1,32 +1,31 @@
 import { NextApiResponse, NextApiRequest } from "next"
-import { getFirebaseAdmin } from "@lib/auth-server"
+import admin from "@lib/firebase-admin"
 
 export default async function logout(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const admin = await getFirebaseAdmin()
-  if (req.method === "POST") {
-    const cookie = req.cookies["sd_auth"]
-
-    return admin
-      .auth()
-      .verifySessionCookie(cookie)
-      .then((decodedClaims: any) =>
-        admin
-          .auth()
-          .revokeRefreshTokens(decodedClaims.sub)
-          .then(() => {
-            res.status(200)
-            res.end(JSON.stringify({ response: "Logged out" }))
-          })
-      )
-      .catch((error: Error) => {
-        res.status(400)
-        res.end(JSON.stringify({ response: "Error! " + error.message }))
-      })
-  } else {
-    res.status(400)
-    res.end(JSON.stringify({ response: "You need to post to this endpoint." }))
+  if (req.method !== "POST") {
+    res.status(400).send({ response: "You need to post to this endpoint." })
+    return
   }
+
+  const cookie = req.cookies[process.env.NEXT_PUBLIC_COOKIE_NAME]
+
+  return admin
+    .auth()
+    .verifySessionCookie(cookie)
+    .then(({ sub }) =>
+      admin
+        .auth()
+        .revokeRefreshTokens(sub)
+        .then(() => res.status(200).send({ response: "Logged out" }))
+    )
+    .catch(() => res.status(401).send({ response: "Invalid authentication." }))
+}
+
+export const config = {
+  api: {
+    externalResolver: true,
+  },
 }

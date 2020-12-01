@@ -1,31 +1,22 @@
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
-import { getCurrentUser } from "@lib/auth-server"
-import { login, logout } from "@lib/auth-client"
+import { GetServerSideProps } from "next"
+import { getAuthState, redirectToUserPage } from "@lib/auth-server"
+import { login } from "@lib/auth-client"
 import * as Types from "types"
 
-export default function Auth({ user, authenticated }: Types.AuthState) {
+export default function Auth({ error }: Types.AuthState) {
   return (
     <div>
       <h1>Auth</h1>
-      <div>
-        <button onClick={login}>Log In</button>
-
-        <button onClick={logout}>Log Out</button>
-      </div>
-      <h2>User</h2>
-      <pre>{JSON.stringify(user, null, "  ")}</pre>
-      <h2>Authenticated</h2>
-      <pre>{authenticated ? "true" : "false"}</pre>
+      <button onClick={login}>Log In</button>
+      {error && <p>{error}</p>}
     </div>
   )
 }
 
-export async function getServerSideProps(
-  context: GetServerSidePropsContext
-): Promise<GetServerSidePropsResult<Types.AuthState>> {
-  const { user, authenticated } = await getCurrentUser(context)
-
-  return {
-    props: { user, authenticated },
-  }
+export const getServerSideProps: GetServerSideProps<Types.AuthState> = async (
+  context
+) => {
+  const authState = await getAuthState(context)
+  if (authState.user) redirectToUserPage(context)
+  return { props: authState }
 }

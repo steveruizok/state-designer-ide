@@ -1,71 +1,44 @@
 import { GetServerSidePropsContext } from "next"
 import { parseCookies } from "nookies"
-import "firebase/auth"
-import pick from "lodash/pick"
-import admin from "firebase-admin"
-import atob from "atob"
-
-var serviceAccount = JSON.parse(atob(process.env.NEXT_PUBLIC_SERVICE_ACCOUNT))
-
-export async function getFirebaseAdmin() {
-  if (!admin.apps.length) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-      databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-    })
-  }
-
-  return admin
-}
-
+import admin from "./firebase-admin"
 import * as Types from "types"
 
-async function verifyCookie(
-  cookie: string
-): Promise<{
-  authenticated: boolean
-  user: Types.User
-}> {
-  const admin = await getFirebaseAdmin()
-  if (!admin) return null
+export async function getAuthState(
+  context?: GetServerSidePropsContext
+): Promise<Types.AuthState> {
+  const state: Types.AuthState = {
+    user: null,
+    authenticated: false,
+    error: "",
+  }
 
-  let user: any = undefined
-  let authenticated: boolean = false
+  const cookies = parseCookies(context)
+  const cookie = cookies[process.env.NEXT_PUBLIC_COOKIE_NAME]
+
+  if (!cookie) return { ...state, error: "No cookie." }
 
   await admin
     .auth()
-    .verifySessionCookie(cookie, true /** checkRevoked */)
-    .then((decodedClaims: { [key: string]: any }) => {
-      authenticated = true
-      user = pick(decodedClaims, "name", "email", "picture", "uid")
+    .verifySessionCookie(cookie, true)
+    .then(({ name, email, picture, uid }) => {
+      state.authenticated = true
+      state.user = { name, email, picture, uid }
     })
     .catch(() => {
-      authenticated = false
+      state.error = "Could not verify cookie."
     })
 
-  return {
-    authenticated,
-    user,
-  }
+  return state
 }
 
-// Public API
+export function redirectToAuthPage(context: GetServerSidePropsContext) {
+  console.log("re-routing...")
+  context.res.writeHead(303, { Location: "/auth" })
+  context.res.end()
+}
 
-export async function getCurrentUser(
-  context?: GetServerSidePropsContext
-): Promise<{ user: Types.User; authenticated: boolean } | null> {
-  const cookies = parseCookies(context)
-
-  if (!cookies["sd_auth"]) return null
-
-  const authentication = await verifyCookie(cookies["sd_auth"])
-
-  if (!authentication) return null
-
-  const { user = null, authenticated = false } = authentication
-
-  return {
-    user,
-    authenticated,
-  }
+export function redirectToUserPage(context: GetServerSidePropsContext) {
+  console.log("re-routing...")
+  context.res.writeHead(303, { Location: "/user" })
+  context.res.end()
 }
