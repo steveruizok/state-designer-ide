@@ -17,14 +17,14 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "baseUrl": ".",
-    "paths": {
-      "@hooks/*": ["hooks/*"],
-      "@state/*": ["state/*"],
-      "@components/*": ["components/*"],
-      "@pages/*": ["pages/*"],
-      "@lib/*": ["lib/*"],
-    }
+		"baseUrl": ".",
+		"paths": {
+			"types": ["types.ts"],
+			"lib/*": ["lib/*"],
+			"site/*": ["site/*"],
+			"utils/*": ["utils/*"],
+			"components/*": ["components/*"],
+		}
   },
   "include": [
     "next-env.d.ts",
@@ -33,5 +33,5 @@
   ],
   "exclude": [
     "node_modules"
-  ],
+  ]
 }

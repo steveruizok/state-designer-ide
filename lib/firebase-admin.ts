@@ -1,8 +1,7 @@
+import atob from "atob"
 import admin from "firebase-admin"
 
-var serviceAccount = JSON.parse(
-  Buffer.from(process.env.NEXT_PUBLIC_SERVICE_ACCOUNT, "base64").toString()
-)
+var serviceAccount = JSON.parse(atob(process.env.NEXT_PUBLIC_SERVICE_ACCOUNT))
 
 if (!admin.apps.length) {
   admin.initializeApp({

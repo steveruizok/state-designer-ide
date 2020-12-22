@@ -8,31 +8,28 @@
     "start": "next start"
   },
   "dependencies": {
-    "@state-designer/core": "^1.3.32",
-    "@state-designer/react": "^1.3.32",
+    "@state-designer/react": "^1.3.35",
     "@stitches/react": "^0.0.2",
     "atob": "^2.1.2",
     "cookie": "^0.4.1",
-    "firebase": "^8.1.1",
-    "firebase-admin": "^9.4.1",
-    "lodash": "^4.17.20",
-    "next": "10.0.2",
+    "firebase": "^8.2.1",
+    "firebase-admin": "^9.4.2",
+    "framer-motion": "^3.1.1",
+    "lodash-es": "^4.17.20",
+    "monaco-editor": "^0.21.2",
+    "next": "10.0.3",
     "nookies": "^2.5.0",
-    "ololog": "^1.1.164",
     "perfect-arrows": "^0.3.3",
+    "prettier": "^2.2.1",
     "react": "17.0.1",
-    "react-dom": "17.0.1"
+    "react-dom": "17.0.1",
+    "react-feather": "^2.0.9",
+    "react-live": "^2.2.3",
+    "use-monaco": "^0.0.29",
+    "use-motion-resize-observer": "^2.0.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.165",
-    "@types/node": "^14.14.10",
-    "@types/react": "^17.0.0",
-    "typescript": "^4.1.2",
-    "@types/atob": "^2.1.2",
-    "@types/cookie": "^0.4.0"
-  },
-  "prettier": {
-    "semi": false,
-    "trailingComma": "es5"
+    "typescript": "^4.1.3"
   }
 }

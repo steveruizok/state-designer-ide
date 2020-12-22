@@ -11,7 +11,7 @@ const config = {
 
 if (!firebase.apps.length) {
   firebase.initializeApp(config)
-  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE)
 }
 
 export default firebase

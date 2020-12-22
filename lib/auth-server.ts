@@ -1,44 +1,90 @@
 import { GetServerSidePropsContext } from "next"
 import { parseCookies } from "nookies"
+import pick from "lodash/pick"
+
 import admin from "./firebase-admin"
 import * as Types from "types"
 
-export async function getAuthState(
+async function verifyCookie(
+  cookie: string
+): Promise<{
+  authenticated: boolean
+  user: Types.User
+}> {
+  if (!admin) return null
+
+  let user: any = undefined
+  let authenticated: boolean = false
+
+  await admin
+    .auth()
+    .verifySessionCookie(cookie, true /** checkRevoked */)
+    .then((decodedClaims: { [key: string]: any }) => {
+      user = pick(decodedClaims, "name", "email", "picture", "uid")
+      user.authenticated = true
+      authenticated = true
+    })
+    .catch(() => {
+      authenticated = false
+    })
+
+  return {
+    authenticated,
+    user,
+  }
+}
+// Public API
+
+export function redirectToAuthPage(context: GetServerSidePropsContext) {
+  context.res.writeHead(303, { Location: "/auth" })
+  context.res.end()
+  return null
+}
+
+export function redirectToUserPage(
+  context: GetServerSidePropsContext,
+  uid: string
+) {
+  context.res.writeHead(303, { Location: `/u/${uid}` })
+  context.res.end()
+  return null
+}
+
+export function redirectToNotFoundPage(context: GetServerSidePropsContext) {
+  context.res.writeHead(303, { Location: "/404" })
+  context.res.end()
+  return null
+}
+
+export async function getCurrentUser(
   context?: GetServerSidePropsContext
 ): Promise<Types.AuthState> {
-  const state: Types.AuthState = {
+  const cookies = parseCookies(context)
+
+  const result = {
     user: null,
     authenticated: false,
     error: "",
   }
 
-  const cookies = parseCookies(context)
-  const cookie = cookies[process.env.NEXT_PUBLIC_COOKIE_NAME]
+  if (!cookies[process.env.NEXT_PUBLIC_COOKIE_NAME]) {
+    result.error = "No cookie."
+    return result
+  }
 
-  if (!cookie) return { ...state, error: "No cookie." }
+  const authentication = await verifyCookie(
+    cookies[process.env.NEXT_PUBLIC_COOKIE_NAME]
+  )
 
-  await admin
-    .auth()
-    .verifySessionCookie(cookie, true)
-    .then(({ name, email, picture, uid }) => {
-      state.authenticated = true
-      state.user = { name, email, picture, uid }
-    })
-    .catch(() => {
-      state.error = "Could not verify cookie."
-    })
+  if (!authentication) {
+    result.error = "Could not verify cookie."
+    return result
+  }
 
-  return state
-}
+  const { user = null, authenticated = false } = authentication
 
-export function redirectToAuthPage(context: GetServerSidePropsContext) {
-  console.log("re-routing...")
-  context.res.writeHead(303, { Location: "/auth" })
-  context.res.end()
-}
+  result.user = user
+  result.authenticated = authenticated
 
-export function redirectToUserPage(context: GetServerSidePropsContext) {
-  console.log("re-routing...")
-  context.res.writeHead(303, { Location: "/user" })
-  context.res.end()
+  return result
 }
