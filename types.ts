@@ -2,6 +2,8 @@
 
 export type LayoutOffset = "content" | "main" | "code" | "detail" | "console"
 
+export type CodeEditorTab = "state" | "view" | "static"
+
 // Data
 
 export interface User {

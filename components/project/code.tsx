@@ -1,21 +1,24 @@
 // @refresh reset
 import * as React from "react"
+import prettier from "prettier/standalone"
+import parser from "prettier/parser-typescript"
 import debounce from "lodash/debounce"
 import { styled, IconButton } from "components/theme"
 import { Save, RefreshCcw, AlertCircle } from "react-feather"
-import { useMonacoEditor, useMonaco, useEditor, useFile } from "use-monaco"
+import { useMonaco, useEditor, useFile } from "use-monaco"
 import themes from "use-monaco/themes"
+import { CodeEditorTab } from "types"
 import { DragHandleHorizontal } from "./drag-handles"
-import { projectState, CODE_COL_WIDTH } from "./index"
+import { CODE_COL_WIDTH } from "./index"
 import { useStateDesigner, createState } from "@state-designer/react"
-import {
-  saveProjectStateCode,
-  saveProjectViewCode,
-  saveProjectStaticCode,
-} from "lib/database"
+import { saveProjectCode } from "lib/database"
+import { codeValidators, codeFormatValidators } from "lib/eval"
+
+const EDITOR_TABS = ["state", "view", "static"]
 
 export const codePanelState = createState({
   data: {
+    activeTab: "state" as CodeEditorTab,
     monaco: null as any,
     editor: null as any,
     models: {
@@ -24,37 +27,68 @@ export const codePanelState = createState({
       static: null as any,
     },
     viewStates: {
-      state: null as any,
-      view: null as any,
-      static: null as any,
+      state: {
+        clean: null as any,
+        dirty: null as any,
+      },
+      view: {
+        clean: null as any,
+        dirty: null as any,
+      },
+      static: {
+        clean: null as any,
+        dirty: null as any,
+      },
     },
     code: {
       state: {
         dirty: "",
         clean: "",
         error: "",
-        unsaved: false,
       },
       view: {
         dirty: "",
         clean: "",
         error: "",
-        unsaved: false,
       },
       static: {
         dirty: "",
         clean: "",
         error: "",
-        unsaved: false,
       },
     },
   },
   on: {
+    CHANGED_AUTH: "setReadOnly",
     LOADED: "loadData",
     RESIZED_PANEL: "resizeEditor",
     SOURCE_UPDATED: ["updateFromDatabase"],
+    CHANGED_CODE: { secretlyDo: "updateDirtyCode" },
+    RESET_CODE: ["resetCode", "restoreActiveTabCleanViewState"],
   },
   states: {
+    error: {
+      initial: "noError",
+      states: {
+        noError: {
+          on: {
+            CHANGED_CODE: {
+              if: "errorInCurrentTab",
+              to: "hasError",
+            },
+            SAVED_CODE: ["saveCode", "saveCurrentCleanViewState"],
+          },
+        },
+        hasError: {
+          on: {
+            CHANGED_CODE: {
+              unless: "errorInCurrentTab",
+              to: "noError",
+            },
+          },
+        },
+      },
+    },
     tab: {
       initial: "loading",
       states: {
@@ -62,45 +96,66 @@ export const codePanelState = createState({
           on: {
             SOURCE_LOADED: {
               if: "hasEditor",
-              do: ["initialLoadFromDatabase", "updateModels", "formatEditor"],
+              do: ["initialLoadFromDatabase", "updateModels"],
               to: "state",
             },
           },
         },
         state: {
-          onEnter: ["loadStateTabViewState", "formatEditor"],
-          onExit: "saveStateTabViewState",
+          onEnter: [
+            "setStateActiveTab",
+            "restoreActiveTabDirtyViewState",
+            {
+              if: "errorInCurrentTab",
+              to: "hasError",
+              else: { to: "noError" },
+            },
+          ],
+          onExit: "saveCurrentViewState",
           on: {
             SELECTED_VIEW_TAB: { to: "tab.view" },
             SELECTED_STATIC_TAB: { to: "tab.static" },
-            CHANGED_CODE: { do: ["updateStateDirtyCode"] },
-            SAVED_CODE: { if: "noStateError", do: "saveStateCode" },
           },
         },
         view: {
-          onEnter: ["loadViewTabViewState", "formatEditor"],
-          onExit: "saveViewTabViewState",
+          onEnter: [
+            "setViewActiveTab",
+            "restoreActiveTabDirtyViewState",
+            {
+              if: "errorInCurrentTab",
+              to: "hasError",
+              else: { to: "noError" },
+            },
+          ],
+          onExit: "saveCurrentViewState",
           on: {
             SELECTED_STATE_TAB: { to: "tab.state" },
             SELECTED_STATIC_TAB: { to: "tab.static" },
-            CHANGED_CODE: { do: ["updateViewDirtyCode"] },
-            SAVED_CODE: { if: "noViewError", do: "saveViewCode" },
           },
         },
         static: {
-          onEnter: ["loadStaticTabViewState", "formatEditor"],
-          onExit: "saveStaticTabViewState",
+          onEnter: [
+            "setStaticActiveTab",
+            "restoreActiveTabDirtyViewState",
+            {
+              if: "errorInCurrentTab",
+              to: "hasError",
+              else: { to: "noError" },
+            },
+          ],
+          onExit: "saveCurrentViewState",
           on: {
             SELECTED_STATE_TAB: { to: "tab.state" },
             SELECTED_VIEW_TAB: { to: "tab.view" },
-            CHANGED_CODE: { do: ["updateStaticDirtyCode"] },
-            SAVED_CODE: { if: "noStaticError", do: "saveStaticCode" },
           },
         },
       },
     },
   },
   conditions: {
+    errorInCurrentTab(data) {
+      return data.code[data.activeTab].error !== ""
+    },
     hasEditor(data) {
       return !!data.editor
     },
@@ -122,99 +177,98 @@ export const codePanelState = createState({
       data.monaco = monaco
       data.editor = editor
     },
-    initialLoadFromDatabase(data, { source }) {
-      data.code.state.clean = JSON.parse(source.code)
-      data.code.state.dirty = data.code.state.clean
-      data.code.view.clean = JSON.parse(source.jsx)
-      data.code.view.dirty = data.code.view.clean
-      data.code.static.clean = JSON.parse(source.statics)
-      data.code.static.dirty = data.code.static.clean
+    initialLoadFromDatabase(data, payload = {}) {
+      EDITOR_TABS.forEach((tab) => {
+        data.code[tab].clean = payload[tab]
+        data.code[tab].dirty = payload[tab]
+      })
     },
-    updateFromDatabase(data, { source }) {
-      data.code.state.clean = JSON.parse(source.code)
-      data.code.view.clean = JSON.parse(source.jsx)
-      data.code.static.clean = JSON.parse(source.statics)
+    updateFromDatabase(data, payload = {}) {
+      EDITOR_TABS.forEach((tab) => {
+        data.code[tab].clean = payload[tab]
+      })
     },
     updateModels(data) {
-      data.models.state.setValue(data.code.state.clean)
-      data.models.view.setValue(data.code.view.clean)
-      data.models.static.setValue(data.code.static.clean)
+      EDITOR_TABS.forEach((tab) => {
+        data.models[tab].setValue(data.code[tab].clean)
+      })
+    },
+    updateCleanViewStates(data) {
+      EDITOR_TABS.forEach((tab) => {
+        data.viewStates[tab].clean.setValue(data.code[tab].clean)
+      })
+    },
+    setStateActiveTab(data) {
+      data.activeTab = "state"
+    },
+    setViewActiveTab(data) {
+      data.activeTab = "view"
+    },
+    setStaticActiveTab(data) {
+      data.activeTab = "static"
     },
     // Resizing
     resizeEditor(data) {
+      data.editor.layout()
+    },
+    saveCurrentCleanViewState(data) {
+      const { viewStates, activeTab, editor } = data
+      viewStates[activeTab].dirty = editor.saveViewState()
+    },
+    saveCurrentViewState(data) {
+      const { activeTab, editor, viewStates } = data
+      viewStates[activeTab].dirty = editor.saveViewState()
+    },
+    restoreActiveTabDirtyViewState(data) {
+      const { activeTab, editor, models, viewStates } = data
+      editor.setModel(models[activeTab])
+      editor.focus()
+      editor.restoreViewState(viewStates[activeTab].dirty)
+    },
+    restoreActiveTabCleanViewState(data) {
+      const { activeTab, editor, models, viewStates } = data
+      editor.setModel(models[activeTab])
+      editor.focus()
+      editor.restoreViewState(viewStates[activeTab].clean)
+    },
+    updateDirtyCode(data, payload: { code: string }) {
+      const { models, code, activeTab } = data
+      if (!codeFormatValidators[activeTab](payload.code)) {
+        models[activeTab].undo()
+      } else {
+        code[activeTab].dirty = payload.code
+        const validator = codeValidators[activeTab]
+        if (validator) {
+          code[activeTab].error = validator(
+            code[activeTab].dirty,
+            code.static.dirty,
+          )
+        }
+      }
+    },
+    setErrorInCurrentTab(data) {
+      const { activeTab } = data
+      data.code[activeTab].error = data.code[activeTab].error
+    },
+    resetCode(data) {
+      const { code, activeTab, models } = data
+      const model = models[activeTab]
+      model.setValue(code[activeTab].clean)
+    },
+    saveCode(data, payload: { oid: string; pid: string }) {
+      const { activeTab } = data
+      const { oid, pid } = payload
+      saveProjectCode(pid, oid, activeTab, data.code[activeTab].dirty)
+    },
+    setReadOnly(data, payload: { oid: string; pid: string }) {
       const { editor } = data
-      editor.layout()
-    },
-    // View States
-    loadStateTabViewState(data) {
-      const { editor, models, viewStates } = data
-      editor.setModel(models.state)
-      editor.restoreViewState(viewStates.state)
-    },
-    loadViewTabViewState(data) {
-      const { editor, models, viewStates } = data
-      editor.setModel(models.view)
-      editor.restoreViewState(viewStates.view)
-    },
-    loadStaticTabViewState(data) {
-      const { editor, models, viewStates } = data
-      editor.setModel(models.static)
-      editor.restoreViewState(viewStates.static)
-    },
-    saveStateTabViewState(data) {
-      const { editor, viewStates } = data
-      const viewState = editor.saveViewState()
-      viewStates.state = viewState
-    },
-    saveViewTabViewState(data) {
-      const { editor, viewStates } = data
-      const viewState = editor.saveViewState()
-      viewStates.view = viewState
-    },
-    saveStaticTabViewState(data) {
-      const { editor, viewStates } = data
-      const viewState = editor.saveViewState()
-      viewStates.static = viewState
-    },
-    formatEditor(data) {
-      const { editor } = data
-      editor.getAction("editor.action.formatDocument").run()
-    },
-    // Code Changes
-    updateStateDirtyCode(data, payload: { code: string }) {
-      data.code.state.dirty = payload.code
-      // data.code.state.error = validateStateCode(code)
-      data.code.state.unsaved = true
-    },
-    updateViewDirtyCode(data, payload: { code: string }) {
-      data.code.view.dirty = payload.code
-      // data.code.state.error = validateViewCode(code)
-      data.code.view.unsaved = true
-    },
-    updateStaticDirtyCode(data, payload: { code: string }) {
-      data.code.static.dirty = payload.code
-      // data.code.state.error = validateStaticCode(code)
-      data.code.static.unsaved = true
-    },
-    // Save Changes
-    saveStateCode(data, payload: { oid: string; pid: string }) {
       const { oid, pid } = payload
-      saveProjectStateCode(pid, oid, data.code.state.dirty)
-    },
-    saveViewCode(data, payload: { oid: string; pid: string }) {
-      const { oid, pid } = payload
-      saveProjectViewCode(pid, oid, data.code.view.dirty)
-    },
-    saveStaticCode(data, payload: { oid: string; pid: string }) {
-      const { oid, pid } = payload
-      saveProjectStaticCode(pid, oid, data.code.static.dirty)
+      // if (editor) {
+      //   editor.updateOptions({ readOnly: oid !== pid })
+      // }
     },
   },
 })
-
-// const stateEditorState = createEditorState(() => true)
-// const viewEditorState = createEditorState(() => true)
-// const staticEditorState = createEditorState(() => true)
 
 interface CodePanelProps {
   uid?: string
@@ -225,9 +279,6 @@ interface CodePanelProps {
 export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   // Local state
   const local = useStateDesigner(codePanelState)
-  // const localStateEditorState = useStateDesigner(stateEditorState)
-  // const localViewEditorState = useStateDesigner(viewEditorState)
-  // const localStaticEditorState = useStateDesigner(staticEditorState)
 
   const { monaco } = useMonaco({
     plugins: {
@@ -242,18 +293,21 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
     path: "state.js",
     monaco,
     defaultContents: "",
+    language: "typescript",
   })
 
   const viewModel = useFile({
     path: "view.js",
     monaco,
     defaultContents: "",
+    language: "typescript",
   })
 
   const staticModel = useFile({
     path: "static.js",
     monaco,
     defaultContents: "",
+    language: "typescript",
   })
 
   const { editor, containerRef } = useEditor({
@@ -261,7 +315,6 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
     model: stateModel,
     options: {
       fontSize: 13,
-      readOnly: oid !== uid,
       showUnused: false,
       quickSuggestions: false,
       fontFamily: "Fira Code",
@@ -273,31 +326,63 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
       cursorBlinking: "smooth",
       lineNumbers: "off",
     },
+    editorDidMount: (editor) => {
+      editor.updateOptions({
+        readOnly: oid !== uid,
+      })
+    },
     onChange: (code) => local.send("CHANGED_CODE", { code }),
   })
 
   const resizeEditor = React.useCallback(
     debounce(() => local.send("RESIZED_PANEL"), 48),
-    []
+    [],
   )
 
   React.useEffect(() => {
     if (!(monaco && editor)) return
 
-    // stateEditorState.send("LOADED_MODEL", { model: stateModel })
-    // viewEditorState.send("LOADED_MODEL", { model: viewModel })
-    // staticEditorState.send("LOADED_MODEL", { model: staticModel })
+    // setup prettier formatter
+    const prettierFormatter = {
+      provideDocumentFormattingEdits(model) {
+        try {
+          const text = prettier.format(model.getValue(), {
+            parser: "typescript",
+            plugins: [parser],
+            semi: false,
+            trailingComma: "es5",
+            tabWidth: 2,
+          })
+
+          const range = model.getFullModelRange()
+
+          return [{ range, text }]
+        } catch (e) {
+          return []
+        }
+      },
+    }
+    monaco.languages.registerDocumentFormattingEditProvider(
+      "javascript",
+      prettierFormatter,
+    )
+    monaco.languages.registerDocumentFormattingEditProvider(
+      "typescript",
+      prettierFormatter,
+    )
 
     editor.onKeyDown((e) => {
       if (e.metaKey && e.code === "KeyS") {
         e.preventDefault()
+        if (error) return
         if (uid !== oid) return // Unsafe!
+
         editor
           .getAction("editor.action.formatDocument")
           .run()
           .then(() => {
-            const currentValue = editor.getValue()
-            local.send("SAVED_CODE", { code: currentValue, oid, pid })
+            const code = editor.getValue()
+            local.send("SAVED_CODE", { code, oid, pid })
           })
       }
     })
@@ -315,12 +400,20 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   }, [monaco, editor])
 
   React.useEffect(() => {
-    if (editor) {
-      editor.updateOptions({ readOnly: oid !== uid })
-    }
-  }, [oid, uid])
+    local.send("CHANGED_AUTH", { oid, pid })
+  }, [editor, oid, uid])
 
   const { code } = local.data
+
+  const activeTab: CodeEditorTab = local.whenIn({
+    "tab.state": "state",
+    "tab.view": "view",
+    "tab.static": "static",
+    default: "state",
+  })
+
+  const error = code[activeTab].error
+  const dirty = code[activeTab].dirty !== code[activeTab].clean
 
   return (
     <CodeContainer>
@@ -350,18 +443,36 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
         </TabButton>
       </Tabs>
       <EditorContainer ref={containerRef} />
-      <Status>
+      <CodeEditorControls>
         <ErrorMessage>
-          <AlertCircle size={16} />
-          ...
+          {error && (
+            <>
+              <AlertCircle size={16} />
+              {error}
+            </>
+          )}
         </ErrorMessage>
-        <IconButton>
+        <IconButton disabled={!dirty} onClick={() => local.send("RESET_CODE")}>
           <RefreshCcw />
         </IconButton>
-        <IconButton>
+        <IconButton
+          disabled={!local.can("SAVED_CODE")}
+          onClick={async () => {
+            if (error) return
+            if (uid !== oid) return // Unsafe!
+
+            editor
+              .getAction("editor.action.formatDocument")
+              .run()
+              .then(() => {
+                const code = editor.getValue()
+                local.send("SAVED_CODE", { code, oid, pid })
+              })
+          }}
+        >
           <Save />
         </IconButton>
-      </Status>
+      </CodeEditorControls>
       <DragHandleHorizontal
         align="right"
         width={CODE_COL_WIDTH}
@@ -381,7 +492,6 @@ const CodeContainer = styled.div({
   width: "100%",
   minWidth: 0,
   maxWidth: "100%",
-  overflow: "hidden",
   gridAutoColumns: "1fr",
   gridTemplateRows: `40px 1fr 40px`,
   borderLeft: "2px solid $border",
@@ -438,9 +548,17 @@ const TabButton = styled.button({
   },
 })
 
-const Status = styled.div({
+const EditorContainer = styled.div({
+  height: "100%",
+  width: "100%",
+  overflow: "hidden",
+})
+
+const CodeEditorControls = styled.div({
   borderTop: "2px solid $border",
-  display: "flex",
+  display: "grid",
+  gridTemplateColumns: "1fr auto auto",
+  gridAutoFlow: "column",
   alignItems: "center",
 })
 
@@ -458,143 +576,3 @@ const ErrorMessage = styled.div({
     mr: "$1",
   },
 })
-
-const EditorContainer = styled.div({
-  height: "100%",
-  width: "100%",
-  overflow: "hidden",
-})
-
-// const CodeEditor: React.FC<{
-//   value: string
-//   clean: string
-//   onSave: (code: string) => void
-//   canSave: () => boolean
-//   onChange: (value: string) => void
-//   editorDidMount: (value: string, editor: any) => void
-//   validate?: (code: string) => boolean
-//   fontSize?: number
-//   readOnly?: boolean
-//   height?: string
-//   width?: string
-//   theme?: string
-//   language?: string
-// }> = ({
-//   value,
-//   clean,
-//   validate,
-//   canSave,
-//   onChange,
-//   onSave,
-//   editorDidMount,
-//   fontSize = 13,
-//   readOnly = false,
-//   ...props
-// }) => {
-//   React.useEffect(() => {
-//     if (typeof window !== "undefined") {
-//       initMonaco()
-//     }
-//   }, [])
-
-//   const rPreviousValue = React.useRef(value)
-//   const rEditor = React.useRef<any>()
-
-//   // We might be updating from firebase changes
-//   React.useEffect(() => {
-//     const editor = rEditor.current
-//     if (!editor) return
-//     const currentValue = editor.getValue()
-
-//     // We've updated from firebase changes
-//     if (clean !== currentValue) {
-//       editor.setValue(clean)
-//     } else {
-//       // We've updated from saved local changes, so noop
-//     }
-//   }, [clean])
-
-//   const handleEditorDidMount = (getValue, editor) => {
-//     rEditor.current = editor
-//     const model = editor.getModel()
-
-//     model.setValue(value)
-//     model.updateOptions({ tabSize: 2 })
-
-//     // Update current value when the model changes
-//     editor.onDidChangeModelContent(() => {
-//       const currentValue = editor.getValue()
-
-//       const previousValue = rPreviousValue.current
-//       const isValid = validate ? validate(currentValue) : true
-
-//       if (isValid) {
-//         onChange(currentValue)
-//         rPreviousValue.current = currentValue
-//       } else {
-//         // User's change was invalid, so undo the change
-//         if (currentValue === previousValue) return
-//         const model = editor.getModel()
-//         model.undo()
-//       }
-//     })
-
-//     // Add a buffer to the top of the editor
-//     editor.changeViewZones((changeAccessor) => {
-//       const domNode = document && document.createElement("div")
-//       changeAccessor.addZone({
-//         afterLineNumber: 0,
-//         heightInLines: 1,
-//         domNode: domNode,
-//       })
-//     })
-
-//     // Save event
-//     editor.onKeyDown(async (e: KeyboardEvent) => {
-//       if (e.metaKey && e.code === "KeyS") {
-//         e.preventDefault()
-
-//         let currentValue = editor.getValue()
-
-//         const isValid = validate ? validate(currentValue) : true
-
-//         if (isValid && canSave()) {
-//           // Run prettier
-//           await editor.getAction("editor.action.formatDocument").run()
-
-//           // Then update previous value
-//           currentValue = editor.getValue()
-//           rPreviousValue.current = currentValue
-
-//           // And run onSave
-//           onSave(currentValue)
-//         }
-//       }
-//     })
-
-//     editorDidMount(getValue, editor)
-//   }
-
-//   return (
-//     <Editor
-//       {...props}
-//       language="javascript"
-//       theme="light"
-//       options={{
-//         fontSize,
-//         readOnly,
-//         showUnused: false,
-//         quickSuggestions: false,
-//         fontFamily: "Fira Code",
-//         fontWeight: "normal",
-//         minimap: { enabled: false },
-//         smoothScrolling: true,
-//         lineDecorationsWidth: 4,
-//         fontLigatures: true,
-//         cursorBlinking: "smooth",
-//         lineNumbers: "off",
-//       }}
-//       editorDidMount={handleEditorDidMount}
-//     />
-//   )
-// }

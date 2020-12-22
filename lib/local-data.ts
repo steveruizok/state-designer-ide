@@ -10,11 +10,9 @@ export const panelOffsets = {
 
 // Update offets from local storage
 function loadLocalOffsets() {
-  if (typeof window !== "undefined") {
-    const savedOffsets = window.localStorage.getItem(`sd_panel_offsets`)
-    if (savedOffsets !== null) {
-      Object.assign(panelOffsets, JSON.parse(savedOffsets))
-    }
+  const savedOffsets = window.localStorage.getItem(`sd_panel_offsets`)
+  if (savedOffsets !== null) {
+    Object.assign(panelOffsets, JSON.parse(savedOffsets))
   }
 }
 
@@ -23,19 +21,14 @@ function updateCssVariables() {
   for (let key in panelOffsets) {
     document.documentElement.style.setProperty(
       `--${key}-offset`,
-      panelOffsets[key] + "px"
+      panelOffsets[key] + "px",
     )
   }
 }
 
 // Save current offsets to local storage
 function saveOffsets() {
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(
-      `sd_panel_offsets`,
-      JSON.stringify(panelOffsets)
-    )
-  }
+  window.localStorage.setItem(`sd_panel_offsets`, JSON.stringify(panelOffsets))
 }
 
 // Set a panel offset
@@ -46,6 +39,8 @@ export function setPanelOffset(offset: LayoutOffset, value: number) {
 }
 
 export function setupOffsets() {
+  if (typeof document === "undefined") return
+  if (typeof window === "undefined") return
   loadLocalOffsets()
   updateCssVariables()
 }

@@ -41,8 +41,16 @@ export const TitleRow = styled.div({
 export const IconButton = styled.button({
   bg: "transparent",
   borderRadius: 4,
+  fontFamily: "$body",
+  fontSize: "$0",
+  fontWeight: "bold",
   border: "none",
   outline: "none",
+  display: "flex",
+  alignItems: "center",
+  "& > p": {
+    pr: "$1",
+  },
   "&:hover": {
     bg: "$muted",
     color: "red",

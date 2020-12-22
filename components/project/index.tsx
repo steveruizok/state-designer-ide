@@ -1,18 +1,20 @@
 import * as React from "react"
 import Link from "next/link"
 import { Home, Sun, Copy, Plus, Minus } from "react-feather"
-import { styled, IconButton } from "components/theme"
+
+import { setupOffsets } from "lib/local-data"
+import { subscribeToDocSnapshot, forkProject } from "lib/database"
+import { login, logout } from "lib/auth-client"
+import { User, ProjectData } from "types"
+import projectState from "./state"
+
+import { styled, IconButton, Text } from "components/theme"
+
 import {
   DragHandleHorizontalRelative,
   DragHandleVertical,
   DragHandleHorizontal,
 } from "./drag-handles"
-import { setupOffsets } from "lib/local-data"
-import { subscribeToDocSnapshot } from "lib/database"
-import { login, logout } from "lib/auth-client"
-import { createState } from "@state-designer/react"
-import { User } from "types"
-
 import Content from "./content"
 import Code, { codePanelState } from "./code"
 import Details from "./details"
@@ -28,43 +30,8 @@ interface ProjectViewProps {
   user: User
   isOwner: boolean
   authenticated: boolean
+  project: ProjectData
 }
-
-export const projectState = createState({
-  data: {
-    oid: "",
-    pid: "",
-    name: "",
-    code: {
-      state: "",
-      view: "",
-      static: "",
-    },
-  },
-  initial: "loading",
-  on: {
-    SOURCE_UPDATED: { do: "updateFromDatabase" },
-  },
-  states: {
-    loading: {
-      on: {
-        SOURCE_LOADED: { do: "updateFromDatabase", to: "ready" },
-      },
-    },
-    ready: {
-      on: {},
-    },
-  },
-  actions: {
-    updateFromDatabase(data, { source }) {
-      data.code.state = source.code
-      data.code.view = source.jsx
-      data.code.static = source.statics
-      data.name = source.name
-      codePanelState.send("SOURCE_LOADED", { source })
-    },
-  },
-})
 
 export default function ProjectView({
   user,
@@ -82,7 +49,6 @@ export default function ProjectView({
     return subscribeToDocSnapshot(pid, oid, (doc) => {
       const source = doc.data()
       projectState.send("SOURCE_UPDATED", { source })
-      codePanelState.send("SOURCE_UPDATED", { source })
     })
   }, [oid, pid])
 
@@ -102,14 +68,17 @@ export default function ProjectView({
       </MenuContainer>
       <TitleContainer>Title</TitleContainer>
       <ControlsContainer>
+        {user?.authenticated && (
+          <IconButton onClick={() => forkProject(pid, oid, user?.uid)}>
+            {!isOwner && <Text>Copy Project</Text>}
+            <Copy />
+          </IconButton>
+        )}
         <IconButton>
           <Minus />
         </IconButton>
         <IconButton>
           <Plus />
-        </IconButton>
-        <IconButton>
-          <Copy />
         </IconButton>
         <IconButton>
           <Sun />

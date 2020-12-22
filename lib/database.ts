@@ -6,7 +6,7 @@ import * as Types from "types"
 export async function getProjectInfo(
   pid: string,
   oid: string,
-  uid?: string
+  uid?: string,
 ): Promise<Types.ProjectResponse> {
   const project = await db
     .collection("users")
@@ -25,7 +25,7 @@ export async function getProjectInfo(
 
 export async function getProjectData(
   pid: string,
-  oid: string
+  oid: string,
 ): Promise<Types.ProjectData> {
   const initial = await db
     .collection("users")
@@ -48,8 +48,8 @@ export function subscribeToDocSnapshot(
   pid: string,
   oid: string,
   callback: (
-    doc: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>
-  ) => void
+    doc: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>,
+  ) => void,
 ) {
   let unsub: any
 
@@ -77,32 +77,41 @@ export function subscribeToDocSnapshot(
 }
 
 export function saveProjectStateCode(pid: string, oid: string, code: string) {
-  db.collection("users")
-    .doc(oid)
-    .collection("projects")
-    .doc(pid)
-    .update({
-      code: JSON.stringify(code),
-    })
+  db.collection("users").doc(oid).collection("projects").doc(pid).update({
+    code: code,
+  })
 }
 
 export function saveProjectViewCode(pid: string, oid: string, code: string) {
-  db.collection("users")
-    .doc(oid)
-    .collection("projects")
-    .doc(pid)
-    .update({
-      jsx: JSON.stringify(code),
-    })
+  db.collection("users").doc(oid).collection("projects").doc(pid).update({
+    jsx: code,
+  })
 }
 
 export function saveProjectStaticCode(pid: string, oid: string, code: string) {
+  db.collection("users").doc(oid).collection("projects").doc(pid).update({
+    statics: code,
+  })
+}
+
+const codeKeys = {
+  state: "code",
+  view: "jsx",
+  static: "statics",
+}
+
+export function saveProjectCode(
+  pid: string,
+  oid: string,
+  activeTab: Types.CodeEditorTab,
+  code: string,
+) {
   db.collection("users")
     .doc(oid)
     .collection("projects")
     .doc(pid)
     .update({
-      statics: JSON.stringify(code),
+      [codeKeys[activeTab]]: JSON.stringify(code),
     })
 }
 
@@ -143,21 +152,23 @@ export async function addUser(uid: string) {
 
   if (initial.exists) {
     if (!initial.data().exists) {
-      user.update({ exists: true }).catch((e) => {
+      user.update({ exists: true, loggedIn: Date.now() }).catch((e) => {
         console.log("Error setting user", uid, e.message)
       })
     }
   } else {
-    user.set({ exists: true }).catch((e) => {
-      console.log("Error setting user", uid, e.message)
-    })
+    user
+      .set({ exists: true, created: Date.now(), loggedIn: Date.now() })
+      .catch((e) => {
+        console.log("Error setting user", uid, e.message)
+      })
   }
 }
 
 export async function addProject(
   pid: string,
   oid: string,
-  template: { [key: string]: any }
+  template: { [key: string]: any },
 ) {
   const project = getProject(pid, oid)
   const initial = await project.get()
@@ -178,7 +189,7 @@ export async function addProject(
 export function updateProject(
   pid: string,
   oid: string,
-  changes: { [key: string]: any }
+  changes: { [key: string]: any },
 ) {
   return getProject(pid, oid).update({
     ...changes,
@@ -188,7 +199,7 @@ export function updateProject(
 export async function createProject(
   pid: string,
   uid: string,
-  templateId = "toggle"
+  templateId = "toggle",
 ) {
   const template = await db.collection("templates").doc(templateId).get()
   return await addProject(pid, uid, template.data())
@@ -198,7 +209,7 @@ export async function updateProjectJsx(
   pid: string,
   oid: string,
   uid: string,
-  code: string
+  code: string,
 ) {
   // must be owner
   if (uid === oid) {
@@ -212,7 +223,7 @@ export async function updateProjectCode(
   pid: string,
   oid: string,
   uid: string,
-  code: string
+  code: string,
 ) {
   // must be owner
   if (uid === oid) {
@@ -227,12 +238,7 @@ export async function createNewProject(pid: string, oid: string, uid: string) {
   router.push(`/${uid}/${pid}`)
 }
 
-export async function forkProject(
-  pid: string,
-  oid: string,
-  uid: string,
-  nextpid?: string
-) {
+export async function forkProject(pid: string, oid: string, uid?: string) {
   const project = await getProject(pid, oid).get()
 
   if (!project.exists) {
@@ -242,25 +248,36 @@ export async function forkProject(
 
   const data = project.data()
 
-  const doc = db
-    .collection("users")
-    .doc(uid)
-    .collection("projects")
-    .doc(nextpid ? nextpid : pid)
+  let doc = db.collection("users").doc(uid).collection("projects").doc(pid)
 
-  const initial = await doc.get()
+  let initial = await doc.get()
 
-  if (initial.exists) {
-    // Not sure
-    console.log("Project already exists!")
-  } else {
-    await doc.set({
-      ...data,
-      owner: uid,
-    })
+  let i = 0
+  let id = pid
+  let exists = initial.exists
+
+  while (exists) {
+    i++
+    id = `${pid}_copy_${i}`
+
+    doc = db.collection("users").doc(uid).collection("projects").doc(id)
+    initial = await doc.get()
+    exists = initial.exists
   }
 
-  router.push(`/${uid}/${nextpid ? nextpid : pid}`)
+  await doc.set({
+    ...data,
+    owner: uid,
+  })
+
+  console.log({
+    ...data,
+    owner: uid,
+  })
+
+  console.log(`created new project at /u/${uid}/p/${id}`)
+
+  router.push(`/u/${uid}/p/${id}`)
 }
 
 export async function getUserProjects(uid: string, oid: string) {
@@ -294,7 +311,7 @@ export async function getUserProjectById(uid: string, pid: string) {
 export async function isProjectNameValid(
   pid: string,
   uid: string,
-  name: string
+  name: string,
 ) {
   return true
 }
@@ -302,7 +319,7 @@ export async function isProjectNameValid(
 export async function updateProjectName(
   pid: string,
   uid: string,
-  name: string
+  name: string,
 ) {
   updateProject(pid, uid, { name })
 }

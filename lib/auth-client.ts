@@ -2,6 +2,7 @@
 
 import router from "next/router"
 import firebase from "./firebase"
+import { addUser } from "./database"
 
 async function clearUserToken() {
   var path = "/api/logout"
@@ -35,6 +36,9 @@ export async function login() {
   const token = await auth.user.getIdToken()
 
   await postUserToken(token)
+
+  await addUser(auth.user.uid)
+
   await firebase.auth().signOut()
   router.reload()
 }
