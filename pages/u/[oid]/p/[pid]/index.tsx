@@ -1,9 +1,11 @@
+import * as React from "react"
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 import { getCurrentUser } from "lib/auth-server"
 import { getProjectData, getProjectInfo } from "lib/database"
 import * as Types from "types"
 import { single } from "utils"
 import dynamic from "next/dynamic"
+import { setupUI } from "lib/local-data"
 const ProjectView = dynamic(() => import("components/project"))
 
 interface ProjectPageProps {
@@ -17,7 +19,14 @@ export default function ProjectPage({
   projectResponse: { pid, oid, isOwner },
   projectData,
 }: ProjectPageProps) {
-  return (
+  const [isMounted, setIsMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setupUI()
+    setIsMounted(true)
+  }, [])
+
+  return isMounted ? (
     <ProjectView
       pid={pid}
       oid={oid}
@@ -26,6 +35,8 @@ export default function ProjectPage({
       authenticated={authenticated}
       project={projectData}
     />
+  ) : (
+    <div>Loading...</div>
   )
 }
 

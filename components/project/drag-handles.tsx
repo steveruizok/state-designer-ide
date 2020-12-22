@@ -1,7 +1,8 @@
 import * as React from "react"
 import { LayoutOffset } from "types"
 import { motion, useMotionValue, animate } from "framer-motion"
-import { panelOffsets, setPanelOffset } from "lib/local-data"
+import { ui, resetOffsets, setPanelOffset } from "lib/local-data"
+import router from "next/router"
 import { styled } from "components/theme"
 
 interface DragHandleProps {
@@ -48,10 +49,10 @@ export function DragHandleHorizontal({
   onMove,
 }: DragHandleHorizontalProps) {
   const rMotionX = useMotionValue(0)
-  const [distance, setDistance] = React.useState(panelOffsets[offset])
+  const [distance, setDistance] = React.useState(ui.panelOffsets[offset])
 
   React.useEffect(() => {
-    setDistance(panelOffsets[offset])
+    setDistance(ui.panelOffsets[offset])
   }, [offset])
 
   React.useEffect(() => {
@@ -63,7 +64,13 @@ export function DragHandleHorizontal({
 
   // When at full width, double tap to return to normal
   // When at normal width, double tap to reach max
-  function togglePosition() {
+  function togglePosition(e: React.MouseEvent) {
+    if (e.shiftKey) {
+      resetOffsets()
+      router.reload()
+      return
+    }
+
     const y = rMotionX.get()
 
     if (align === "left" && y + distance === 0) {
@@ -120,10 +127,10 @@ export function DragHandleVertical({
   offset,
   onMove,
 }: DragHandleVerticalProps) {
-  const [distance, setDistance] = React.useState(panelOffsets[offset])
+  const [distance, setDistance] = React.useState(ui.panelOffsets[offset])
 
   React.useEffect(() => {
-    setDistance(panelOffsets[offset])
+    setDistance(ui.panelOffsets[offset])
   }, [offset])
 
   const rMotionY = useMotionValue(0)
@@ -165,9 +172,9 @@ export function DragHandleVertical({
     <DragHandle
       direction="horizontal"
       style={{
+        y: rMotionY,
         [align]:
           align === "top" ? height + distance - 3 : height - distance - 3,
-        y: rMotionY,
       }}
       drag="y"
       dragConstraints={{
@@ -190,10 +197,10 @@ export function DragHandleHorizontalRelative({
   onMove,
 }: DragHandleHorizontalRelativeProps) {
   const rMotionX = useMotionValue(0)
-  const [distance, setDistance] = React.useState(panelOffsets[offset])
+  const [distance, setDistance] = React.useState(ui.panelOffsets[offset])
 
   React.useEffect(() => {
-    setDistance(panelOffsets[offset])
+    setDistance(ui.panelOffsets[offset])
   }, [offset])
 
   React.useEffect(() => {
@@ -224,6 +231,7 @@ export function DragHandleHorizontalRelative({
         height: "100%",
         width: 4,
         cursor: "ew-resize",
+        zIndex: 999,
       }}
       drag="x"
       dragConstraints={containerRef}

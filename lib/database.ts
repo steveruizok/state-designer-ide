@@ -275,8 +275,6 @@ export async function forkProject(pid: string, oid: string, uid?: string) {
     owner: uid,
   })
 
-  console.log(`created new project at /u/${uid}/p/${id}`)
-
   router.push(`/u/${uid}/p/${id}`)
 }
 

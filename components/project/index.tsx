@@ -1,12 +1,14 @@
 import * as React from "react"
 import Link from "next/link"
+import Router from "next/router"
 import { Home, Sun, Copy, Plus, Minus } from "react-feather"
 
-import { setupOffsets } from "lib/local-data"
+import { setupUI } from "lib/local-data"
 import { subscribeToDocSnapshot, forkProject } from "lib/database"
 import { login, logout } from "lib/auth-client"
 import { User, ProjectData } from "types"
 import projectState from "./state"
+import { codePanelState } from "./code"
 
 import { styled, IconButton, Text } from "components/theme"
 
@@ -16,13 +18,13 @@ import {
   DragHandleHorizontal,
 } from "./drag-handles"
 import Content from "./content"
-import Code, { codePanelState } from "./code"
-import Details from "./details"
+import Code from "./code"
+import Details, { DETAILS_ROW_HEIGHT } from "./details"
 import Console, { CONSOLE_HEIGHT } from "./console"
+import Chart from "./chart"
 
 export const CONTENT_COL_WIDTH = 200
 export const CODE_COL_WIDTH = 320
-export const DETAILS_ROW_HEIGHT = 320
 
 interface ProjectViewProps {
   pid: string
@@ -41,16 +43,26 @@ export default function ProjectView({
 }: ProjectViewProps) {
   const rMainContainer = React.useRef<HTMLDivElement>(null)
 
-  React.useLayoutEffect(() => {
-    setupOffsets()
-  }, [])
-
   React.useEffect(() => {
     return subscribeToDocSnapshot(pid, oid, (doc) => {
       const source = doc.data()
       projectState.send("SOURCE_UPDATED", { source })
     })
   }, [oid, pid])
+
+  React.useEffect(() => {
+    function handleRouteChange() {
+      projectState.send("UNLOADED")
+      codePanelState.send("UNLOADED")
+    }
+
+    Router.events.on("routeChangeStart", handleRouteChange)
+    return () => {
+      Router.events.off("routeChangeStart", handleRouteChange)
+      projectState.send("UNLOADED")
+      codePanelState.send("UNLOADED")
+    }
+  }, [])
 
   return (
     <Layout>
@@ -94,8 +106,8 @@ export default function ProjectView({
         />
       </Content>
       <MainContainer>
+        <Chart />
         <MainDragArea ref={rMainContainer} />
-        <ChartContainer>Chart</ChartContainer>
         <ViewContainer>
           View <br />
           {user ? (
@@ -116,15 +128,7 @@ export default function ProjectView({
             />
           </Console>
         </ViewContainer>
-        <Details>
-          <DragHandleVertical
-            height={DETAILS_ROW_HEIGHT}
-            top={300}
-            bottom={DETAILS_ROW_HEIGHT - 40}
-            offset="detail"
-            align="bottom"
-          />
-        </Details>
+        <Details />
         <DragHandleHorizontalRelative
           containerRef={rMainContainer}
           offset="main"
@@ -193,18 +197,13 @@ const MainContainer = styled.div({
 })
 
 const MainDragArea = styled.div({
+  userSelect: "none",
+  pointerEvents: "none",
   position: "absolute",
   top: 0,
   left: "10%",
   width: "80%",
   height: "100%",
-})
-
-const ChartContainer = styled.div({
-  position: "relative",
-  gridArea: "chart",
-  display: "grid",
-  borderRight: "2px solid $border",
 })
 
 const ViewContainer = styled.div({

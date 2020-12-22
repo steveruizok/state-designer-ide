@@ -12,7 +12,45 @@ export const Flex = styled.div({
   display: "flex",
 })
 
-export const Button = styled.button({})
+export const Button = styled.button({
+  fontSize: "$0",
+  fontWeight: "bold",
+  fontFamily: "$body",
+  px: "$1",
+  bg: "transparent",
+  border: "none",
+  outline: "none",
+  cursor: "pointer",
+  "&:hover": {
+    bg: "muted",
+  },
+  variants: {
+    variant: {
+      nodeEvent: {
+        py: "$1",
+        px: "$1",
+        fontSize: "$0",
+        fontWeight: "bold",
+        fontFamily: "$body",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        width: "fit-content",
+        borderRadius: 2,
+        color: "$text",
+        cursor: "pointer",
+        outline: "none",
+        "&:disabled": {
+          cursor: "not-allowed",
+          color: "inactive",
+        },
+        "& > *[data-hidey='true']": {
+          visibility: "hidden",
+        },
+      },
+    },
+  },
+})
 
 export const Input = styled.input({})
 
@@ -36,6 +74,9 @@ export const TitleRow = styled.div({
   p: "$1",
   color: "$text",
   borderBottom: "2px solid $border",
+  "& p": {
+    flexGrow: 1,
+  },
 })
 
 export const IconButton = styled.button({

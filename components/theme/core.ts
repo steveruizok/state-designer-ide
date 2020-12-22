@@ -167,11 +167,15 @@ css.global({
   "*": {
     boxSizing: "border-box",
   },
+  html: {
+    overscrollBehavior: "none",
+  },
   body: {
     fontFamily: "$body",
     fontWeight: "$2",
     color: "$text",
     bg: "$background",
+    overscrollBehavior: "none",
   },
   a: {},
   h1: {},

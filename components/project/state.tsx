@@ -15,7 +15,6 @@ const projectState = createState({
     static: undefined as any,
     captive: createState({}),
   },
-  initial: "loading",
   on: {
     SOURCE_UPDATED: [
       "updateFromDatabase",
@@ -24,21 +23,19 @@ const projectState = createState({
       "createCaptiveState",
     ],
   },
+  initial: "loading",
   states: {
     loading: {
       on: {
-        SOURCE_LOADED: [
-          "updateFromDatabase",
-          "createStatic",
-          "createCaptiveState",
-          {
-            to: "ready",
-          },
-        ],
+        SOURCE_UPDATED: {
+          to: "ready",
+        },
       },
     },
     ready: {
-      on: {},
+      on: {
+        UNLOADED: { to: "loading" },
+      },
     },
   },
   actions: {

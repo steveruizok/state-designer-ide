@@ -59,8 +59,8 @@ export const codePanelState = createState({
     },
   },
   on: {
-    CHANGED_AUTH: "setReadOnly",
     LOADED: "loadData",
+    UNLOADED: { to: ["loading", "noError"] },
     RESIZED_PANEL: "resizeEditor",
     SOURCE_UPDATED: ["updateFromDatabase"],
     CHANGED_CODE: { secretlyDo: "updateDirtyCode" },
@@ -260,13 +260,6 @@ export const codePanelState = createState({
       const { oid, pid } = payload
       saveProjectCode(pid, oid, activeTab, data.code[activeTab].dirty)
     },
-    setReadOnly(data, payload: { oid: string; pid: string }) {
-      const { editor } = data
-      const { oid, pid } = payload
-      // if (editor) {
-      //   editor.updateOptions({ readOnly: oid !== pid })
-      // }
-    },
   },
 })
 
@@ -318,7 +311,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
       showUnused: false,
       quickSuggestions: false,
       fontFamily: "Fira Code",
-      fontWeight: "normal",
+      fontWeight: "500",
       minimap: { enabled: false },
       smoothScrolling: true,
       lineDecorationsWidth: 4,
@@ -400,7 +393,11 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   }, [monaco, editor])
 
   React.useEffect(() => {
-    local.send("CHANGED_AUTH", { oid, pid })
+    if (editor) {
+      editor.updateOptions({
+        readOnly: oid !== uid,
+      })
+    }
   }, [editor, oid, uid])
 
   const { code } = local.data
@@ -442,7 +439,10 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
           Static
         </TabButton>
       </Tabs>
-      <EditorContainer ref={containerRef} />
+      <EditorContainer
+        ref={containerRef}
+        visibility={local.isIn("loading") ? "hidden" : "visible"}
+      />
       <CodeEditorControls>
         <ErrorMessage>
           {error && (
@@ -552,6 +552,18 @@ const EditorContainer = styled.div({
   height: "100%",
   width: "100%",
   overflow: "hidden",
+  variants: {
+    visibility: {
+      hidden: {
+        pointerEvents: "none",
+        userSelect: "none",
+        opacity: 0.1,
+      },
+      visible: {
+        opacity: 1,
+      },
+    },
+  },
 })
 
 const CodeEditorControls = styled.div({
