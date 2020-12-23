@@ -85,7 +85,6 @@ const EventButton: React.FC<{
           ? "Cannot send events when state is inactive."
           : "The state cannot handle this event due to its current payload."
       }
-      // variant={"nodeEvent"}
       disabled={isDisabled}
       onClick={() => {
         ProjectState.data.captive.send(name)
@@ -113,8 +112,7 @@ const EventButton: React.FC<{
 }
 
 const NodeEventsContainer = styled.div({
-  // py: 0,
-  // px: 1,
+  px: "$0",
   display: "flex",
   flexDirection: "row",
   flexWrap: "wrap",

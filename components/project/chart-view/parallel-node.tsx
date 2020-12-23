@@ -1,7 +1,7 @@
 import * as React from "react"
 import { S } from "@state-designer/react"
 import NodeHeading from "./node-heading"
-import { NodeContainer, ChildNodesContainer } from "./styled"
+import { NodeContainer, ChildNodesContainer, Divider } from "./styled"
 import StateNode from "./state-node"
 import { ParallelDivider } from "./styled"
 import { styled } from "components/theme"
@@ -22,6 +22,7 @@ export default function ParallelNode({ node }: ParallelNodeProps) {
     >
       <NodeHeading node={node} />
       <NodeEvents node={node} />
+      <Divider state={node.active ? "active" : "inactive"} />
       <ChildNodesContainer type="parallel">
         {childNodes.map((child, i) => {
           return (

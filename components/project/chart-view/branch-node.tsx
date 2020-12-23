@@ -1,7 +1,7 @@
 import * as React from "react"
 import sortBy from "lodash/sortBy"
 import { S } from "@state-designer/react"
-import { NodeContainer, ChildNodesContainer } from "./styled"
+import { NodeContainer, ChildNodesContainer, Divider } from "./styled"
 import NodeHeading from "./node-heading"
 import StateNode from "./state-node"
 import NodeEvents from "./node-events"
@@ -21,6 +21,7 @@ const BranchNode: React.FC<{ node: S.State<any, any> }> = ({ node }) => {
     >
       <NodeHeading node={node} />
       <NodeEvents node={node} />
+      <Divider state={node.active ? "active" : "inactive"} />
       <ChildNodesContainer type="branch">
         {getSortedBranchChildNodes(childNodes).map((child, i) => (
           <StateNode key={i} node={child} />

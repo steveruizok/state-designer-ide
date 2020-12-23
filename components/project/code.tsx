@@ -3,7 +3,7 @@ import * as React from "react"
 import prettier from "prettier/standalone"
 import parser from "prettier/parser-typescript"
 import debounce from "lodash/debounce"
-import { styled, IconButton } from "components/theme"
+import { styled, IconButton, TabButton } from "components/theme"
 import { Save, RefreshCcw, AlertCircle } from "react-feather"
 import { useMonaco, useEditor, useFile } from "use-monaco"
 import themes from "use-monaco/themes"
@@ -318,6 +318,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
       fontLigatures: true,
       cursorBlinking: "smooth",
       lineNumbers: "off",
+      scrollBeyondLastLine: false,
     },
     editorDidMount: (editor) => {
       editor.updateOptions({
@@ -365,18 +366,23 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
     )
 
     editor.onKeyDown((e) => {
-      if (e.metaKey && e.code === "KeyS") {
-        e.preventDefault()
-        if (error) return
-        if (uid !== oid) return // Unsafe!
+      if (e.metaKey) {
+        if (e.code === "KeyS") {
+          e.preventDefault()
+          if (error) return
+          if (uid !== oid) return // Unsafe!
 
-        editor
-          .getAction("editor.action.formatDocument")
-          .run()
-          .then(() => {
-            const code = editor.getValue()
-            local.send("SAVED_CODE", { code, oid, pid })
-          })
+          editor
+            .getAction("editor.action.formatDocument")
+            .run()
+            .then(() => {
+              const code = editor.getValue()
+              local.send("SAVED_CODE", { code, oid, pid })
+            })
+        } else if (e.code === "KeyA") {
+          const range = editor.getModel().getFullModelRange()
+          editor.setSelection(range)
+        }
       }
     })
 
@@ -497,57 +503,6 @@ const CodeContainer = styled.div({
   borderLeft: "2px solid $border",
 })
 
-const Tabs = styled.div({
-  display: "flex",
-  borderBottom: "2px solid $border",
-})
-
-const TabButton = styled.button({
-  cursor: "pointer",
-  color: "$text",
-  fontFamily: "$body",
-  fontWeight: "$2",
-  display: "flex",
-  flexGrow: 2,
-  alignItems: "center",
-  justifyContent: "center",
-  textAlign: "center",
-  background: "transparent",
-  border: "none",
-  outline: "none",
-  "&:hover": {
-    opacity: 1,
-    bg: "$muted",
-  },
-  pl: "$2",
-  variants: {
-    activeState: {
-      active: {
-        opacity: 1,
-      },
-      inactive: {
-        opacity: 0.5,
-      },
-    },
-    codeState: {
-      clean: {
-        "&::after": {
-          content: "'•'",
-          color: "transparent",
-          marginLeft: "$0",
-        },
-      },
-      dirty: {
-        "&::after": {
-          content: "'•'",
-          color: "$text",
-          marginLeft: "$0",
-        },
-      },
-    },
-  },
-})
-
 const EditorContainer = styled.div({
   height: "100%",
   width: "100%",
@@ -587,4 +542,10 @@ const ErrorMessage = styled.div({
   svg: {
     mr: "$1",
   },
+})
+
+const Tabs = styled.div({
+  display: "flex",
+  bg: "$muted",
+  borderBottom: "1px solid $shadow",
 })

@@ -22,14 +22,14 @@ export const Button = styled.button({
   outline: "none",
   cursor: "pointer",
   "&:hover": {
-    bg: "muted",
+    bg: "$shadowLight",
   },
   variants: {
     variant: {
       nodeEvent: {
         py: "$1",
         px: "$1",
-        fontSize: "$0",
+        fontSize: "$1",
         fontWeight: "bold",
         fontFamily: "$body",
         display: "flex",
@@ -42,7 +42,7 @@ export const Button = styled.button({
         outline: "none",
         "&:disabled": {
           cursor: "not-allowed",
-          color: "inactive",
+          color: "$inactive",
         },
         "& > *[data-hidey='true']": {
           visibility: "hidden",
@@ -71,11 +71,19 @@ export const TitleRow = styled.div({
   display: "flex",
   alignItems: "center",
   bg: "$muted",
-  p: "$1",
+  p: 0,
+  height: 40,
   color: "$text",
-  borderBottom: "2px solid $border",
+  borderBottom: "1px solid $shadow",
+  userSelect: "none",
   "& p": {
     flexGrow: 1,
+  },
+  "& > *[data-hidey='true']": {
+    visibility: "hidden",
+  },
+  "&:hover > *[data-hidey='true']": {
+    visibility: "visible",
   },
 })
 
@@ -93,7 +101,7 @@ export const IconButton = styled.button({
     pr: "$1",
   },
   "&:hover": {
-    bg: "$muted",
+    bg: "$shadowLight",
     color: "red",
   },
   p: "$1",
@@ -101,5 +109,53 @@ export const IconButton = styled.button({
   svg: {
     height: 18,
     width: 18,
+  },
+})
+
+export const TabButton = styled.button({
+  cursor: "pointer",
+  color: "$text",
+  fontFamily: "$body",
+  fontSize: "$1",
+  fontWeight: "$2",
+  display: "flex",
+  flexGrow: 2,
+  alignItems: "center",
+  justifyContent: "center",
+  textAlign: "center",
+  background: "transparent",
+  border: "none",
+  outline: "none",
+  "&:hover": {
+    opacity: 1,
+    color: "$text",
+    bg: "$shadowLight",
+  },
+  pl: "$2",
+  variants: {
+    activeState: {
+      active: {
+        opacity: 1,
+      },
+      inactive: {
+        opacity: 0.5,
+      },
+    },
+    codeState: {
+      clean: {
+        "&::after": {
+          content: "'•'",
+          color: "transparent",
+          marginLeft: "$0",
+        },
+      },
+      dirty: {
+        "&::after": {
+          content: "'•'",
+          color: "$text",
+          marginLeft: "$0",
+        },
+      },
+    },
   },
 })

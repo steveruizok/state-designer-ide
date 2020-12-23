@@ -1,5 +1,5 @@
 import { S } from "@state-designer/react"
-import { Disc, MoreVertical } from "react-feather"
+import { Disc, MoreHorizontal } from "react-feather"
 // import IconSelect from "../icon-select"
 import ProjectState from "../state"
 import { styled, IconButton } from "components/theme"
@@ -14,7 +14,7 @@ const NodeHeading: React.FC<{
       )}
       <h3>{node.name}</h3>
       <IconButton data-hidey="true">
-        <MoreVertical />
+        <MoreHorizontal />
       </IconButton>
       {/* <IconSelect
         data-hidey="true"
@@ -40,15 +40,16 @@ const NodeHeadingContainer = styled.div({
   display: "flex",
   py: "$0",
   pl: "$1",
+  pr: "$0",
   justifyContent: "space-between",
   alignItems: "center",
   borderColor: "$active",
   h3: {
-    fontSize: "$1",
+    fontSize: "$2",
     m: 0,
     p: 0,
     display: "inline-block",
-    ml: "$0",
+    mx: "$0",
     flexGrow: 1,
   },
   "&[data-isactive='false']": {
@@ -64,9 +65,7 @@ const NodeHeadingContainer = styled.div({
     type: {
       leaf: {},
       branch: {},
-      parallel: {
-        borderBottom: "1px solid $outline",
-      },
+      parallel: {},
     },
   },
 })

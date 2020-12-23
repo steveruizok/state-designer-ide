@@ -54,7 +54,24 @@ export const ChildNodesContainer = styled.div({
 export const ParallelDivider = styled.div({
   alignSelf: "stretch",
   height: "100%",
-  borderLeft: "2px solid dashed",
+  borderLeft: "1px solid dashed",
+  variants: {
+    state: {
+      active: {
+        borderColor: "$text",
+      },
+      inactive: {
+        borderColor: "$inactive",
+      },
+    },
+  },
+})
+
+export const Divider = styled.hr({
+  border: 0,
+  borderBottom: "1px solid currentColor",
+  mt: "$0",
+  mb: 0,
   variants: {
     state: {
       active: {
