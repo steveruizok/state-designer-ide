@@ -127,7 +127,7 @@ function Chart({ state, zoomedPath }: ChartProps) {
         animate={animation}
         onDoubleClick={(e) => e.stopPropagation()}
       >
-        <StateNodeContainer ref={rStateNode as any}>
+        <StateNodeContainer id="chart-container" ref={rStateNode as any}>
           <StateNode node={zoomed || captive.stateTree} />
           <CanvasOverlay
             scale={mvScale}
@@ -135,6 +135,7 @@ function Chart({ state, zoomedPath }: ChartProps) {
             offsetY={mvY}
             width={mvStateNodeWidth}
             height={mvStateNodeHeight}
+            resizeRef={rStateNode}
           />
         </StateNodeContainer>
       </ChartCanvas>

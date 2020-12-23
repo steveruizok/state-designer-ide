@@ -13,9 +13,10 @@ export const Flex = styled.div({
 })
 
 export const Button = styled.button({
-  fontSize: "$0",
+  fontSize: "$1",
   fontWeight: "bold",
   fontFamily: "$body",
+  lineHeight: "$ui",
   px: "$1",
   bg: "transparent",
   border: "none",
@@ -58,10 +59,14 @@ export const Text = styled.p({
   m: 0,
   p: 0,
   variants: {
-    type: {
+    variant: {
       body: {
         fontSize: "$2",
         lineHeight: "$body",
+      },
+      ui: {
+        fontSize: "$1",
+        lineHeight: "$ui",
       },
     },
   },
@@ -71,7 +76,6 @@ export const TitleRow = styled.div({
   display: "flex",
   alignItems: "center",
   bg: "$muted",
-  p: 0,
   height: 40,
   color: "$text",
   borderBottom: "1px solid $shadow",
@@ -79,6 +83,8 @@ export const TitleRow = styled.div({
   "& p": {
     flexGrow: 1,
   },
+  px: "$0",
+  py: 0,
   "& > *[data-hidey='true']": {
     visibility: "hidden",
   },
@@ -119,7 +125,6 @@ export const TabButton = styled.button({
   fontSize: "$1",
   fontWeight: "$2",
   display: "flex",
-  flexGrow: 2,
   alignItems: "center",
   justifyContent: "center",
   textAlign: "center",
@@ -131,8 +136,20 @@ export const TabButton = styled.button({
     color: "$text",
     bg: "$shadowLight",
   },
-  pl: "$2",
   variants: {
+    variant: {
+      code: {
+        height: "100%",
+        pl: "$2",
+        flexGrow: 2,
+        borderRadius: 4,
+      },
+      details: {
+        py: "$1",
+        px: "$2",
+        borderRadius: 4,
+      },
+    },
     activeState: {
       active: {
         opacity: 1,

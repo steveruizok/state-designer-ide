@@ -1,11 +1,12 @@
 import * as React from "react"
 import { LayoutOffset } from "types"
-import { motion, useMotionValue, animate } from "framer-motion"
-import { ui, resetOffsets, setPanelOffset } from "lib/local-data"
+import { motion, animate, MotionValue } from "framer-motion"
+import { ui, resetOffsets } from "lib/local-data"
 import router from "next/router"
 import { styled } from "components/theme"
 
 interface DragHandleProps {
+  motionValue: MotionValue<number>
   offset: LayoutOffset
   onMove?: (size: number) => void
 }
@@ -19,7 +20,6 @@ interface DragHandleHorizontalProps extends DragHandleProps {
 
 const DragHandle = styled(motion.div, {
   position: "absolute",
-  backgroundColor: "transparent",
   zIndex: 999,
   "&:hover": {
     bg: "$hover",
@@ -41,6 +41,7 @@ const DragHandle = styled(motion.div, {
 })
 
 export function DragHandleHorizontal({
+  motionValue,
   width,
   left,
   right,
@@ -48,19 +49,11 @@ export function DragHandleHorizontal({
   offset,
   onMove,
 }: DragHandleHorizontalProps) {
-  const rMotionX = useMotionValue(0)
-  const [distance, setDistance] = React.useState(ui.panelOffsets[offset])
+  const [initial, setInitial] = React.useState(motionValue.get())
 
   React.useEffect(() => {
-    setDistance(ui.panelOffsets[offset])
+    setInitial(ui.panelOffsets[offset])
   }, [offset])
-
-  React.useEffect(() => {
-    return rMotionX.onChange((v) => {
-      onMove && onMove(distance - v)
-      setPanelOffset(offset, distance + v)
-    })
-  }, [distance, offset, rMotionX])
 
   // When at full width, double tap to return to normal
   // When at normal width, double tap to reach max
@@ -71,22 +64,22 @@ export function DragHandleHorizontal({
       return
     }
 
-    const y = rMotionX.get()
+    const y = motionValue.get()
 
-    if (align === "left" && y + distance === 0) {
-      animate(rMotionX, right + -distance, {
+    if (align === "left" && y + initial === 0) {
+      animate(motionValue, right + -initial, {
         type: "spring",
         stiffness: 200,
         damping: 20,
       })
-    } else if (align === "right" && y + distance === 0) {
-      animate(rMotionX, -(left + distance), {
+    } else if (align === "right" && y + initial === 0) {
+      animate(motionValue, -(left + initial), {
         type: "spring",
         stiffness: 200,
         damping: 20,
       })
     } else {
-      animate(rMotionX, -distance, {
+      animate(motionValue, -initial, {
         type: "spring",
         stiffness: 200,
         damping: 20,
@@ -98,13 +91,13 @@ export function DragHandleHorizontal({
     <DragHandle
       direction="vertical"
       style={{
-        x: rMotionX,
-        [align]: align === "left" ? width + distance - 3 : width - distance - 3,
+        x: motionValue,
+        [align]: align === "left" ? width + initial - 3 : width - initial - 3,
       }}
       drag="x"
       dragConstraints={{
-        left: -left - distance,
-        right: right - distance,
+        left: -left - initial,
+        right: right - initial,
       }}
       dragElastic={0.1}
       onDoubleClick={togglePosition}
@@ -120,6 +113,7 @@ interface DragHandleVerticalProps extends DragHandleProps {
 }
 
 export function DragHandleVertical({
+  motionValue,
   height,
   top,
   bottom,
@@ -127,40 +121,31 @@ export function DragHandleVertical({
   offset,
   onMove,
 }: DragHandleVerticalProps) {
-  const [distance, setDistance] = React.useState(ui.panelOffsets[offset])
+  const [initial, setInitial] = React.useState(motionValue.get())
 
   React.useEffect(() => {
-    setDistance(ui.panelOffsets[offset])
+    setInitial(ui.panelOffsets[offset])
   }, [offset])
-
-  const rMotionY = useMotionValue(0)
-
-  React.useEffect(() => {
-    return rMotionY.onChange((v) => {
-      onMove && onMove(distance - v)
-      setPanelOffset(offset, distance + v)
-    })
-  }, [distance, offset, rMotionY])
 
   // When at full height, double tap to return to normal
   // When at normal height, double tap to reach max
   function togglePosition() {
-    const y = rMotionY.get()
+    const y = motionValue.get()
 
-    if (align === "top" && y + distance === 0) {
-      animate(rMotionY, bottom - distance, {
+    if (align === "top" && y + initial === 0) {
+      animate(motionValue, bottom - initial, {
         type: "spring",
         stiffness: 200,
         damping: 20,
       })
-    } else if (align === "bottom" && y + distance === 0) {
-      animate(rMotionY, -(top + distance), {
+    } else if (align === "bottom" && y + initial === 0) {
+      animate(motionValue, -(top + initial), {
         type: "spring",
         stiffness: 200,
         damping: 20,
       })
     } else {
-      animate(rMotionY, -distance, {
+      animate(motionValue, -initial, {
         type: "spring",
         stiffness: 200,
         damping: 20,
@@ -172,14 +157,13 @@ export function DragHandleVertical({
     <DragHandle
       direction="horizontal"
       style={{
-        y: rMotionY,
-        [align]:
-          align === "top" ? height + distance - 3 : height - distance - 3,
+        y: motionValue,
+        [align]: align === "top" ? height + initial - 3 : height - initial - 3,
       }}
       drag="y"
       dragConstraints={{
-        top: -top - distance,
-        bottom: bottom - distance,
+        top: -top - initial,
+        bottom: bottom - initial,
       }}
       dragElastic={0.1}
       onDoubleClick={togglePosition}
@@ -192,28 +176,21 @@ interface DragHandleHorizontalRelativeProps extends DragHandleProps {
 }
 
 export function DragHandleHorizontalRelative({
+  motionValue,
   containerRef,
   offset,
   onMove,
 }: DragHandleHorizontalRelativeProps) {
-  const rMotionX = useMotionValue(0)
-  const [distance, setDistance] = React.useState(ui.panelOffsets[offset])
+  const [initial, setInitial] = React.useState(ui.panelOffsets[offset])
 
   React.useEffect(() => {
-    setDistance(ui.panelOffsets[offset])
+    setInitial(ui.panelOffsets[offset])
   }, [offset])
-
-  React.useEffect(() => {
-    return rMotionX.onChange((v) => {
-      onMove && onMove(distance - v)
-      setPanelOffset(offset, distance + v)
-    })
-  }, [distance, offset, rMotionX])
 
   // When at full width, double tap to return to normal
   // When at normal width, double tap to reach max
   function togglePosition() {
-    animate(rMotionX, -distance, {
+    animate(motionValue, -initial, {
       type: "spring",
       stiffness: 200,
       damping: 20,
@@ -224,8 +201,8 @@ export function DragHandleHorizontalRelative({
     <DragHandle
       direction="horizontal"
       style={{
-        x: rMotionX,
-        left: `calc(50% + ${distance - 2}px)`,
+        x: motionValue,
+        left: `calc(50% + ${initial - 2}px)`,
         position: "absolute",
         backgroundColor: "transparent",
         height: "100%",

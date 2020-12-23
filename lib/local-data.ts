@@ -1,9 +1,17 @@
-import { LayoutOffset } from "types"
+import { LayoutOffset, CodeEditorTab } from "types"
+import { motionValue, MotionValue } from "framer-motion"
 
 export const ui = {
-  wrapDetails: false,
-  payloadsOpen: false,
-  activeTab: "state",
+  details: {
+    activeTab: "data",
+    wrap: false,
+  },
+  content: {
+    payloadsOpen: false,
+  },
+  code: {
+    activeTab: "state",
+  },
   panelOffsets: {
     content: 0,
     main: 0,
@@ -13,12 +21,27 @@ export const ui = {
   },
 }
 
+export const motionValues: Record<LayoutOffset, MotionValue<number>> = {
+  content: motionValue(0),
+  main: motionValue(0),
+  code: motionValue(0),
+  detail: motionValue(0),
+  console: motionValue(0),
+}
+
 // Update offets from local storage
 function loadLocalUI() {
   const savedUI = window.localStorage.getItem(`sd_ui`)
   if (savedUI !== null) {
     const saved = JSON.parse(savedUI)
     Object.assign(ui, saved)
+    for (let key in ui.panelOffsets) {
+      const initial = ui.panelOffsets[key]
+      motionValues[key].set(0)
+      motionValues[key].onChange((v: number) =>
+        savePanelOffset(key as LayoutOffset, initial + v),
+      )
+    }
   }
 }
 
@@ -47,18 +70,35 @@ function saveUI() {
   window.localStorage.setItem(`sd_ui`, JSON.stringify(ui))
 }
 
+// Panels
+
 // Set a panel offset
-export function setPanelOffset(offset: LayoutOffset, value: number) {
+export function savePanelOffset(offset: LayoutOffset, value: number) {
   ui.panelOffsets[offset] = value
   updateCssVariables()
   saveUI()
 }
 
-// Set details wrapping
-export function setWrapDetails(value: boolean) {
-  ui.wrapDetails = value
+// Details
+
+export function saveWrapDetails(value: boolean) {
+  ui.details.wrap = value
   saveUI()
 }
+
+export function saveDetailsTab(value: "data" | "values") {
+  ui.details.activeTab = value
+  saveUI()
+}
+
+// Code
+
+export function saveCodeTab(value: CodeEditorTab) {
+  ui.code.activeTab = value
+  saveUI()
+}
+
+// Setup
 
 export function setupUI() {
   if (typeof document === "undefined") return

@@ -26,6 +26,17 @@ export const NodeContainer = styled.div({
         width: "fit-content",
       },
     },
+    state: {
+      normal: {
+        bg: "$transparent",
+      },
+      highlight: {
+        bg: "$codeHl",
+        "&[data-isroot='true']": {
+          bg: "$codeHl",
+        },
+      },
+    },
   },
 })
 

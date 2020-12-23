@@ -2,7 +2,7 @@ import * as React from "react"
 import { MotionValue, motion } from "framer-motion"
 import { S, useStateDesigner } from "@state-designer/react"
 import ProjectState from "../state"
-import Highlights from "../highlights"
+import { Highlights } from "../highlights"
 import { quadrant, theta, normal, gradient } from "./helpers"
 import { getBoxToBoxArrow } from "perfect-arrows"
 
@@ -12,22 +12,27 @@ const CanvasOverlay: React.FC<{
   offsetY: MotionValue<number>
   width: MotionValue<number>
   height: MotionValue<number>
-}> = ({ scale, offsetX, offsetY, width, height }) => {
-  const captive = useStateDesigner(ProjectState.data.captive)
+  resizeRef: React.RefObject<any>
+}> = ({ scale, resizeRef, offsetX, offsetY, width, height }) => {
+  // const captive = useStateDesigner(ProjectState.data.captive)
   const local = useStateDesigner(Highlights)
 
   const rCanvas = React.useRef<HTMLCanvasElement>()
+  const rCtx = React.useRef<CanvasRenderingContext2D>()
 
   React.useEffect(() => {
     const updateCanvasSize = () => {
       const canvas = rCanvas.current
       if (!canvas) return
-
       const w = width.get()
       const h = height.get()
-
-      canvas.width = w
-      canvas.height = h
+      var dpr = window.devicePixelRatio || 1
+      canvas.width = w * dpr
+      canvas.height = h * dpr
+      canvas.style.setProperty("transform-origin", `top left`)
+      canvas.style.setProperty("transform", `scale(${1 / dpr})`)
+      rCtx.current = canvas.getContext("2d") as CanvasRenderingContext2D
+      rCtx.current.scale(dpr, dpr)
     }
 
     updateCanvasSize()
@@ -42,7 +47,7 @@ const CanvasOverlay: React.FC<{
 
   React.useEffect(() => {
     const cvs = rCanvas.current
-    const ctx = cvs?.getContext("2d")
+    const ctx = rCtx.current
     if (!ctx) return
 
     const sc = scale.get()
@@ -56,41 +61,39 @@ const CanvasOverlay: React.FC<{
 
       const hFrame = getFrame(hl, sc, cFrame.x, cFrame.y)
 
-      // if (local.data.event) {
-      //   const eventButtons = local.data.eventButtonRefs
-      //   if (!eventButtons) {
-      //     return
-      //   }
-      //   const pathEvents = eventButtons.get(local.data.path)
-      //   if (!pathEvents) {
-      //     // console.log("No events found for that state", local.data.path)
-      //     return
-      //   }
-      //   const buttonRef = pathEvents.get(local.data.event)
+      if (local.data.event) {
+        const eventButtons = local.data.eventButtonRefs
+        if (!eventButtons) {
+          return
+        }
+        const pathEvents = eventButtons.get(local.data.path)
+        if (!pathEvents) {
+          return
+        }
+        const buttonRef = pathEvents.get(local.data.event)
 
-      //   if (!buttonRef) return
+        if (!buttonRef) return
 
-      //   const button = buttonRef.current
+        const button = buttonRef.current
 
-      //   if (!button) return
+        if (!button) return
 
-      //   const bFrame = getFrame(button, sc, cFrame.x, cFrame.y)
+        const bFrame = getFrame(button, sc, cFrame.x, cFrame.y)
 
-      //   // fillRectWithScale(ctx, bFrame, sc)
+        // fillRectWithScale(ctx, bFrame, sc)
 
-      //   if (targets) {
-      //     for (let target of targets) {
-      //       const targ = target.ref.current
-      //       if (!targ) continue
+        if (targets) {
+          for (let target of targets) {
+            const targ = target.ref.current
+            if (!targ) continue
 
-      //       const tFrame = getFrame(targ, sc, cFrame.x, cFrame.y)
+            const tFrame = getFrame(targ, sc, cFrame.x, cFrame.y)
 
-      //       drawLineFromEventButtonToStateNode(ctx, bFrame, tFrame)
-
-      //       // fillRectWithScale(ctx, tFrame, sc)
-      //     }
-      //   }
-      // }
+            // fillRectWithScale(ctx, tFrame, sc)
+            drawLineFromEventButtonToStateNode(ctx, bFrame, tFrame)
+          }
+        }
+      }
     }
   }, [local.values.highlitStateRef, local.values.targets])
 
@@ -105,8 +108,6 @@ const CanvasOverlay: React.FC<{
         position: "absolute",
         top: 0,
         left: 0,
-        width,
-        height,
         pointerEvents: "none",
       }}
     />
@@ -177,7 +178,7 @@ function fillRectWithScale(
   scale: number,
 ) {
   ctx.save()
-  ctx.fillStyle = "rgba(255, 0, 0, .15)"
+  ctx.fillStyle = "rgba(0, 121, 242, .08)"
   ctx.fillRect(frame.x, frame.y, frame.width, frame.height)
   ctx.restore()
 }
@@ -198,11 +199,9 @@ function drawLineFromEventButtonToStateNode(
     b.height,
     {
       padStart: 0,
-      padEnd: -20,
+      padEnd: 0,
       bow: 0.12,
       stretch: 0,
-      stretchMin: 128,
-      stretchMax: 500,
     },
   )
 
@@ -214,16 +213,16 @@ function drawLineFromEventButtonToStateNode(
   ctx.moveTo(sx, sy)
   ctx.quadraticCurveTo(cx, cy, ex, ey)
 
-  ctx.strokeStyle = "rgba(0,0,0,.5)"
+  ctx.strokeStyle = "rgba(0,0,0,1)"
   ctx.lineWidth = 6
   ctx.stroke()
 
   ctx.beginPath()
-  drawDot(ctx, sx, sy)
+  drawDot(ctx, sx, sy, 5)
   drawArrowhead(ctx, ex, ey, ae)
 
-  ctx.strokeStyle = "rgba(0,0,0,.5)"
-  ctx.lineWidth = 4
+  ctx.strokeStyle = "rgba(0,0,0,1)"
+  ctx.lineWidth = 3
   ctx.stroke()
 
   ctx.fillStyle = "red"
@@ -234,7 +233,7 @@ function drawLineFromEventButtonToStateNode(
   ctx.quadraticCurveTo(cx, cy, ex, ey)
 
   ctx.strokeStyle = "red"
-  ctx.lineWidth = 2
+  ctx.lineWidth = 3
   ctx.stroke()
 
   ctx.restore()
@@ -247,6 +246,7 @@ function drawArrowhead(
   angle: number,
   color = "#000",
 ) {
+  var dpr = window.devicePixelRatio || 1
   ctx.translate(x, y)
   ctx.rotate(angle)
   ctx.moveTo(0, 0)
@@ -255,6 +255,7 @@ function drawArrowhead(
   ctx.lineTo(0, 0 - 6)
   ctx.lineTo(0, 0)
   ctx.resetTransform()
+  ctx.scale(dpr, dpr)
 }
 
 function drawDot(

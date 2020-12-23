@@ -12,7 +12,10 @@ import { DragHandleHorizontal } from "./drag-handles"
 import { CODE_COL_WIDTH } from "./index"
 import { useStateDesigner, createState } from "@state-designer/react"
 import { saveProjectCode } from "lib/database"
+import { ui, saveCodeTab, motionValues } from "lib/local-data"
 import { codeValidators, codeFormatValidators } from "lib/eval"
+import { Highlights } from "components/project/highlights"
+import useMotionResizeObserver from "use-motion-resize-observer"
 
 const EDITOR_TABS = ["state", "view", "static"]
 
@@ -61,7 +64,6 @@ export const codePanelState = createState({
   on: {
     LOADED: "loadData",
     UNLOADED: { to: ["loading", "noError"] },
-    RESIZED_PANEL: "resizeEditor",
     SOURCE_UPDATED: ["updateFromDatabase"],
     CHANGED_CODE: { secretlyDo: "updateDirtyCode" },
     RESET_CODE: ["resetCode", "restoreActiveTabCleanViewState"],
@@ -94,11 +96,26 @@ export const codePanelState = createState({
       states: {
         loading: {
           on: {
-            SOURCE_LOADED: {
-              if: "hasEditor",
-              do: ["initialLoadFromDatabase", "updateModels"],
-              to: "state",
-            },
+            SOURCE_LOADED: [
+              {
+                unless: "hasEditor",
+                break: true,
+              },
+              "initialLoadFromDatabase",
+              "updateModels",
+              {
+                if: "initialTabIsState",
+                to: "state",
+              },
+              {
+                if: "initialTabIsView",
+                to: "view",
+              },
+              {
+                if: "initialTabIsStatic",
+                to: "static",
+              },
+            ],
           },
         },
         state: {
@@ -153,6 +170,15 @@ export const codePanelState = createState({
     },
   },
   conditions: {
+    initialTabIsState(_, payload) {
+      return ui.code.activeTab === "state"
+    },
+    initialTabIsView(_, payload) {
+      return ui.code.activeTab === "view"
+    },
+    initialTabIsStatic(_, payload) {
+      return ui.code.activeTab === "static"
+    },
     errorInCurrentTab(data) {
       return data.code[data.activeTab].error !== ""
     },
@@ -200,16 +226,15 @@ export const codePanelState = createState({
     },
     setStateActiveTab(data) {
       data.activeTab = "state"
+      saveCodeTab("state")
     },
     setViewActiveTab(data) {
       data.activeTab = "view"
+      saveCodeTab("view")
     },
     setStaticActiveTab(data) {
       data.activeTab = "static"
-    },
-    // Resizing
-    resizeEditor(data) {
-      data.editor.layout()
+      saveCodeTab("static")
     },
     saveCurrentCleanViewState(data) {
       const { viewStates, activeTab, editor } = data
@@ -328,10 +353,86 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
     onChange: (code) => local.send("CHANGED_CODE", { code }),
   })
 
+  // Highlights
+  const rPreviousDecorations = React.useRef<any[]>([])
+
+  // Subscribe to highlights state
+  React.useEffect(() => {
+    return Highlights.onUpdate(({ data: { state, event, scrollToLine } }) => {
+      if (local.data.activeTab !== "state") return
+      if (!editor) return
+      const previous = rPreviousDecorations.current
+      const search = state || event
+      const code = editor.getValue()
+
+      if (search === null) {
+        rPreviousDecorations.current = editor.deltaDecorations(previous, [])
+      } else {
+        const searchString = search + ":"
+        const lines = code.split("\n")
+        const ranges: number[][] = []
+
+        if (searchString === "root:") {
+          ranges[0] = [0, 1, lines.length - 1, 1]
+        } else {
+          let rangeIndex = 0,
+            startSpaces = 0,
+            state = "searchingForStart"
+
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i]
+            if (state === "searchingForStart") {
+              if (line.includes(" " + searchString)) {
+                startSpaces = line.search(/\S/)
+                state = "searchingForEnd"
+                ranges[rangeIndex] = [i + 1, 1]
+              }
+            } else if (state === "searchingForEnd") {
+              if (i === 0) continue
+              const spaces = line.search(/\S/)
+              const range = ranges[rangeIndex]
+
+              if (spaces <= startSpaces) {
+                range.push(spaces < startSpaces || i === range[0] ? i : i + 1)
+                range.push(1)
+                rangeIndex++
+                state = "searchingForStart"
+              }
+            }
+          }
+        }
+
+        const hlRanges = ranges.map(([a, b, c, d]) => ({
+          range: new monaco.Range(a, b, c, d),
+          options: {
+            isWholeLine: true,
+            inlineClassName: "inlineCodeHighlight",
+            marginClassName: "lineCodeHighlight",
+          },
+        }))
+
+        if (scrollToLine && hlRanges.length > 0) {
+          editor.revealLineInCenter(hlRanges[0].range.startLineNumber - 1, 0)
+        }
+
+        const decorations = editor.deltaDecorations(previous, hlRanges)
+
+        rPreviousDecorations.current = decorations
+      }
+    })
+  }, [editor, monaco])
+
+  // Resizing
   const resizeEditor = React.useCallback(
-    debounce(() => local.send("RESIZED_PANEL"), 48),
-    [],
+    debounce(() => {
+      editor?.layout()
+    }, 48),
+    [editor],
   )
+
+  const { ref: resizeRef } = useMotionResizeObserver<HTMLDivElement>({
+    onResize: () => resizeEditor(),
+  })
 
   React.useEffect(() => {
     if (!(monaco && editor)) return
@@ -395,6 +496,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
         view: viewModel,
         static: staticModel,
       },
+      activeTab: ui.code.activeTab,
     })
   }, [monaco, editor])
 
@@ -419,10 +521,11 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   const dirty = code[activeTab].dirty !== code[activeTab].clean
 
   return (
-    <CodeContainer>
+    <CodeContainer ref={resizeRef}>
       <Tabs>
         <TabButton
           onClick={() => local.send("SELECTED_STATE_TAB")}
+          variant="code"
           activeState={local.isIn("tab.state") ? "active" : "inactive"}
           codeState={code.state.clean === code.state.dirty ? "clean" : "dirty"}
         >
@@ -430,6 +533,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
         </TabButton>
         <TabButton
           onClick={() => local.send("SELECTED_VIEW_TAB")}
+          variant="code"
           activeState={local.isIn("tab.view") ? "active" : "inactive"}
           codeState={code.view.clean === code.view.dirty ? "clean" : "dirty"}
         >
@@ -437,6 +541,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
         </TabButton>
         <TabButton
           onClick={() => local.send("SELECTED_STATIC_TAB")}
+          variant="code"
           activeState={local.isIn("tab.static") ? "active" : "inactive"}
           codeState={
             code.static.clean === code.static.dirty ? "clean" : "dirty"
@@ -480,12 +585,12 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
         </IconButton>
       </CodeEditorControls>
       <DragHandleHorizontal
+        motionValue={motionValues.code}
         align="right"
         width={CODE_COL_WIDTH}
         left={300}
         right={280}
         offset="code"
-        onMove={resizeEditor}
       />
     </CodeContainer>
   )
@@ -498,14 +603,13 @@ const CodeContainer = styled.div({
   width: "100%",
   minWidth: 0,
   maxWidth: "100%",
-  gridAutoColumns: "1fr",
+  gridTemplateColumns: "minmax(0, 1fr)",
   gridTemplateRows: `40px 1fr 40px`,
+  borderTop: "2px solid $border",
   borderLeft: "2px solid $border",
 })
 
 const EditorContainer = styled.div({
-  height: "100%",
-  width: "100%",
   overflow: "hidden",
   variants: {
     visibility: {
@@ -518,6 +622,15 @@ const EditorContainer = styled.div({
         opacity: 1,
       },
     },
+  },
+  ".inlineCodeHighlight": {
+    py: "2px",
+    px: 0,
+    bg: "$codeHl",
+    fontWeight: "bold",
+  },
+  ".lineCodeHighlight": {
+    bg: "$codeHl",
   },
 })
 
@@ -545,7 +658,9 @@ const ErrorMessage = styled.div({
 })
 
 const Tabs = styled.div({
+  overflow: "hidden",
   display: "flex",
   bg: "$muted",
   borderBottom: "1px solid $shadow",
+  p: "$0",
 })

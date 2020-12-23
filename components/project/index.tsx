@@ -2,8 +2,7 @@ import * as React from "react"
 import Link from "next/link"
 import Router from "next/router"
 import { Home, Sun, Copy, Plus, Minus } from "react-feather"
-
-import { setupUI } from "lib/local-data"
+import { motionValue } from "framer-motion"
 import { subscribeToDocSnapshot, forkProject } from "lib/database"
 import { login, logout } from "lib/auth-client"
 import { User, ProjectData } from "types"
@@ -20,8 +19,10 @@ import {
 import Content from "./content"
 import Code from "./code"
 import Details, { DETAILS_ROW_HEIGHT } from "./details"
-import Console, { CONSOLE_HEIGHT } from "./console"
+import Console from "./console"
 import Chart from "./chart"
+
+import { motionValues } from "lib/local-data"
 
 export const CONTENT_COL_WIDTH = 200
 export const CODE_COL_WIDTH = 320
@@ -98,6 +99,7 @@ export default function ProjectView({
       </ControlsContainer>
       <Content>
         <DragHandleHorizontal
+          motionValue={motionValues.content}
           align="left"
           width={CONTENT_COL_WIDTH}
           left={60}
@@ -109,27 +111,11 @@ export default function ProjectView({
         <Chart />
         <MainDragArea ref={rMainContainer} />
         <ViewContainer>
-          View <br />
-          {user ? (
-            <div>
-              Name: {user.name} <br /> Owner? {isOwner.toString()} <br />{" "}
-              Authenticated? {user.authenticated.toString()}
-            </div>
-          ) : (
-            <div>Not logged in</div>
-          )}
-          <Console>
-            <DragHandleVertical
-              height={CONSOLE_HEIGHT}
-              top={580}
-              bottom={CONSOLE_HEIGHT - 40}
-              offset="console"
-              align="bottom"
-            />
-          </Console>
+          <Console />
         </ViewContainer>
         <Details />
         <DragHandleHorizontalRelative
+          motionValue={motionValues.main}
           containerRef={rMainContainer}
           offset="main"
         />
@@ -146,9 +132,10 @@ const Layout = styled.div({
   top: 0,
   left: 0,
   width: "100vw",
-  minWidth: "auto",
   maxWidth: "100vw",
+  minWidth: "auto",
   height: "100vh",
+  maxHeight: "100%",
   minHeight: "auto",
   overflow: "hidden",
   gridTemplateColumns: `calc(${CONTENT_COL_WIDTH}px + var(--content-offset)) minmax(10%, 1fr) calc(${CODE_COL_WIDTH}px - var(--code-offset))`,
@@ -162,7 +149,6 @@ const MenuContainer = styled.div({
   gridArea: "menu",
   display: "flex",
   alignItems: "center",
-  borderBottom: "2px solid $border",
 })
 
 const TitleContainer = styled.div({
@@ -171,7 +157,6 @@ const TitleContainer = styled.div({
   alignItems: "center",
   justifyContent: "center",
   textAlign: "center",
-  borderBottom: "2px solid $border",
 })
 
 const ControlsContainer = styled.div({
@@ -179,7 +164,6 @@ const ControlsContainer = styled.div({
   display: "flex",
   alignItems: "center",
   justifyContent: "flex-end",
-  borderBottom: "2px solid $border",
 })
 
 const MainContainer = styled.div({
@@ -191,6 +175,7 @@ const MainContainer = styled.div({
   maxWidth: "100%",
   maxHeight: "100%",
   overflow: "hidden",
+  borderTop: "2px solid $border",
   gridTemplateAreas: `"chart view" "details view"`,
   gridTemplateColumns: `calc(50% + var(--main-offset)) minmax(15%, 1fr)`,
   gridTemplateRows: `minmax(0, 1fr) min(100%, calc(${DETAILS_ROW_HEIGHT}px - var(--detail-offset)))`,

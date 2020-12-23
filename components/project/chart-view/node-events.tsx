@@ -1,16 +1,29 @@
 import * as React from "react"
 import { S, useStateDesigner } from "@state-designer/react"
 import ProjectState from "../state"
-import Highlights from "../highlights"
+import { Highlights } from "../highlights"
 import { styled, Button } from "components/theme"
 
 const NodeEvents: React.FC<{ node: S.State<any, any> }> = ({ node }) => {
   const local = useStateDesigner(ProjectState)
-  const events = Object.entries(node.on)
   const captiveData = local.data.captive.data
 
+  const events = Object.entries(node.on)
+
+  if (node.onEvent) {
+    events.unshift(["onEvent", node.onEvent])
+  }
+
+  if (node.onExit) {
+    events.unshift(["onExit", node.onExit])
+  }
+
+  if (node.onEnter) {
+    events.unshift(["onEnter", node.onEnter])
+  }
+
   return (
-    <NodeEventsContainer>
+    <NodeEventsContainer type={node.type}>
       {events.map(([name, handlers], i) => {
         const payloadStringValue = "nothing" //local.data.code.payloads[name]
 
@@ -20,13 +33,19 @@ const NodeEvents: React.FC<{ node: S.State<any, any> }> = ({ node }) => {
           try {
             const fn = Function("Static", `return ${payloadStringValue}`)
             payload = fn(local.data.code.static)
-          } catch (e) {
-            // suppress
-          }
+          } catch (e) {}
         }
 
         const isActive = node.active
-        const canHandleEvent = local.data.captive.can(name, payload)
+
+        let canHandleEvent = true
+
+        try {
+          canHandleEvent = local.data.captive.can(name, payload)
+        } catch (e) {
+          throw new Error("error while testing event")
+        }
+
         const isDisabled = !isActive || !canHandleEvent
 
         let targets: string[] = []
@@ -65,6 +84,7 @@ const EventButton: React.FC<{
   isActive: boolean
 }> = ({ name, node, payload, targets, isDisabled, isActive }) => {
   const rButton = React.useRef<HTMLButtonElement>(null)
+  const { captive } = ProjectState.data
 
   React.useEffect(() => {
     Highlights.send("MOUNTED_EVENT_BUTTON", {
@@ -72,7 +92,7 @@ const EventButton: React.FC<{
       ref: rButton,
       path: node.path,
     })
-  })
+  }, [])
 
   return (
     <Button
@@ -80,17 +100,17 @@ const EventButton: React.FC<{
       variant="nodeEvent"
       title={
         !isDisabled
-          ? `Send ${name} event`
+          ? `Click to send the ${name} event`
           : !isActive
-          ? "Cannot send events when state is inactive."
+          ? "The state cannot handle events while it is inactive."
           : "The state cannot handle this event due to its current payload."
       }
       disabled={isDisabled}
       onClick={() => {
-        ProjectState.data.captive.send(name)
-        ProjectState.data.captive.getUpdate(({ active }) => {
-          Highlights.send("CHANGED_ACTIVE_STATES", { active })
-        })
+        captive.send(name, payload)
+        captive.getUpdate(({ active }) =>
+          Highlights.send("CHANGED_ACTIVE_STATES", { active }),
+        )
       }}
       onMouseEnter={(e) => {
         e.stopPropagation()
@@ -118,4 +138,13 @@ const NodeEventsContainer = styled.div({
   flexWrap: "wrap",
   maxWidth: 400,
   gap: 1,
+  variants: {
+    type: {
+      leaf: {
+        pb: "$0",
+      },
+      branch: {},
+      parallel: {},
+    },
+  },
 })

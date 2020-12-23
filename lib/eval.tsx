@@ -1,30 +1,57 @@
 import * as Utils from "components/static/utils"
 import Colors from "components/static/colors"
 import { createState } from "@state-designer/react"
+import { consoleState } from "components/project/console"
+
+const regex = /:(.*):/g
+
+function printFromState(...messages: any[]) {
+  let message = messages
+    .map((m) => (typeof m !== "string" ? JSON.stringify(m) : m))
+    .join(", ")
+
+  consoleState.send("LOGGED", { source: "state", message })
+}
+
+function printFromStatic(...messages: any[]) {
+  let message = messages
+    .map((m) => (typeof m !== "string" ? JSON.stringify(m) : m))
+    .join(", ")
+
+  consoleState.send("LOGGED", { source: "static", message })
+}
+
+function fakePrint(message: string | number | any) {}
 
 /* --------------------- Values --------------------- */
 
-export function getStaticValues(code: string) {
+export function getStaticValues(code: string, print = printFromStatic) {
   try {
     return Function(
       "Colors",
       "Utils",
+      "print",
       `${code}\n\nreturn getStatic()`,
-    )(Colors, Utils)
+    )(Colors, Utils, print)
   } catch (err) {
     throw new Error(err.message)
   }
 }
 
-export function getCaptiveState(stateCode: string, staticCode: string) {
+export function getCaptiveState(
+  stateCode: string,
+  staticCode: string,
+  print = printFromState,
+) {
   try {
     return Function(
       "createState",
       "Static",
       "Colors",
       "Utils",
+      "print",
       `return ${stateCode}`,
-    )(createState, staticCode, Colors, Utils)
+    )(createState, staticCode, Colors, Utils, print)
   } catch (err) {
     throw new Error(err.message)
   }
@@ -35,7 +62,7 @@ export function getCaptiveState(stateCode: string, staticCode: string) {
 export function validateStaticCode(staticCode: string) {
   let error = ""
   try {
-    getStaticValues(staticCode)
+    getStaticValues(staticCode, fakePrint)
   } catch (err) {
     error = err.message
   }
@@ -46,7 +73,7 @@ export function validateStaticCode(staticCode: string) {
 export function validateStateCode(stateCode: string, staticCode: string) {
   let error = ""
   try {
-    getCaptiveState(stateCode, staticCode)
+    getCaptiveState(stateCode, staticCode, fakePrint)
   } catch (err) {
     error = err.message
   }

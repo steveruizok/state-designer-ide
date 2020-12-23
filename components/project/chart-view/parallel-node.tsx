@@ -7,11 +7,12 @@ import { ParallelDivider } from "./styled"
 import { styled } from "components/theme"
 import NodeEvents from "./node-events"
 
-interface ParallelNodeProps {
+interface NodeProps {
   node: S.State<any, any>
+  highlight: boolean
 }
 
-export default function ParallelNode({ node }: ParallelNodeProps) {
+export default function ParallelNode({ node, highlight }: NodeProps) {
   const childNodes = Object.values(node.states)
 
   return (
@@ -19,6 +20,7 @@ export default function ParallelNode({ node }: ParallelNodeProps) {
       childOf={node.parentType || "branch"}
       data-isroot={node.parentType === null}
       data-isactive={node.active}
+      state={highlight ? "highlight" : "normal"}
     >
       <NodeHeading node={node} />
       <NodeEvents node={node} />

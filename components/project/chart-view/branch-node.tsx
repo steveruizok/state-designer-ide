@@ -6,7 +6,12 @@ import NodeHeading from "./node-heading"
 import StateNode from "./state-node"
 import NodeEvents from "./node-events"
 
-const BranchNode: React.FC<{ node: S.State<any, any> }> = ({ node }) => {
+interface NodeProps {
+  node: S.State<any, any>
+  highlight: boolean
+}
+
+export default function BranchNode({ node, highlight }: NodeProps) {
   const childNodes = Object.values(node.states)
 
   function getSortedBranchChildNodes(nodes: S.State<any, any>[]) {
@@ -18,6 +23,7 @@ const BranchNode: React.FC<{ node: S.State<any, any> }> = ({ node }) => {
       childOf={node.parentType || "branch"}
       data-isroot={node.parentType === null}
       data-isactive={node.active}
+      state={highlight ? "highlight" : "normal"}
     >
       <NodeHeading node={node} />
       <NodeEvents node={node} />
@@ -30,5 +36,3 @@ const BranchNode: React.FC<{ node: S.State<any, any> }> = ({ node }) => {
     </NodeContainer>
   )
 }
-
-export default BranchNode

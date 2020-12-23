@@ -35,12 +35,6 @@ export const toastState = createState({
 export default function Toast() {
   const local = useStateDesigner(toastState)
 
-  React.useEffect(() => {
-    toastState.send("ADDED_TOAST", {
-      message: "Hello world!" + Math.random().toFixed(2),
-    })
-  }, [])
-
   return (
     <AnimateSharedLayout>
       <ToastContainer layout>
@@ -49,16 +43,6 @@ export default function Toast() {
             <Message key={toast.id} {...toast} />
           ))}
         </AnimatePresence>
-        <button
-          style={{ pointerEvents: "all" }}
-          onClick={() =>
-            toastState.send("ADDED_TOAST", {
-              message: "Hello world!" + Math.random().toFixed(2),
-            })
-          }
-        >
-          Add Toast
-        </button>
       </ToastContainer>
     </AnimateSharedLayout>
   )
@@ -70,7 +54,7 @@ function Message({ id, message, autohide = true }: ToastMessage) {
 
     const timeout = setTimeout(
       () => toastState.send("DISMISSED_TOAST", { id }),
-      5000,
+      3000,
     )
     return () => clearTimeout(timeout)
   }, [autohide])
@@ -104,7 +88,7 @@ function Message({ id, message, autohide = true }: ToastMessage) {
 }
 
 const ToastContainer = styled(motion.div, {
-  position: "absolute",
+  position: "fixed",
   bottom: 24,
   width: "100%",
   display: "flex",
@@ -129,11 +113,12 @@ const ToastMessage = styled(motion.div, {
   color: "$text",
   width: "fit-content",
   borderRadius: 8,
-  border: "2px solid $message",
+  fontSize: "$0",
+  border: "1px solid $shadow",
   boxShadow: "0 6px 24px $shadow",
   pl: "$2",
-  pr: "$1",
-  py: "$1",
+  pr: "$0",
+  py: "$0",
   mt: "$1",
   [`${IconButton}`]: {
     ml: "$1",

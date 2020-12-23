@@ -1,5 +1,6 @@
 import { createState } from "@state-designer/react"
 import { codePanelState } from "./code"
+import { consoleState } from "./console"
 import { getStaticValues, getCaptiveState } from "lib/eval"
 
 const projectState = createState({
@@ -19,6 +20,7 @@ const projectState = createState({
     SOURCE_UPDATED: [
       "updateFromDatabase",
       "updateCodePanelState",
+      "resetConsole",
       "createStatic",
       "createCaptiveState",
     ],
@@ -76,6 +78,9 @@ const projectState = createState({
       } catch (err) {
         console.error("Error building captive state!", err.message)
       }
+    },
+    resetConsole(data) {
+      consoleState.send("RESET")
     },
   },
 })

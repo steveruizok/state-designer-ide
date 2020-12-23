@@ -1,9 +1,9 @@
 import * as React from "react"
-import { S } from "@state-designer/react"
+import { S, useStateDesigner } from "@state-designer/react"
 import ParallelNode from "./parallel-node"
 import BranchNode from "./branch-node"
 import LeafNode from "./leaf-node"
-import Highlights from "../highlights"
+import { Highlights } from "../highlights"
 import { styled } from "components/theme"
 
 interface StateNodeProps {
@@ -18,6 +18,8 @@ const NodeComponent = {
 
 export default function StateNode({ node }: StateNodeProps) {
   const rContainer = React.useRef<HTMLDivElement>(null)
+  const localHighlights = useStateDesigner(Highlights)
+  const highlight = localHighlights.data.path === node.path
 
   React.useEffect(() => {
     Highlights.send("MOUNTED_NODE", { path: node.path, ref: rContainer })
@@ -42,7 +44,7 @@ export default function StateNode({ node }: StateNodeProps) {
         Highlights.send("CLEARED_STATE_HIGHLIGHT", { stateName: node.name })
       }}
     >
-      <Component node={node} />
+      <Component node={node} highlight={highlight} />
     </StateNodeContainer>
   )
 }
