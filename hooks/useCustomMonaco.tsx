@@ -1,3 +1,4 @@
+import * as React from "react"
 import prettier from "prettier/standalone"
 import parser from "prettier/parser-typescript"
 import { useMonaco } from "use-monaco"
@@ -34,14 +35,17 @@ export default function useCustomMonaco(language: "json" | "typescript") {
     },
     theme: theme === "light" ? "light" : "dark",
     onLoad: (monaco) => {
+      if (monaco === null) return
+
       monaco.editor.defineTheme("light", {
         base: "vs",
         inherit: true,
         rules: [],
         colors: {
-          "editorCursor.foreground": "red",
-          "editorBracketMatch.border": "#ffffff00",
-          "editorBracketMatch.background": "#ffffff33",
+          "editor.lineHighlightBorder": "#77777700",
+          "editor.lineHighlightBackground": "#77777711",
+          "editorBracketMatch.border": "#00000000",
+          "editorBracketMatch.background": "#00000022",
           "editorIndentGuide.background": "#ffffff00",
         },
       })
@@ -51,10 +55,11 @@ export default function useCustomMonaco(language: "json" | "typescript") {
         inherit: true,
         rules: [],
         colors: {
-          "editorCursor.foreground": "red",
+          "editor.lineHighlightBorder": "#777777ff",
+          "editor.lineHighlightBackground": "#77777717",
           "editorBracketMatch.border": "#ffffff00",
-          "editorBracketMatch.background": "#ffffff33",
-          "editorIndentGuide.background": "#ffffff00",
+          "editorBracketMatch.background": "#ffffff22",
+          "editorIndentGuide.background": "#00000000",
         },
       })
 
@@ -71,6 +76,11 @@ export default function useCustomMonaco(language: "json" | "typescript") {
       return undefined
     },
   })
+
+  React.useEffect(() => {
+    if (!monaco) return
+    monaco.editor.setTheme(theme)
+  }, [monaco, theme])
 
   return { monaco, isLoading }
 }

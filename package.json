@@ -25,8 +25,9 @@
     "react-dom": "17.0.1",
     "react-feather": "^2.0.9",
     "react-live": "^2.2.3",
+    "react-merge-refs": "^1.1.0",
     "react-use-gesture": "^9.0.0-beta.11",
-    "use-monaco": "^0.0.29",
+    "use-monaco": "^0.0.34",
     "use-motion-resize-observer": "^2.0.0"
   },
   "devDependencies": {

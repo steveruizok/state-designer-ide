@@ -17,6 +17,7 @@ import { codeValidators, codeFormatValidators } from "lib/eval"
 import { Highlights } from "components/project/highlights"
 import useMotionResizeObserver from "use-motion-resize-observer"
 import useTheme from "hooks/useTheme"
+import useCustomMonaco from "hooks/useCustomMonaco"
 import useCustomEditor from "hooks/useCustomEditor"
 
 const EDITOR_TABS = ["state", "view", "static"]
@@ -328,16 +329,8 @@ interface CodePanelProps {
 export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   // Local state
   const local = useStateDesigner(codePanelState)
-  const { theme } = useTheme()
 
-  const { monaco } = useMonaco({
-    plugins: {
-      prettier: ["typescript"],
-      typings: true,
-      theme: { themes },
-    },
-    theme: theme === "light" ? "light" : "dark",
-  })
+  const { monaco } = useCustomMonaco("typescript")
 
   const stateModel = useFile({
     path: "state.js",
@@ -360,70 +353,13 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
     language: "typescript",
   })
 
-  const { editor, containerRef } = useEditor({
+  const { editor, containerRef } = useCustomEditor(
     monaco,
-    model: stateModel,
-    options: {
-      fontSize: 13,
-      showUnused: false,
-      quickSuggestions: false,
-      fontFamily: "Fira Code",
-      fontWeight: "500",
-      minimap: { enabled: false },
-      smoothScrolling: true,
-      lineDecorationsWidth: 4,
-      fontLigatures: true,
-      cursorBlinking: "smooth",
-      lineNumbers: "off",
-      scrollBeyondLastLine: false,
-      scrollbar: {
-        verticalScrollbarSize: 0,
-        verticalSliderSize: 8,
-        horizontalScrollbarSize: 0,
-        horizontalSliderSize: 8,
-      },
-      renderLineHighlight: "none",
-      // renderIndentGuides: false,
-      cursorWidth: 3,
-    },
-    editorDidMount: (editor) => {
-      editor.updateOptions({
-        readOnly: oid !== uid,
-      })
-
-      monaco.editor.defineTheme("light", {
-        base: "vs",
-        inherit: true,
-        rules: [],
-        colors: {
-          "editorCursor.foreground": "red",
-          "editorBracketMatch.border": "#ffffff00",
-          "editorBracketMatch.background": "#ffffff33",
-          "editorIndentGuide.background": "#ffffff00",
-        },
-      })
-
-      monaco.editor.defineTheme("dark", {
-        base: "vs-dark",
-        inherit: true,
-        rules: [],
-        colors: {
-          "editorCursor.foreground": "red",
-          "editorBracketMatch.border": "#ffffff00",
-          "editorBracketMatch.background": "#ffffff33",
-          "editorIndentGuide.background": "#ffffff00",
-        },
-      })
-    },
-    onChange: (code) => local.send("CHANGED_CODE", { code }),
-  })
-
-  // Theme
-
-  React.useEffect(() => {
-    if (!monaco) return
-    monaco.editor.setTheme(theme)
-  }, [monaco, editor, theme])
+    stateModel,
+    oid !== uid,
+    false,
+    (code) => local.send("CHANGED_CODE", { code }),
+  )
 
   // Highlights
   const rPreviousDecorations = React.useRef<any[]>([])
@@ -495,49 +431,9 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
     })
   }, [editor, monaco])
 
-  // Resizing
-  const resizeEditor = React.useCallback(
-    debounce(() => {
-      editor?.layout()
-    }, 48),
-    [editor],
-  )
-
-  const { ref: resizeRef } = useMotionResizeObserver<HTMLDivElement>({
-    onResize: () => resizeEditor(),
-  })
-
+  // Setup save action and load up the state machine
   React.useEffect(() => {
     if (!(monaco && editor)) return
-
-    // setup prettier formatter
-    const prettierFormatter = {
-      provideDocumentFormattingEdits(model) {
-        try {
-          const text = prettier.format(model.getValue(), {
-            parser: "typescript",
-            plugins: [parser],
-            semi: false,
-            trailingComma: "es5",
-            tabWidth: 2,
-          })
-
-          const range = model.getFullModelRange()
-
-          return [{ range, text }]
-        } catch (e) {
-          return []
-        }
-      },
-    }
-    monaco.languages.registerDocumentFormattingEditProvider(
-      "javascript",
-      prettierFormatter,
-    )
-    monaco.languages.registerDocumentFormattingEditProvider(
-      "typescript",
-      prettierFormatter,
-    )
 
     editor.onKeyDown((e) => {
       if (e.metaKey) {
@@ -553,14 +449,10 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
               const code = editor.getValue()
               local.send("SAVED_CODE", { code, oid, pid })
             })
-        } else if (e.code === "KeyA") {
-          const range = editor.getModel().getFullModelRange()
-          editor.setSelection(range)
         }
       }
     })
 
-    // Load up the state machine
     local.send("LOADED", {
       monaco,
       editor,
@@ -572,14 +464,6 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
       activeTab: ui.code.activeTab,
     })
   }, [monaco, editor])
-
-  React.useEffect(() => {
-    if (editor) {
-      editor.updateOptions({
-        readOnly: oid !== uid,
-      })
-    }
-  }, [editor, oid, uid])
 
   const { code } = local.data
 
@@ -594,7 +478,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   const dirty = local.isIn("hasChanges")
 
   return (
-    <CodeContainer ref={resizeRef}>
+    <CodeContainer>
       <Tabs>
         <TabButton
           onClick={() => local.send("SELECTED_STATE_TAB")}

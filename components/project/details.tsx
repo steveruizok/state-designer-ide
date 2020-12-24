@@ -2,7 +2,9 @@ import * as React from "react"
 import debounce from "lodash/debounce"
 import { animate } from "framer-motion"
 import { useStateDesigner } from "@state-designer/react"
-import { useFile, useMonaco, useEditor } from "use-monaco"
+import { useFile } from "use-monaco"
+import useCustomEditor from "hooks/useCustomEditor"
+import useCustomMonaco from "hooks/useCustomMonaco"
 import {
   styled,
   IconButton,
@@ -36,15 +38,8 @@ export default function Details({}: DetailsProps) {
     data: null,
     view: null,
   })
-  const { theme } = useTheme()
 
-  const { monaco } = useMonaco({
-    plugins: {
-      prettier: ["json"],
-      typings: true,
-    },
-    theme: "vs-light",
-  })
+  const { monaco } = useCustomMonaco("json")
 
   const dataModel = useFile({
     path: "data.json",
@@ -60,51 +55,13 @@ export default function Details({}: DetailsProps) {
     language: "json",
   })
 
-  const { editor, containerRef } = useEditor({
+  const { editor, containerRef } = useCustomEditor(
     monaco,
-    model: dataModel,
-    options: {
-      fontSize: 13,
-      showUnused: false,
-      quickSuggestions: false,
-      fontFamily: "Fira Code",
-      fontWeight: "500",
-      minimap: { enabled: false },
-      smoothScrolling: true,
-      lineDecorationsWidth: 4,
-      fontLigatures: true,
-      cursorBlinking: "smooth",
-      lineNumbers: "off",
-      wordWrap: isWrapped ? "on" : "off",
-      scrollBeyondLastLine: false,
-      readOnly: true,
-      glyphMargin: false,
-      lightbulb: { enabled: false },
-      lineNumbersMinChars: 0,
-      scrollbar: {
-        verticalScrollbarSize: 0,
-        verticalSliderSize: 8,
-        horizontalScrollbarSize: 0,
-        horizontalSliderSize: 8,
-      },
-    },
-    editorDidMount: (editor, monaco) => {
-      // Select all on Command + A
-      editor.onKeyDown((e) => {
-        if (e.metaKey) {
-          if (e.code === "KeyA") {
-            const range = editor.getModel().getFullModelRange()
-            editor.setSelection(range)
-          }
-        }
-      })
-    },
-  })
-
-  React.useEffect(() => {
-    if (!monaco) return
-    monaco.editor.setTheme(theme === "light" ? "vs-light" : "vs-dark")
-  }, [monaco, editor, theme])
+    dataModel,
+    true,
+    isWrapped,
+    () => {},
+  )
 
   // Handle editor changes when the user changes tabs
   function handleTabChange(tab: "data" | "values") {
@@ -124,18 +81,6 @@ export default function Details({}: DetailsProps) {
     // Update the state
     setActiveTab(tab)
   }
-
-  // A debounced callback to handle the editor resize
-  const resizeEditor = React.useCallback(
-    debounce(() => {
-      editor?.layout()
-    }, 48),
-    [editor],
-  )
-
-  const { ref: resizeRef } = useMotionResizeObserver<HTMLDivElement>({
-    onResize: () => resizeEditor(),
-  })
 
   // Toggle whether the editor should wrap its content
   function toggleWrap() {
@@ -187,7 +132,7 @@ export default function Details({}: DetailsProps) {
   }
 
   return (
-    <DetailsContainer ref={resizeRef}>
+    <DetailsContainer>
       <TitleRow>
         <TabsContainer>
           <TabButton

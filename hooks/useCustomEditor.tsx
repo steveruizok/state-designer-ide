@@ -1,16 +1,18 @@
 import * as React from "react"
-import prettier from "prettier/standalone"
-import parser from "prettier/parser-typescript"
-import { useEditor, useMonacoContext } from "use-monaco"
+import { useEditor } from "use-monaco"
+import mergeRefs from "react-merge-refs"
 import useTheme from "./useTheme"
+import debounce from "lodash/debounce"
+import useMotionResizeObserver from "use-motion-resize-observer"
 
 export default function useCustomEditor(
+  monaco: any,
   model: any,
   readOnly: boolean,
+  wrap: boolean,
   onChange: (code: string) => void,
 ) {
   const { theme } = useTheme()
-  const { monaco } = useMonacoContext()
 
   const { editor, containerRef } = useEditor({
     monaco,
@@ -28,13 +30,14 @@ export default function useCustomEditor(
       cursorBlinking: "smooth",
       lineNumbers: "off",
       scrollBeyondLastLine: false,
+      wordWrap: wrap ? "on" : "off",
       scrollbar: {
         verticalScrollbarSize: 0,
         verticalSliderSize: 8,
         horizontalScrollbarSize: 0,
         horizontalSliderSize: 8,
       },
-      renderLineHighlight: "none",
+      renderLineHighlight: "all",
       // renderIndentGuides: false,
       cursorWidth: 3,
     },
@@ -57,42 +60,37 @@ export default function useCustomEditor(
   })
 
   React.useEffect(() => {
-    if (!(monaco && editor)) return
-
-    // setup prettier formatter
-    const prettierFormatter = {
-      provideDocumentFormattingEdits(model) {
-        try {
-          const text = prettier.format(model.getValue(), {
-            parser: "typescript",
-            plugins: [parser],
-            semi: false,
-            trailingComma: "es5",
-            tabWidth: 2,
-          })
-
-          const range = model.getFullModelRange()
-
-          return [{ range, text }]
-        } catch (e) {
-          return []
-        }
-      },
-    }
-    monaco.languages.registerDocumentFormattingEditProvider(
-      "javascript",
-      prettierFormatter,
-    )
-    monaco.languages.registerDocumentFormattingEditProvider(
-      "typescript",
-      prettierFormatter,
-    )
-  }, [monaco, editor])
-
-  React.useEffect(() => {
     if (!monaco) return
     monaco.editor.setTheme(theme)
   }, [monaco, editor, theme])
 
-  return { editor, containerRef }
+  // Resizing
+  const resizeEditor = React.useCallback(
+    debounce(() => {
+      editor?.layout()
+    }, 48),
+    [editor],
+  )
+
+  const { ref: resizeRef } = useMotionResizeObserver<HTMLDivElement>({
+    onResize: () => resizeEditor(),
+  })
+
+  React.useEffect(() => {
+    if (editor) {
+      editor.updateOptions({
+        readOnly,
+      })
+    }
+  }, [editor, readOnly])
+
+  React.useEffect(() => {
+    if (editor) {
+      editor.updateOptions({
+        wordWrap: wrap ? "on" : "off",
+      })
+    }
+  }, [monaco, editor, wrap])
+
+  return { editor, containerRef: mergeRefs([resizeRef, containerRef]) }
 }

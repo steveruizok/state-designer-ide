@@ -3530,24 +3530,10 @@ mkdirp@^0.5.1, mkdirp@^0.5.3:
   dependencies:
     minimist "^1.2.5"
 
-monaco-editor@0.20.0, monaco-editor@^0.20.0:
-  version "0.20.0"
-  resolved "https://registry.yarnpkg.com/monaco-editor/-/monaco-editor-0.20.0.tgz#5d5009343a550124426cb4d965a4d27a348b4dea"
-  integrity sha512-hkvf4EtPJRMQlPC3UbMoRs0vTAFAYdzFQ+gpMb8A+9znae1c43q8Mab9iVsgTcg/4PNiLGGn3SlDIa8uvK1FIQ==
-
 monaco-editor@^0.21.2:
   version "0.21.2"
   resolved "https://registry.yarnpkg.com/monaco-editor/-/monaco-editor-0.21.2.tgz#37054e63e480d51a2dd17d609dcfb192304d5605"
   integrity sha512-jS51RLuzMaoJpYbu7F6TPuWpnWTLD4kjRW0+AZzcryvbxrTwhNy1KC9yboyKpgMTahpUbDUsuQULoo0GV1EPqg==
-
-monaco-graphql@^0.3.3:
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/monaco-graphql/-/monaco-graphql-0.3.3.tgz#081eb354f8b83a999cff964e0466afa32f3d08e0"
-  integrity sha512-mpZ235ZfupvHj63xlFhATS7/wp+PH0S5/JpyHrnSw7QQ/A/ZMwC5AbF6fja0QhpD2Hc/gRNym8lz+62L2Tpm6Q==
-  dependencies:
-    graphql-language-service "^3.0.4"
-    graphql-language-service-utils "^2.4.3"
-    monaco-editor "^0.20.0"
 
 move-concurrently@^1.0.1:
   version "1.0.1"
@@ -4357,6 +4343,11 @@ react-live@^2.2.3:
     prop-types "^15.5.8"
     react-simple-code-editor "^0.10.0"
     unescape "^1.0.1"
+
+react-merge-refs@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/react-merge-refs/-/react-merge-refs-1.1.0.tgz#73d88b892c6c68cbb7a66e0800faa374f4c38b06"
+  integrity sha512-alTKsjEL0dKH/ru1Iyn7vliS2QRcBp9zZPGoWxUOvRGWPUYgjo+V01is7p04It6KhgrzhJGnIj9GgX8W4bZoCQ==
 
 react-refresh@0.8.3:
   version "0.8.3"
@@ -5402,16 +5393,15 @@ use-deep-compare-effect@^1.3.1:
     "@types/react" "^17.0.0"
     dequal "^2.0.2"
 
-use-monaco@^0.0.29:
-  version "0.0.29"
-  resolved "https://registry.yarnpkg.com/use-monaco/-/use-monaco-0.0.29.tgz#478a690366f6e82f1eec2974bb92b28bd31d692d"
-  integrity sha512-27/Xk5f0h4hlAdJ3evZhBktnZOe4jRAcw2SWW69ydQX8Pnq0/18IK6F73hEwKE8+ZmgZj4plvmXdkJ8kaUDmfA==
+use-monaco@^0.0.34:
+  version "0.0.34"
+  resolved "https://registry.yarnpkg.com/use-monaco/-/use-monaco-0.0.34.tgz#5eb3e7cd156541717ac57400e8beb8a7321f90d8"
+  integrity sha512-my7YXrCoxZVehjVYDsbUhKV6pAYDy/uYPPNCYKsqXpOmhV+fdewfgfgfCCIarPpqs7ywRX5O+AT51xm+sSCFUQ==
   dependencies:
     create-hook-context "^1.0.0"
     graphql-language-service "^3.0.4"
     graphql-language-service-types "^1.6.3"
-    monaco-editor "0.20.0"
-    monaco-graphql "^0.3.3"
+    monaco-editor "^0.21.2"
     use-debounce "^3.4.2"
     use-deep-compare-effect "^1.3.1"
 
