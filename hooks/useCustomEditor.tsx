@@ -38,7 +38,6 @@ export default function useCustomEditor(
         horizontalSliderSize: 8,
       },
       renderLineHighlight: "all",
-      // renderIndentGuides: false,
       cursorWidth: 3,
     },
     editorDidMount: (editor) => {
@@ -49,9 +48,9 @@ export default function useCustomEditor(
       editor.onKeyDown((e) => {
         if (e.metaKey) {
           if (e.code === "KeyA") {
-            e.preventDefault()
-            const range = editor.getModel().getFullModelRange()
-            editor.setSelection(range)
+            // e.preventDefault()
+            // const range = editor.getModel().getFullModelRange()
+            // editor.setSelection(range)
           }
         }
       })
@@ -73,7 +72,7 @@ export default function useCustomEditor(
   )
 
   const { ref: resizeRef } = useMotionResizeObserver<HTMLDivElement>({
-    onResize: () => resizeEditor(),
+    onResize: resizeEditor,
   })
 
   React.useEffect(() => {
@@ -90,7 +89,7 @@ export default function useCustomEditor(
         wordWrap: wrap ? "on" : "off",
       })
     }
-  }, [monaco, editor, wrap])
+  }, [editor, wrap])
 
   return { editor, containerRef: mergeRefs([resizeRef, containerRef]) }
 }
