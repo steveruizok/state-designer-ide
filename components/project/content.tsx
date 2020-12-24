@@ -68,7 +68,7 @@ function StateItem({ node, highlight }: StateItemProps) {
     >
       <Button state={node.active ? "active" : "inactive"}>
         {range(node.depth).map((i) => (
-          <Circle key={i} size="5" fill="text" />
+          <Circle key={i} size="5" fill="currentColor" />
         ))}
         {node.isInitial ? (
           <Disc size="12" strokeWidth={3} />
@@ -102,6 +102,7 @@ function EventItem({ name }: EventItemProps) {
 }
 
 const Button = styled.button({
+  color: "$text",
   fontSize: "$1",
   fontWeight: "bold",
   fontFamily: "$body",

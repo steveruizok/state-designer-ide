@@ -1,6 +1,7 @@
 import * as React from "react"
 import Link from "next/link"
 import Router from "next/router"
+import useTheme from "hooks/useTheme"
 import { Home, Sun, Copy, Plus, Minus } from "react-feather"
 import { motionValue } from "framer-motion"
 import { subscribeToDocSnapshot, forkProject } from "lib/database"
@@ -9,7 +10,7 @@ import { User, ProjectData } from "types"
 import projectState from "./state"
 import { codePanelState } from "./code"
 
-import { styled, IconButton, Text } from "components/theme"
+import { styled, IconButton, Text, Button } from "components/theme"
 
 import {
   DragHandleHorizontalRelative,
@@ -42,6 +43,7 @@ export default function ProjectView({
   pid,
   isOwner,
 }: ProjectViewProps) {
+  const { toggle } = useTheme()
   const rMainContainer = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
@@ -74,9 +76,9 @@ export default function ProjectView({
           </IconButton>
         </Link>
         {user ? (
-          <button onClick={() => logout()}>Log Out</button>
+          <Button onClick={() => logout()}>Log Out</Button>
         ) : (
-          <button onClick={login}>Log in</button>
+          <Button onClick={login}>Log in</Button>
         )}
       </MenuContainer>
       <TitleContainer>Title</TitleContainer>
@@ -93,7 +95,7 @@ export default function ProjectView({
         <IconButton>
           <Plus />
         </IconButton>
-        <IconButton>
+        <IconButton onClick={toggle}>
           <Sun />
         </IconButton>
       </ControlsContainer>

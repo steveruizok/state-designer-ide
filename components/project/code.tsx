@@ -16,6 +16,8 @@ import { ui, saveCodeTab, motionValues } from "lib/local-data"
 import { codeValidators, codeFormatValidators } from "lib/eval"
 import { Highlights } from "components/project/highlights"
 import useMotionResizeObserver from "use-motion-resize-observer"
+import useTheme from "hooks/useTheme"
+import useCustomEditor from "hooks/useCustomEditor"
 
 const EDITOR_TABS = ["state", "view", "static"]
 
@@ -69,6 +71,27 @@ export const codePanelState = createState({
     RESET_CODE: ["resetCode", "restoreActiveTabCleanViewState"],
   },
   states: {
+    changes: {
+      initial: "noChanges",
+      states: {
+        noChanges: {
+          on: {
+            CHANGED_CODE: {
+              unless: "codeMatchesClean",
+              to: "hasChanges",
+            },
+          },
+        },
+        hasChanges: {
+          on: {
+            CHANGED_CODE: {
+              if: "codeMatchesClean",
+              to: "noChanges",
+            },
+          },
+        },
+      },
+    },
     error: {
       initial: "noError",
       states: {
@@ -78,7 +101,11 @@ export const codePanelState = createState({
               if: "errorInCurrentTab",
               to: "hasError",
             },
-            SAVED_CODE: ["saveCode", "saveCurrentCleanViewState"],
+            SAVED_CODE: {
+              unless: "errorInCurrentTab",
+              do: ["saveCode", "saveCurrentCleanViewState"],
+              to: "noChanges",
+            },
           },
         },
         hasError: {
@@ -194,6 +221,10 @@ export const codePanelState = createState({
     noStaticError(data) {
       return data.code.static.error === ""
     },
+    codeMatchesClean(data) {
+      const { activeTab } = data
+      return data.code[activeTab].clean === data.code[activeTab].dirty
+    },
   },
   actions: {
     // Data
@@ -297,6 +328,7 @@ interface CodePanelProps {
 export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   // Local state
   const local = useStateDesigner(codePanelState)
+  const { theme } = useTheme()
 
   const { monaco } = useMonaco({
     plugins: {
@@ -304,7 +336,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
       typings: true,
       theme: { themes },
     },
-    theme: "vs-light",
+    theme: theme === "light" ? "light" : "dark",
   })
 
   const stateModel = useFile({
@@ -344,14 +376,54 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
       cursorBlinking: "smooth",
       lineNumbers: "off",
       scrollBeyondLastLine: false,
+      scrollbar: {
+        verticalScrollbarSize: 0,
+        verticalSliderSize: 8,
+        horizontalScrollbarSize: 0,
+        horizontalSliderSize: 8,
+      },
+      renderLineHighlight: "none",
+      // renderIndentGuides: false,
+      cursorWidth: 3,
     },
     editorDidMount: (editor) => {
       editor.updateOptions({
         readOnly: oid !== uid,
       })
+
+      monaco.editor.defineTheme("light", {
+        base: "vs",
+        inherit: true,
+        rules: [],
+        colors: {
+          "editorCursor.foreground": "red",
+          "editorBracketMatch.border": "#ffffff00",
+          "editorBracketMatch.background": "#ffffff33",
+          "editorIndentGuide.background": "#ffffff00",
+        },
+      })
+
+      monaco.editor.defineTheme("dark", {
+        base: "vs-dark",
+        inherit: true,
+        rules: [],
+        colors: {
+          "editorCursor.foreground": "red",
+          "editorBracketMatch.border": "#ffffff00",
+          "editorBracketMatch.background": "#ffffff33",
+          "editorIndentGuide.background": "#ffffff00",
+        },
+      })
     },
     onChange: (code) => local.send("CHANGED_CODE", { code }),
   })
+
+  // Theme
+
+  React.useEffect(() => {
+    if (!monaco) return
+    monaco.editor.setTheme(theme)
+  }, [monaco, editor, theme])
 
   // Highlights
   const rPreviousDecorations = React.useRef<any[]>([])
@@ -406,8 +478,9 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
           range: new monaco.Range(a, b, c, d),
           options: {
             isWholeLine: true,
+            linesDecorationsClassName: "lineCodeHighlight",
             inlineClassName: "inlineCodeHighlight",
-            marginClassName: "lineCodeHighlight",
+            marginClassName: "marginCodeHighlight",
           },
         }))
 
@@ -518,7 +591,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   })
 
   const error = code[activeTab].error
-  const dirty = code[activeTab].dirty !== code[activeTab].clean
+  const dirty = local.isIn("hasChanges")
 
   return (
     <CodeContainer ref={resizeRef}>
@@ -624,13 +697,30 @@ const EditorContainer = styled.div({
     },
   },
   ".inlineCodeHighlight": {
-    py: "2px",
-    px: 0,
-    bg: "$codeHl",
-    fontWeight: "bold",
+    "&::after": {
+      content: "''",
+      position: "absolute",
+      left: 0,
+      top: 0,
+      height: "100%",
+      width: "100%",
+      bg: "$codeHl",
+      zIndex: -1,
+    },
   },
-  ".lineCodeHighlight": {
+  ".marginCodeHighlight": {
     bg: "$codeHl",
+    position: "relative",
+    // "&::after": {
+    //   content: "''",
+    //   position: "absolute",
+    //   left: 0,
+    //   top: 0,
+    //   height: "100%",
+    //   bg: "$accent",
+    //   width: "4px !important",
+    //   zIndex: 9999,
+    // },
   },
 })
 

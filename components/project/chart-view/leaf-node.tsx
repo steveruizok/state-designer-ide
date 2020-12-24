@@ -13,8 +13,8 @@ export default function LeafNode({ node, highlight }: NodeProps) {
   return (
     <NodeContainer
       childOf={node.parentType}
-      data-isroot={false}
-      data-isactive={node.active}
+      nodeLevel="child"
+      nodeState={node.active ? "active" : "inactive"}
       state={highlight ? "highlight" : "normal"}
     >
       <NodeHeading node={node} />

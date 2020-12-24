@@ -1,6 +1,6 @@
-import { styled, css } from "./core"
+import { styled, css, lightTheme, darkTheme } from "./core"
 
-export { styled, css }
+export { styled, css, lightTheme, darkTheme }
 
 export const Box = styled.div({})
 
@@ -13,6 +13,7 @@ export const Flex = styled.div({
 })
 
 export const Button = styled.button({
+  color: "$text",
   fontSize: "$1",
   fontWeight: "bold",
   fontFamily: "$body",
@@ -94,6 +95,7 @@ export const TitleRow = styled.div({
 })
 
 export const IconButton = styled.button({
+  color: "$text",
   bg: "transparent",
   borderRadius: 4,
   fontFamily: "$body",
@@ -175,4 +177,11 @@ export const TabButton = styled.button({
       },
     },
   },
+})
+
+export const TabsContainer = styled.div({
+  display: "flex",
+  overflow: "hidden",
+  justifyContent: "flex-start",
+  flexGrow: 2,
 })

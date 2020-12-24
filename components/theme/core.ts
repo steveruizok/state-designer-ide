@@ -7,8 +7,8 @@ export const { styled, css } = createStyled({
       $muted: "#fafafa",
       $background: "#ffffff",
       $codeText: "#f8f8f2",
-      $codeBg: "#282a36",
-      $codeHl: "#edf4fe",
+      $codeBg: "#ffffff",
+      $codeHl: "#f3f3f3",
       $accent: "#ff0000",
       $canvas: "#efefef",
       $border: "#333333",
@@ -147,13 +147,15 @@ export const { styled, css } = createStyled({
   },
 })
 
+export const lightTheme = css.theme({})
+
 export const darkTheme = css.theme({
   colors: {
     $text: "#fcfcfa",
     $muted: "#242529",
     $background: "#202124",
     $codeText: "#f8f8f2",
-    $codeBg: "#282a36",
+    $codeBg: "#1e1e1e",
     $codeHl: "#3b3d41",
     $accent: "#F00",
     $canvas: "#1b1c1e",

@@ -3,7 +3,14 @@ import debounce from "lodash/debounce"
 import { animate } from "framer-motion"
 import { useStateDesigner } from "@state-designer/react"
 import { useFile, useMonaco, useEditor } from "use-monaco"
-import { styled, IconButton, TabButton, TitleRow } from "components/theme"
+import {
+  styled,
+  IconButton,
+  TabsContainer,
+  TabButton,
+  TitleRow,
+} from "components/theme"
+import useTheme from "hooks/useTheme"
 import { Copy, AlignLeft, ChevronDown, ChevronUp } from "react-feather"
 import projectState from "./state"
 import { DragHandleVertical } from "./drag-handles"
@@ -29,6 +36,7 @@ export default function Details({}: DetailsProps) {
     data: null,
     view: null,
   })
+  const { theme } = useTheme()
 
   const { monaco } = useMonaco({
     plugins: {
@@ -73,6 +81,12 @@ export default function Details({}: DetailsProps) {
       glyphMargin: false,
       lightbulb: { enabled: false },
       lineNumbersMinChars: 0,
+      scrollbar: {
+        verticalScrollbarSize: 0,
+        verticalSliderSize: 8,
+        horizontalScrollbarSize: 0,
+        horizontalSliderSize: 8,
+      },
     },
     editorDidMount: (editor, monaco) => {
       // Select all on Command + A
@@ -86,6 +100,11 @@ export default function Details({}: DetailsProps) {
       })
     },
   })
+
+  React.useEffect(() => {
+    if (!monaco) return
+    monaco.editor.setTheme(theme === "light" ? "vs-light" : "vs-dark")
+  }, [monaco, editor, theme])
 
   // Handle editor changes when the user changes tabs
   function handleTabChange(tab: "data" | "values") {
@@ -175,6 +194,7 @@ export default function Details({}: DetailsProps) {
             variant="details"
             activeState={activeTab === "data" ? "active" : "inactive"}
             onClick={() => handleTabChange("data")}
+            onDoubleClick={toggleExpanded}
           >
             Data
           </TabButton>
@@ -182,6 +202,7 @@ export default function Details({}: DetailsProps) {
             variant="details"
             activeState={activeTab === "values" ? "active" : "inactive"}
             onClick={() => handleTabChange("values")}
+            onDoubleClick={toggleExpanded}
           >
             Values
           </TabButton>
@@ -225,11 +246,4 @@ const DetailsContainer = styled.div({
 
 const CodeContainer = styled.div({
   overflow: "hidden",
-})
-
-const TabsContainer = styled.div({
-  display: "flex",
-  overflow: "hidden",
-  justifyContent: "flex-start",
-  flexGrow: 2,
 })

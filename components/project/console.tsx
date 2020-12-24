@@ -1,7 +1,14 @@
 import * as React from "react"
 import { animate } from "framer-motion"
 import { createState, useStateDesigner } from "@state-designer/react"
-import { styled, IconButton, Text, TitleRow } from "components/theme"
+import {
+  styled,
+  IconButton,
+  TabButton,
+  TabsContainer,
+  Text,
+  TitleRow,
+} from "components/theme"
 import { Copy, ChevronDown, ChevronUp } from "react-feather"
 import { DragHandleVertical } from "./drag-handles"
 import { ui, motionValues } from "lib/local-data"
@@ -84,8 +91,16 @@ export default function Console({}: ConsoleProps) {
 
   return (
     <ConsoleContainer>
-      <TitleRow css={extraPadding}>
-        <Text variant={"ui"}>Console</Text>
+      <TitleRow>
+        <TabsContainer>
+          <TabButton
+            variant="details"
+            activeState={"active"}
+            onDoubleClick={toggleExpanded}
+          >
+            Console
+          </TabButton>
+        </TabsContainer>
         <IconButton data-hidey="true" onClick={copyCurrent}>
           <Copy />
         </IconButton>
@@ -108,10 +123,6 @@ export default function Console({}: ConsoleProps) {
   )
 }
 
-const extraPadding = {
-  pl: "$2",
-}
-
 const ConsoleContainer = styled.div({
   display: "grid",
   position: "absolute",
@@ -127,6 +138,7 @@ const ConsoleContainer = styled.div({
 
 const CodeContainer = styled.pre({
   overflow: "scroll",
+  bg: "$codeBg",
   p: "$2",
   m: 0,
   display: "flex",

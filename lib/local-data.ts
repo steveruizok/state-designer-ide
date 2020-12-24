@@ -1,5 +1,7 @@
 import { LayoutOffset, CodeEditorTab } from "types"
 import { motionValue, MotionValue } from "framer-motion"
+import { lightTheme, darkTheme } from "components/theme"
+import { createState, useStateDesigner } from "@state-designer/react"
 
 export const ui = {
   details: {
@@ -19,7 +21,26 @@ export const ui = {
     detail: 0,
     console: 0,
   },
+  theme: "light",
 }
+
+export const themeState = createState({
+  data: {
+    theme: ui.theme,
+  },
+  on: {
+    TOGGLED: "toggleTheme",
+    SET_THEME: "setTheme",
+  },
+  actions: {
+    toggleTheme(data) {
+      data.theme = toggleTheme()
+    },
+    setTheme(data, payload: { theme: string }) {
+      data.theme = payload.theme
+    },
+  },
+})
 
 export const motionValues: Record<LayoutOffset, MotionValue<number>> = {
   content: motionValue(0),
@@ -42,6 +63,10 @@ function loadLocalUI() {
         savePanelOffset(key as LayoutOffset, initial + v),
       )
     }
+    if (typeof document !== "undefined") {
+      document.body.className = ui.theme === "dark" ? darkTheme : lightTheme
+    }
+    themeState.send("SET_THEME", { theme: ui.theme })
   }
 }
 
@@ -96,6 +121,17 @@ export function saveDetailsTab(value: "data" | "values") {
 export function saveCodeTab(value: CodeEditorTab) {
   ui.code.activeTab = value
   saveUI()
+}
+
+// Theme
+
+export function toggleTheme() {
+  ui.theme = ui.theme === "light" ? "dark" : "light"
+  if (typeof document !== "undefined") {
+    document.body.className = ui.theme === "dark" ? darkTheme : lightTheme
+  }
+  saveUI()
+  return ui.theme
 }
 
 // Setup

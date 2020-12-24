@@ -4,12 +4,7 @@ export const NodeContainer = styled.div({
   color: "$text",
   fontFamily: "$monospace",
   fontSize: "$1",
-  "&[data-isactive='false']": {
-    borderColor: "$inactive",
-  },
-  "&[data-isroot='true']": {
-    bg: "$root",
-  },
+  bg: "$node",
   variants: {
     childOf: {
       leaf: {},
@@ -26,15 +21,27 @@ export const NodeContainer = styled.div({
         width: "fit-content",
       },
     },
+    nodeLevel: {
+      child: {},
+      root: {
+        bg: "$root",
+      },
+    },
+    nodeState: {
+      active: {
+        borderColor: "$active",
+      },
+      inactive: {
+        borderColor: "$inactive",
+      },
+    },
     state: {
       normal: {
         bg: "$transparent",
       },
       highlight: {
-        bg: "$codeHl",
-        "&[data-isroot='true']": {
-          bg: "$codeHl",
-        },
+        // color: "$accent",
+        border: "$accent",
       },
     },
   },

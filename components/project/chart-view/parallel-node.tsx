@@ -18,8 +18,8 @@ export default function ParallelNode({ node, highlight }: NodeProps) {
   return (
     <NodeContainer
       childOf={node.parentType || "branch"}
-      data-isroot={node.parentType === null}
-      data-isactive={node.active}
+      nodeLevel={node.parentType === null ? "root" : "child"}
+      nodeState={node.active ? "active" : "inactive"}
       state={highlight ? "highlight" : "normal"}
     >
       <NodeHeading node={node} />

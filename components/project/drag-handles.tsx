@@ -100,6 +100,7 @@ export function DragHandleHorizontal({
         right: right - initial,
       }}
       dragElastic={0.1}
+      dragMomentum={false}
       onDoubleClick={togglePosition}
     />
   )
@@ -166,6 +167,7 @@ export function DragHandleVertical({
         bottom: bottom - initial,
       }}
       dragElastic={0.1}
+      dragMomentum={false}
       onDoubleClick={togglePosition}
     />
   )
@@ -213,6 +215,7 @@ export function DragHandleHorizontalRelative({
       drag="x"
       dragConstraints={containerRef}
       dragElastic={0.1}
+      dragMomentum={false}
       onDoubleClick={togglePosition}
     />
   )
