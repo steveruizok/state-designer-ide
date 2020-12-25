@@ -261,9 +261,11 @@ const CodeContainer = styled.div({
   gridTemplateRows: `40px 1fr 40px`,
   borderTop: "2px solid $border",
   borderLeft: "2px solid $border",
+  overflow: "hidden",
 })
 
 const EditorContainer = styled.div({
+  borderBottom: "2px solid $border",
   variants: {
     visibility: {
       hidden: {
@@ -295,7 +297,8 @@ const EditorContainer = styled.div({
 })
 
 const CodeEditorControls = styled.div({
-  borderTop: "2px solid $border",
+  height: 40,
+  bg: "$muted",
   display: "grid",
   gridTemplateColumns: "1fr auto auto",
   gridAutoFlow: "column",

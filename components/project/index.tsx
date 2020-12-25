@@ -17,11 +17,11 @@ import {
   DragHandleHorizontalRelative,
   DragHandleHorizontal,
 } from "./drag-handles"
-import Content from "./content"
-import Code from "./code"
-import Details, { DETAILS_ROW_HEIGHT } from "./details"
-import Console from "./console"
-import Chart from "./chart"
+import Content from "./content-panel"
+import Code from "./code-panel"
+import Details, { DETAILS_ROW_HEIGHT } from "./details-panel"
+import Console from "./console-panel"
+import Chart from "./chart-view"
 import LiveView from "./live-view"
 
 import { motionValues } from "lib/local-data"

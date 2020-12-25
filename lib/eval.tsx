@@ -1,24 +1,27 @@
 import * as Utils from "components/static/utils"
 import Colors from "components/static/colors"
 import { createState } from "@state-designer/react"
-import { consoleState } from "components/project/console"
+import { consoleState } from "components/project/console-panel"
 
-const regex = /:(.*):/g
-
-function printFromState(...messages: any[]) {
+function printFrom(source: string, ...messages: any[]) {
   let message = messages
-    .map((m) => (typeof m !== "string" ? JSON.stringify(m) : m))
+    .map((m) => (typeof m === "string" ? m : JSON.stringify(m)))
     .join(", ")
 
-  consoleState.send("LOGGED", { source: "state", message })
+  console.log(...messages)
+  consoleState.send("LOGGED", { source, message })
 }
 
-function printFromStatic(...messages: any[]) {
-  let message = messages
-    .map((m) => (typeof m !== "string" ? JSON.stringify(m) : m))
-    .join(", ")
+export function printFromState(...messages: any[]) {
+  return printFrom("state", ...messages)
+}
 
-  consoleState.send("LOGGED", { source: "static", message })
+export function printFromView(...messages: any[]) {
+  return printFrom("view", ...messages)
+}
+
+export function printFromStatic(...messages: any[]) {
+  return printFrom("static", ...messages)
 }
 
 function fakePrint(message: string | number | any) {}

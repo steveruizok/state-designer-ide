@@ -1,7 +1,7 @@
 import { useStateDesigner } from "@state-designer/react"
-import projectState from "../../states/project"
+import projectState from "states/project"
 import { styled } from "components/theme"
-import ChartView from "components/project/chart-view"
+import ChartView from "components/project/chart"
 
 export default function Chart() {
   const local = useStateDesigner(projectState)

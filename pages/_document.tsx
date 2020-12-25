@@ -2,6 +2,7 @@ import React from "react"
 import NextDocument, {
   Html,
   Main,
+  Head,
   NextScript,
   DocumentContext,
 } from "next/document"
@@ -46,13 +47,10 @@ export default class Document extends NextDocument {
     }
   }
 
-  componentWillMount() {
-    // For initial page load
-  }
-
   render() {
     return (
       <Html lang="en">
+        <Head />
         <body className={darkTheme}>
           <Main />
           <NextScript />

@@ -164,15 +164,6 @@ function Chart({ state, zoomedPath }: ChartProps) {
 
 export default React.memo(Chart)
 
-const CanvasControls = styled.div({
-  height: 40,
-  position: "absolute",
-  bottom: 0,
-  width: "100%",
-  display: "flex",
-  justifyContent: "space-between",
-})
-
 const ChartContainer = styled(motion.div, {
   position: "relative",
   overflow: "hidden",
@@ -194,6 +185,16 @@ const ChartCanvas = styled(motion.div, {
 const StateNodeContainer = styled(motion.div, {
   width: "fit-content",
   position: "relative",
+})
+
+const CanvasControls = styled.div({
+  height: 40,
+  position: "absolute",
+  bottom: 0,
+  width: "100%",
+  display: "flex",
+  justifyContent: "space-between",
+  bg: "$scrim",
 })
 
 /* --------------------- Helpers -------------------- */

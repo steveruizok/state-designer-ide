@@ -20,6 +20,7 @@ export default function StateNode({ node }: StateNodeProps) {
   const rContainer = React.useRef<HTMLDivElement>(null)
   const local = useStateDesigner(highlightsState)
   const highlight = local.data.path === node.path
+  const isRoot = node.parentType === null
 
   React.useEffect(() => {
     local.send("MOUNTED_NODE", { path: node.path, ref: rContainer })
@@ -33,6 +34,7 @@ export default function StateNode({ node }: StateNodeProps) {
       data-type="node-container"
       onMouseOver={(e) => {
         e.stopPropagation()
+        if (isRoot) return
         local.send("HIGHLIT_STATE", {
           stateName: node.name,
           shiftKey: e.shiftKey,

@@ -1,7 +1,7 @@
 import { LayoutOffset, CodeEditorTab } from "types"
 import { motionValue, MotionValue } from "framer-motion"
 import { lightTheme, darkTheme } from "components/theme"
-import themeState from "states/theme"
+import { createState } from "@state-designer/react"
 
 export const ui = {
   details: {
@@ -23,6 +23,28 @@ export const ui = {
   },
   theme: "light" as "dark" | "light",
 }
+
+export const themeState = createState({
+  data: {
+    theme: ui.theme,
+  },
+  on: {
+    TOGGLED: ["toggleTheme", "updateTheme"],
+    SET_THEME: ["setTheme", "updateTheme"],
+    SET_INITIAL_THEME: "setTheme",
+  },
+  actions: {
+    toggleTheme(data) {
+      data.theme = data.theme === "dark" ? "light" : "dark"
+    },
+    setTheme(data, payload: { theme: "dark" | "light" }) {
+      data.theme = payload.theme
+    },
+    updateTheme(data) {
+      setTheme(data.theme)
+    },
+  },
+})
 
 export const motionValues: Record<LayoutOffset, MotionValue<number>> = {
   content: motionValue(0),

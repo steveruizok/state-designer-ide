@@ -5,12 +5,39 @@ import { motion } from "framer-motion"
 import Colors from "components/static/colors"
 import * as Utils from "components/static/utils"
 import * as Icons from "react-feather"
-import { styled, css, Text, Button } from "components/theme"
+import {
+  styled,
+  css,
+  Box,
+  Grid,
+  Flex,
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Heading5,
+  Heading6,
+  Input,
+  Text,
+  PlainButton,
+  PlainIconButton,
+} from "components/theme"
 import { LiveProvider, LiveError, LivePreview } from "react-live"
-import liveViewState from "states/live-view"
+import { printFromView } from "lib/eval"
 
 const Components = {
-  Button,
+  Box,
+  Grid,
+  Flex,
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Heading5,
+  Heading6,
+  Input,
+  IconButton: PlainIconButton,
+  Button: PlainButton,
   Text,
 }
 
@@ -43,6 +70,7 @@ const Preview: React.FC<{
         Static: statics,
         state,
         styled,
+        print: printFromView,
         css,
       }}
     >

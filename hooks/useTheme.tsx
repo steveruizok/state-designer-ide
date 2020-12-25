@@ -1,5 +1,5 @@
 import * as React from "react"
-import themeState from "states/theme"
+import { themeState } from "lib/local-data"
 import { useStateDesigner } from "@state-designer/react"
 
 export default function useTheme() {

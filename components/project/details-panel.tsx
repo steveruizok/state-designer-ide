@@ -12,7 +12,7 @@ import {
 } from "components/theme"
 import useTheme from "hooks/useTheme"
 import { Copy, AlignLeft, ChevronDown, ChevronUp } from "react-feather"
-import projectState from "../../states/project"
+import projectState from "states/project"
 import { DragHandleVertical } from "./drag-handles"
 import { ui, saveWrapDetails, motionValues } from "lib/local-data"
 import toastState from "states/toast"
