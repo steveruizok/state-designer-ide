@@ -109,7 +109,7 @@ const ToastMessage = styled(motion.div, {
   pointerEvents: "all",
   display: "flex",
   alignItems: "center",
-  bg: "$background",
+  bg: "$toastBg",
   color: "$text",
   width: "fit-content",
   borderRadius: 8,

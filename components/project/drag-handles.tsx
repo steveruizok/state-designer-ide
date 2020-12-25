@@ -21,9 +21,7 @@ interface DragHandleHorizontalProps extends DragHandleProps {
 const DragHandle = styled(motion.div, {
   position: "absolute",
   zIndex: 999,
-  "&:hover": {
-    bg: "$hover",
-  },
+  bg: "transparent",
   variants: {
     direction: {
       horizontal: {

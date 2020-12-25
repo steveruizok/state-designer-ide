@@ -353,6 +353,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
     stateModel,
     oid !== uid,
     false,
+    undefined,
     (code) => local.send("CHANGED_CODE", { code }),
   )
 
@@ -562,7 +563,6 @@ const CodeContainer = styled.div({
 })
 
 const EditorContainer = styled.div({
-  overflow: "hidden",
   variants: {
     visibility: {
       hidden: {
@@ -590,16 +590,6 @@ const EditorContainer = styled.div({
   ".marginCodeHighlight": {
     bg: "$codeHl",
     position: "relative",
-    // "&::after": {
-    //   content: "''",
-    //   position: "absolute",
-    //   left: 0,
-    //   top: 0,
-    //   height: "100%",
-    //   bg: "$accent",
-    //   width: "4px !important",
-    //   zIndex: 9999,
-    // },
   },
 })
 

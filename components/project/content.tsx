@@ -154,7 +154,6 @@ const ContentContainer = styled.div({
   display: "flex",
   flexDirection: "column",
   gridTemplateRows: 40,
-  borderRight: "2px solid $border",
 })
 
 const ContentTitle = styled.div({

@@ -1,5 +1,4 @@
 import * as React from "react"
-import debounce from "lodash/debounce"
 import { animate } from "framer-motion"
 import { useStateDesigner } from "@state-designer/react"
 import { useFile, useMonacoContext } from "use-monaco"
@@ -59,7 +58,12 @@ export default function Details({}: DetailsProps) {
     dataModel,
     true,
     isWrapped,
-    () => {},
+    (editor) => {
+      setTimeout(() => {
+        editor.setSelection(new monaco.Selection(0, 0, 0, 0))
+      }, 1000)
+    },
+    () => editor.setSelection(new monaco.Selection(0, 0, 0, 0)),
   )
 
   // Handle editor changes when the user changes tabs
@@ -75,6 +79,11 @@ export default function Details({}: DetailsProps) {
       editor.setModel(dataModel)
     } else if (tab === "values") {
       editor.setModel(valuesModel)
+    }
+
+    // Restore view state
+    if (viewStates[tab]) {
+      editor.restoreViewState(viewStates[tab])
     }
 
     // Update the state
@@ -182,9 +191,9 @@ const DetailsContainer = styled.div({
   gridTemplateColumns: "minmax(0, 1fr)",
   gridTemplateRows: "auto 1fr",
   gridArea: "details",
-  position: "relative",
   minWidth: 0,
-  borderTop: "2px solid $border",
+  position: "relative",
+  borderLeft: "2px solid $border",
   borderRight: "2px solid $border",
 })
 

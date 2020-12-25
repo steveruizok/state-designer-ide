@@ -10,7 +10,8 @@ export default function useCustomEditor(
   model: any,
   readOnly: boolean,
   wrap: boolean,
-  onChange: (code: string) => void,
+  onMount?: (editor: any) => void,
+  onChange?: (code: string) => void,
 ) {
   const { theme } = useTheme()
 
@@ -45,8 +46,6 @@ export default function useCustomEditor(
         readOnly,
       })
 
-      editor.setSelection(new monaco.Selection(0, 0, 0, 0))
-
       editor.onKeyDown((e) => {
         if (e.metaKey) {
           if (e.code === "KeyA") {
@@ -56,8 +55,12 @@ export default function useCustomEditor(
           }
         }
       })
+
+      onMount && onMount(editor)
     },
-    onChange,
+    onChange: (value) => {
+      onChange && onChange(value)
+    },
   })
 
   React.useEffect(() => {

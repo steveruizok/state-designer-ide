@@ -127,13 +127,12 @@ const ConsoleContainer = styled.div({
   display: "grid",
   position: "absolute",
   bottom: 0,
-  left: 0,
-  width: "100%",
   height: `calc(${CONSOLE_ROW_HEIGHT}px - var(--console-offset))`,
   gridTemplateColumns: "minmax(0, 1fr)",
   gridTemplateRows: "auto 1fr",
   minWidth: 0,
-  borderTop: "2px solid $border",
+  width: "calc(100% + 2px)",
+  zIndex: 99,
 })
 
 const CodeContainer = styled.pre({

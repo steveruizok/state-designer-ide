@@ -21,5 +21,5 @@ const ChartContainer = styled.div({
   position: "relative",
   gridArea: "chart",
   display: "grid",
-  borderRight: "2px solid $border",
+  bg: "$border",
 })

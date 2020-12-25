@@ -160,6 +160,7 @@ const ChartContainer = styled(motion.div, {
   width: "100%",
   cursor: "grab",
   userSelect: "none",
+  borderRight: "2px solid $borderContrast",
 })
 
 const ChartCanvas = styled(motion.div, {

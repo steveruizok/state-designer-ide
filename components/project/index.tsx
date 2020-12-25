@@ -3,7 +3,6 @@ import Link from "next/link"
 import Router from "next/router"
 import useTheme from "hooks/useTheme"
 import { Home, Sun, Copy, Plus, Minus } from "react-feather"
-import { motionValue } from "framer-motion"
 import { subscribeToDocSnapshot, forkProject } from "lib/database"
 import { login, logout } from "lib/auth-client"
 import { User, ProjectData } from "types"
@@ -14,7 +13,6 @@ import { styled, IconButton, Text, Button } from "components/theme"
 
 import {
   DragHandleHorizontalRelative,
-  DragHandleVertical,
   DragHandleHorizontal,
 } from "./drag-handles"
 import Content from "./content"
@@ -113,6 +111,7 @@ export default function ProjectView({
         <Chart />
         <MainDragArea ref={rMainContainer} />
         <ViewContainer>
+          <LiveView />
           <Console />
         </ViewContainer>
         <Details />
@@ -177,10 +176,10 @@ const MainContainer = styled.div({
   maxWidth: "100%",
   maxHeight: "100%",
   overflow: "hidden",
-  borderTop: "2px solid $border",
   gridTemplateAreas: `"chart view" "details view"`,
   gridTemplateColumns: `calc(50% + var(--main-offset)) minmax(15%, 1fr)`,
   gridTemplateRows: `minmax(0, 1fr) min(100%, calc(${DETAILS_ROW_HEIGHT}px - var(--detail-offset)))`,
+  bg: "$border",
 })
 
 const MainDragArea = styled.div({
@@ -197,3 +196,29 @@ const ViewContainer = styled.div({
   gridArea: "view",
   position: "relative",
 })
+
+const LiveView = styled.div({
+  height: "100%",
+})
+
+// function MovingPanel() {
+//   const offsetY = useTransform(
+//     [motionValues.detail, motionValues.console],
+//     ([d, c]: number[]) => {
+//       return Math.min(d - c)
+//     },
+//   )
+//   const height = useTransform(
+//     [motionValues.detail, motionValues.console],
+//     ([d, c]: number[]) => {
+//       return Math.abs(d - c)
+//     },
+//   )
+//   return <MovingPanelBorder style={{}} />
+// }
+
+// const MovingPanelBorder = styled(motion.div, {
+//   bg: "$borderContrast",
+//   width: 2,
+//   pointerEvents: "none",
+// })
