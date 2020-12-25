@@ -4,7 +4,6 @@ import { animate } from "framer-motion"
 import { useStateDesigner } from "@state-designer/react"
 import { useFile } from "use-monaco"
 import useCustomEditor from "hooks/useCustomEditor"
-import useCustomMonaco from "hooks/useCustomMonaco"
 import {
   styled,
   IconButton,
@@ -39,24 +38,19 @@ export default function Details({}: DetailsProps) {
     view: null,
   })
 
-  const { monaco } = useCustomMonaco("json")
-
   const dataModel = useFile({
     path: "data.json",
-    monaco,
     defaultContents: JSON.stringify(captive.data, null, 2),
-    language: "json",
+    // language: "json",
   })
 
   const valuesModel = useFile({
     path: "values.json",
-    monaco,
     defaultContents: JSON.stringify(captive.values, null, 2),
-    language: "json",
+    // language: "json",
   })
 
   const { editor, containerRef } = useCustomEditor(
-    monaco,
     dataModel,
     true,
     isWrapped,

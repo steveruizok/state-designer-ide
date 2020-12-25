@@ -5,7 +5,7 @@ import parser from "prettier/parser-typescript"
 import debounce from "lodash/debounce"
 import { styled, IconButton, TabButton } from "components/theme"
 import { Save, RefreshCcw, AlertCircle } from "react-feather"
-import { useMonaco, useEditor, useFile } from "use-monaco"
+import { useMonaco, useEditor, useFile, useMonacoContext } from "use-monaco"
 import themes from "use-monaco/themes"
 import { CodeEditorTab } from "types"
 import { DragHandleHorizontal } from "./drag-handles"
@@ -17,7 +17,6 @@ import { codeValidators, codeFormatValidators } from "lib/eval"
 import { Highlights } from "components/project/highlights"
 import useMotionResizeObserver from "use-motion-resize-observer"
 import useTheme from "hooks/useTheme"
-import useCustomMonaco from "hooks/useCustomMonaco"
 import useCustomEditor from "hooks/useCustomEditor"
 
 const EDITOR_TABS = ["state", "view", "static"]
@@ -330,31 +329,24 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   // Local state
   const local = useStateDesigner(codePanelState)
 
-  const { monaco } = useCustomMonaco("typescript")
-
   const stateModel = useFile({
-    path: "state.js",
-    monaco,
+    path: "state.ts",
     defaultContents: "",
-    language: "typescript",
   })
 
   const viewModel = useFile({
-    path: "view.js",
-    monaco,
+    path: "view.tsx",
     defaultContents: "",
-    language: "typescript",
   })
 
   const staticModel = useFile({
-    path: "static.js",
-    monaco,
+    path: "static.ts",
     defaultContents: "",
-    language: "typescript",
   })
 
+  const { monaco } = useMonacoContext()
+
   const { editor, containerRef } = useCustomEditor(
-    monaco,
     stateModel,
     oid !== uid,
     false,

@@ -6,16 +6,12 @@ import debounce from "lodash/debounce"
 import useMotionResizeObserver from "use-motion-resize-observer"
 
 export default function useCustomEditor(
-  monaco: any,
   model: any,
   readOnly: boolean,
   wrap: boolean,
   onChange: (code: string) => void,
 ) {
-  const { theme } = useTheme()
-
   const { editor, containerRef } = useEditor({
-    monaco,
     model,
     options: {
       fontSize: 13,
@@ -31,6 +27,7 @@ export default function useCustomEditor(
       lineNumbers: "off",
       scrollBeyondLastLine: false,
       wordWrap: wrap ? "on" : "off",
+      readOnly,
       scrollbar: {
         verticalScrollbarSize: 0,
         verticalSliderSize: 8,
@@ -41,9 +38,9 @@ export default function useCustomEditor(
       cursorWidth: 3,
     },
     editorDidMount: (editor) => {
-      editor.updateOptions({
-        readOnly,
-      })
+      // editor.updateOptions({
+      //   readOnly,
+      // })
 
       editor.onKeyDown((e) => {
         if (e.metaKey) {
@@ -58,10 +55,10 @@ export default function useCustomEditor(
     onChange,
   })
 
-  React.useEffect(() => {
-    if (!monaco) return
-    monaco.editor.setTheme(theme)
-  }, [monaco, editor, theme])
+  // React.useEffect(() => {
+  //   if (!monaco) return
+  //   monaco.editor.setTheme(theme)
+  // }, [monaco, editor, theme])
 
   // Resizing
   const resizeEditor = React.useCallback(
@@ -75,21 +72,21 @@ export default function useCustomEditor(
     onResize: resizeEditor,
   })
 
-  React.useEffect(() => {
-    if (editor) {
-      editor.updateOptions({
-        readOnly,
-      })
-    }
-  }, [editor, readOnly])
+  // React.useEffect(() => {
+  //   if (editor) {
+  //     editor.updateOptions({
+  //       readOnly,
+  //     })
+  //   }
+  // }, [editor, readOnly])
 
-  React.useEffect(() => {
-    if (editor) {
-      editor.updateOptions({
-        wordWrap: wrap ? "on" : "off",
-      })
-    }
-  }, [editor, wrap])
+  // React.useEffect(() => {
+  //   if (editor) {
+  //     editor.updateOptions({
+  //       wordWrap: wrap ? "on" : "off",
+  //     })
+  //   }
+  // }, [editor, wrap])
 
   return { editor, containerRef: mergeRefs([resizeRef, containerRef]) }
 }
