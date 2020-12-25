@@ -1,36 +1,10 @@
 import * as React from "react"
-import uniqueId from "lodash/uniqueId"
 import { X } from "react-feather"
 import { styled, Text, IconButton } from "components/theme"
-import { createState, useStateDesigner } from "@state-designer/react"
+import { useStateDesigner } from "@state-designer/react"
 import { motion, AnimateSharedLayout, AnimatePresence } from "framer-motion"
-
-interface ToastMessage {
-  id: string
-  message: string
-  autohide?: boolean
-}
-
-export const toastState = createState({
-  data: {
-    toasts: {} as Record<string, ToastMessage>,
-  },
-  on: {
-    ADDED_TOAST: "showToast",
-    DISMISSED_TOAST: "dismissToast",
-  },
-  actions: {
-    showToast(data, payload: { message: string }) {
-      const { message } = payload
-      const id = uniqueId()
-      data.toasts[id] = { id, message }
-    },
-    dismissToast(data, payload: { id: string }) {
-      const { id } = payload
-      delete data.toasts[id]
-    },
-  },
-})
+import { ToastMessage } from "types"
+import toastState from "states/toast"
 
 export default function Toast() {
   const local = useStateDesigner(toastState)
@@ -60,7 +34,7 @@ function Message({ id, message, autohide = true }: ToastMessage) {
   }, [autohide])
 
   return (
-    <ToastMessage
+    <MessageContainer
       layoutId={id}
       initial={{ opacity: 0, y: 32 }}
       animate={{ opacity: 1, y: 0 }}
@@ -83,7 +57,7 @@ function Message({ id, message, autohide = true }: ToastMessage) {
       <IconButton onClick={() => toastState.send("DISMISSED_TOAST", { id })}>
         <X />
       </IconButton>
-    </ToastMessage>
+    </MessageContainer>
   )
 }
 
@@ -105,7 +79,7 @@ const ToastContainer = styled(motion.div, {
   },
 })
 
-const ToastMessage = styled(motion.div, {
+const MessageContainer = styled(motion.div, {
   pointerEvents: "all",
   display: "flex",
   alignItems: "center",

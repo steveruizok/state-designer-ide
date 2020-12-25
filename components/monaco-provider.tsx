@@ -132,24 +132,10 @@ export default function CustomMonacoProvider({ children }) {
           // Types
 
           monaco.languages.typescript?.loadTypes("react", "17.0.1")
-          // monaco.languages.typescript?.exposeGlobal("react", "*", "React")
-
-          // monaco.languages.typescript?.loadTypes(
-          //   "@state-designer/react",
-          //   "1.3.35",
-          // )
-
-          // monaco.languages.typescript?.exposeGlobal(
-          //   "@state-designer/react",
-          //   "createState",
-          //   "createState",
-          // )
-
-          // monaco.languages.typescript?.exposeGlobal(
-          //   "@state-designer/react",
-          //   "useStateDesigner",
-          //   "useStateDesigner",
-          // )
+          monaco.languages.typescript?.loadTypes(
+            "@state-designer/react",
+            "1.3.35",
+          )
 
           return null
         }

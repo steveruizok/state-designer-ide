@@ -12,10 +12,10 @@ import {
 } from "components/theme"
 import useTheme from "hooks/useTheme"
 import { Copy, AlignLeft, ChevronDown, ChevronUp } from "react-feather"
-import projectState from "./state"
+import projectState from "../../states/project"
 import { DragHandleVertical } from "./drag-handles"
 import { ui, saveWrapDetails, motionValues } from "lib/local-data"
-import { toastState } from "components/toast"
+import toastState from "states/toast"
 import useMotionResizeObserver from "use-motion-resize-observer"
 
 interface DetailsProps {}

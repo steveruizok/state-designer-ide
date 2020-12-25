@@ -49,3 +49,21 @@ export type UserProjectsResponse = {
   projects: string[]
   isOwner: boolean
 }
+
+// UI
+
+export interface ToastMessage {
+  id: string
+  message: string
+  autohide?: boolean
+}
+
+export interface HighlightData {
+  event: string | null
+  state: string | null
+  path: string | null
+  scrollToLine: boolean
+  targets: string[]
+  eventButtonRefs: Map<string, Map<string, React.RefObject<HTMLDivElement>>>
+  nodeRefs: Map<string, React.RefObject<HTMLDivElement>>
+}

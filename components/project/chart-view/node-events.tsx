@@ -1,7 +1,7 @@
 import * as React from "react"
 import { S, useStateDesigner } from "@state-designer/react"
-import ProjectState from "../state"
-import { Highlights } from "../highlights"
+import ProjectState from "states/project"
+import highlightsState from "states/code-panel"
 import { styled, Button } from "components/theme"
 
 const NodeEvents: React.FC<{ node: S.State<any, any> }> = ({ node }) => {
@@ -87,7 +87,7 @@ const EventButton: React.FC<{
   const { captive } = ProjectState.data
 
   React.useEffect(() => {
-    Highlights.send("MOUNTED_EVENT_BUTTON", {
+    highlightsState.send("MOUNTED_EVENT_BUTTON", {
       name,
       ref: rButton,
       path: node.path,
@@ -109,19 +109,19 @@ const EventButton: React.FC<{
       onClick={() => {
         captive.send(name, payload)
         captive.getUpdate(({ active }) =>
-          Highlights.send("CHANGED_ACTIVE_STATES", { active }),
+          highlightsState.send("CHANGED_ACTIVE_STATES", { active }),
         )
       }}
       onMouseEnter={(e) => {
         e.stopPropagation()
-        Highlights.send("HIGHLIT_EVENT", {
+        highlightsState.send("HIGHLIT_EVENT", {
           eventName: name,
           shiftKey: e.shiftKey,
           targets,
         })
       }}
       onMouseLeave={() =>
-        Highlights.send("CLEARED_EVENT_HIGHLIGHT", {
+        highlightsState.send("CLEARED_EVENT_HIGHLIGHT", {
           eventName: name,
         })
       }

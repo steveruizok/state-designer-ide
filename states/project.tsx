@@ -1,6 +1,6 @@
 import { createState } from "@state-designer/react"
-import { codePanelState } from "./code"
-import { consoleState } from "./console"
+import codePanelState from "./code-panel"
+import consoleState from "./console"
 import { getStaticValues, getCaptiveState } from "lib/eval"
 
 const projectState = createState({
@@ -16,26 +16,33 @@ const projectState = createState({
     static: undefined as any,
     captive: createState({}),
   },
-  on: {
-    SOURCE_UPDATED: [
-      "updateFromDatabase",
-      "updateCodePanelState",
-      "resetConsole",
-      "createStatic",
-      "createCaptiveState",
-    ],
-  },
   initial: "loading",
   states: {
     loading: {
       on: {
-        SOURCE_UPDATED: {
-          to: "ready",
-        },
+        SOURCE_UPDATED: [
+          {
+            do: [
+              "updateFromDatabase",
+              "updateCodePanelState",
+              "resetConsole",
+              "createStatic",
+              "createCaptiveState",
+            ],
+          },
+          { wait: 1, to: "ready" },
+        ],
       },
     },
     ready: {
       on: {
+        SOURCE_UPDATED: [
+          "updateFromDatabase",
+          "updateCodePanelState",
+          "resetConsole",
+          "createStatic",
+          "createCaptiveState",
+        ],
         UNLOADED: { to: "loading" },
       },
     },

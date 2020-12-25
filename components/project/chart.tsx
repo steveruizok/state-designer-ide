@@ -1,5 +1,5 @@
 import { useStateDesigner } from "@state-designer/react"
-import projectState from "./state"
+import projectState from "../../states/project"
 import { styled } from "components/theme"
 import ChartView from "components/project/chart-view"
 
@@ -22,4 +22,7 @@ const ChartContainer = styled.div({
   gridArea: "chart",
   display: "grid",
   bg: "$border",
+  height: "100%",
+  width: "100%",
+  borderRight: "2px solid $borderContrast",
 })

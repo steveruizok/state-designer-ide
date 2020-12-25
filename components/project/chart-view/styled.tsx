@@ -22,7 +22,9 @@ export const NodeContainer = styled.div({
       },
     },
     nodeLevel: {
-      child: {},
+      child: {
+        bg: "$node",
+      },
       root: {
         bg: "$root",
       },
@@ -36,9 +38,11 @@ export const NodeContainer = styled.div({
       },
     },
     state: {
-      normal: {
-        bg: "$transparent",
+      root: {},
+      "root-highlight": {
+        border: "$accent",
       },
+      normal: {},
       highlight: {
         // color: "$accent",
         border: "$accent",

@@ -3,8 +3,8 @@ import { range } from "components/static/utils"
 import { styled } from "components/theme"
 import { Circle, Disc, MinusCircle } from "react-feather"
 import { S, useStateDesigner } from "@state-designer/react"
-import projectState from "components/project/state"
-import { Highlights } from "components/project/highlights"
+import projectState from "states/project"
+import highlightsState from "states/highlights"
 
 interface ContentProps {
   children: React.ReactNode
@@ -54,14 +54,14 @@ function StateItem({ node, highlight }: StateItemProps) {
       title={`Zoom to ${node.name}`}
       onClick={() => projectState.send("SELECTED_NODE", { id: node.path })}
       onMouseEnter={(e) =>
-        Highlights.send("HIGHLIT_STATE", {
+        highlightsState.send("HIGHLIT_STATE", {
           stateName: node.name,
           shiftKey: e.shiftKey,
           path: node.path,
         })
       }
       onMouseLeave={(e) => {
-        Highlights.send("CLEARED_STATE_HIGHLIGHT", {
+        highlightsState.send("CLEARED_STATE_HIGHLIGHT", {
           stateName: node.name,
         })
       }}

@@ -13,6 +13,7 @@ interface NodeProps {
 
 export default function BranchNode({ node, highlight }: NodeProps) {
   const childNodes = Object.values(node.states)
+  const isRoot = node.parentType === null
 
   function getSortedBranchChildNodes(nodes: S.State<any, any>[]) {
     return sortBy(nodes, (n) => !n.isInitial)
@@ -21,9 +22,17 @@ export default function BranchNode({ node, highlight }: NodeProps) {
   return (
     <NodeContainer
       childOf={node.parentType || "branch"}
-      nodeLevel={node.parentType === null ? "root" : "child"}
+      nodeLevel={isRoot ? "root" : "child"}
       nodeState={node.active ? "active" : "inactive"}
-      state={highlight ? "highlight" : "normal"}
+      state={
+        isRoot
+          ? highlight
+            ? "root-highlight"
+            : "root"
+          : highlight
+          ? "highlight"
+          : "normal"
+      }
     >
       <NodeHeading node={node} />
       <NodeEvents node={node} />

@@ -1,7 +1,7 @@
 import { S, useStateDesigner } from "@state-designer/react"
 import { Disc, MoreHorizontal } from "react-feather"
 // import IconSelect from "../icon-select"
-import ProjectState from "../state"
+import ProjectState from "../../../states/project"
 
 import { styled, IconButton } from "components/theme"
 

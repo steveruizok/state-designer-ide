@@ -2,12 +2,14 @@ import * as React from "react"
 import Link from "next/link"
 import Router from "next/router"
 import useTheme from "hooks/useTheme"
+import { useStateDesigner } from "@state-designer/react"
 import { Home, Sun, Copy, Plus, Minus } from "react-feather"
 import { subscribeToDocSnapshot, forkProject } from "lib/database"
 import { login, logout } from "lib/auth-client"
+import codePanelState from "states/code-panel"
+import projectState from "states/project"
+import liveViewState from "states/live-view"
 import { User, ProjectData } from "types"
-import projectState from "./state"
-import { codePanelState } from "./code"
 
 import { styled, IconButton, Text, Button } from "components/theme"
 
@@ -20,6 +22,7 @@ import Code from "./code"
 import Details, { DETAILS_ROW_HEIGHT } from "./details"
 import Console from "./console"
 import Chart from "./chart"
+import LiveView from "./live-view"
 
 import { motionValues } from "lib/local-data"
 
@@ -111,7 +114,7 @@ export default function ProjectView({
         <Chart />
         <MainDragArea ref={rMainContainer} />
         <ViewContainer>
-          <LiveView />
+          <LiveViewWrapper />
           <Console />
         </ViewContainer>
         <Details />
@@ -123,6 +126,22 @@ export default function ProjectView({
       </MainContainer>
       <Code oid={oid} pid={pid} uid={user?.uid} />
     </Layout>
+  )
+}
+
+function LiveViewWrapper() {
+  const local = useStateDesigner(projectState)
+  const localEditor = useStateDesigner(liveViewState)
+  const theme = useTheme()
+
+  return (
+    <LiveView
+      code={localEditor.data.code}
+      statics={local.data.static}
+      state={local.data.captive}
+      theme={theme}
+      ready={local.isIn("ready")}
+    />
   )
 }
 
@@ -195,10 +214,6 @@ const MainDragArea = styled.div({
 const ViewContainer = styled.div({
   gridArea: "view",
   position: "relative",
-})
-
-const LiveView = styled.div({
-  height: "100%",
 })
 
 // function MovingPanel() {

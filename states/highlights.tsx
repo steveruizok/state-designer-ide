@@ -1,16 +1,7 @@
 import { S, createState } from "@state-designer/react"
-import projectState from "components/project/state"
+import projectState from "states/project"
 import last from "lodash/last"
-
-type HighlightData = {
-  event: string | null
-  state: string | null
-  path: string | null
-  scrollToLine: boolean
-  targets: string[]
-  eventButtonRefs: Map<string, Map<string, React.RefObject<HTMLDivElement>>>
-  nodeRefs: Map<string, React.RefObject<HTMLDivElement>>
-}
+import { HighlightData } from "types"
 
 const initialData: HighlightData = {
   event: null,
@@ -22,7 +13,7 @@ const initialData: HighlightData = {
   nodeRefs: new Map([]),
 }
 
-export const Highlights = createState({
+const highlightsState = createState({
   data: initialData,
   initial: "highlit",
   states: {
@@ -170,3 +161,5 @@ export function findTransitionTargets<D = any>(
 
   return acc
 }
+
+export default highlightsState

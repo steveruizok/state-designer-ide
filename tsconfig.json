@@ -23,6 +23,7 @@
 			"lib/*": ["lib/*"],
 			"site/*": ["site/*"],
 			"utils/*": ["utils/*"],
+			"states/*": ["states/*"],
 			"components/*": ["components/*"],
 		}
   },

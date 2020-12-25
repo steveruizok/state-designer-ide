@@ -14,13 +14,21 @@ interface NodeProps {
 
 export default function ParallelNode({ node, highlight }: NodeProps) {
   const childNodes = Object.values(node.states)
-
+  const isRoot = node.parentType === null
   return (
     <NodeContainer
       childOf={node.parentType || "branch"}
-      nodeLevel={node.parentType === null ? "root" : "child"}
+      nodeLevel={isRoot ? "root" : "child"}
       nodeState={node.active ? "active" : "inactive"}
-      state={highlight ? "highlight" : "normal"}
+      state={
+        isRoot
+          ? highlight
+            ? "root-highlight"
+            : "root"
+          : highlight
+          ? "highlight"
+          : "normal"
+      }
     >
       <NodeHeading node={node} />
       <NodeEvents node={node} />

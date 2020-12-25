@@ -6,13 +6,12 @@ import {
   IconButton,
   TabButton,
   TabsContainer,
-  Text,
   TitleRow,
 } from "components/theme"
 import { Copy, ChevronDown, ChevronUp } from "react-feather"
 import { DragHandleVertical } from "./drag-handles"
 import { ui, motionValues } from "lib/local-data"
-import { toastState } from "components/toast"
+import toastState from "states/toast"
 
 export const consoleState = createState({
   data: {

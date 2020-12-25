@@ -23,20 +23,32 @@ export const Button = styled.button({
   border: "none",
   outline: "none",
   cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-start",
   "&:hover": {
     bg: "$shadowLight",
+    color: "$accent",
+    "&:disabled": {
+      color: "$text",
+    },
+  },
+  "&:disabled": {
+    opacity: 0.5,
   },
   variants: {
     variant: {
+      iconLeft: {
+        "& > svg": {
+          mr: "$0",
+        },
+      },
       nodeEvent: {
         py: "$1",
         px: "$1",
         fontSize: "$1",
         fontWeight: "bold",
         fontFamily: "$body",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-start",
         width: "fit-content",
         borderRadius: 2,
         color: "$text",

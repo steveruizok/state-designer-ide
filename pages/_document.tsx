@@ -5,12 +5,17 @@ import NextDocument, {
   NextScript,
   DocumentContext,
 } from "next/document"
+import { setupUI } from "lib/local-data"
 
 import { css, darkTheme } from "../components/theme"
 
 export default class Document extends NextDocument {
   static async getInitialProps(ctx: DocumentContext) {
     const originalRenderPage = ctx.renderPage
+
+    if (typeof document !== "undefined" && typeof window !== "undefined") {
+      setupUI()
+    }
 
     try {
       let extractedStyles: any
@@ -39,6 +44,10 @@ export default class Document extends NextDocument {
       }
     } finally {
     }
+  }
+
+  componentWillMount() {
+    // For initial page load
   }
 
   render() {

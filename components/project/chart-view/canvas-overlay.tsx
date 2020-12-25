@@ -1,8 +1,8 @@
 import * as React from "react"
 import { MotionValue, motion } from "framer-motion"
 import { S, useStateDesigner } from "@state-designer/react"
-import ProjectState from "../state"
-import { Highlights } from "../highlights"
+import ProjectState from "../../../states/project"
+import highlightsState from "../../../states/highlights"
 import { quadrant, theta, normal, gradient } from "./helpers"
 import { getBoxToBoxArrow } from "perfect-arrows"
 
@@ -15,7 +15,7 @@ const CanvasOverlay: React.FC<{
   resizeRef: React.RefObject<any>
 }> = ({ scale, resizeRef, offsetX, offsetY, width, height }) => {
   // const captive = useStateDesigner(ProjectState.data.captive)
-  const local = useStateDesigner(Highlights)
+  const local = useStateDesigner(highlightsState)
 
   const rCanvas = React.useRef<HTMLCanvasElement>()
   const rCtx = React.useRef<CanvasRenderingContext2D>()

@@ -1,14 +1,15 @@
 import * as React from "react"
 import throttle from "lodash/throttle"
-import { Compass } from "react-feather"
+import { Compass, RotateCcw } from "react-feather"
+import { motion } from "framer-motion"
 import { S, useStateDesigner } from "@state-designer/react"
-import { motion, useAnimation, useMotionValue } from "framer-motion"
+import { useAnimation, useMotionValue } from "framer-motion"
 import StateNode from "./state-node"
 import CanvasOverlay from "./canvas-overlay"
 import useMotionResizeObserver from "use-motion-resize-observer"
 import usePreventZooming from "hooks/usePreventZooming"
 import useScaleZooming from "hooks/useScaleZooming"
-import { styled, IconButton } from "components/theme"
+import { styled, Button, IconButton } from "components/theme"
 
 interface ChartProps {
   state: S.DesignedState<any, any>
@@ -139,19 +140,38 @@ function Chart({ state, zoomedPath }: ChartProps) {
           />
         </StateNodeContainer>
       </ChartCanvas>
-      <IconButton
-        data-hidey="true"
-        style={{ position: "absolute", bottom: 0, right: 0 }}
-        title="Reset Canvas"
-        onClick={() => resetView()}
-      >
-        <Compass />
-      </IconButton>
+      <CanvasControls>
+        <Button
+          data-hidey="true"
+          title="Reset Canvas"
+          variant="iconLeft"
+          disabled={captive.log.length === 0}
+          onClick={() => captive.reset()}
+        >
+          <RotateCcw size={14} strokeWidth={3} /> Reset State
+        </Button>
+        <IconButton
+          data-hidey="true"
+          title="Reset Canvas"
+          onClick={() => resetView()}
+        >
+          <Compass />
+        </IconButton>
+      </CanvasControls>
     </ChartContainer>
   )
 }
 
 export default React.memo(Chart)
+
+const CanvasControls = styled.div({
+  height: 40,
+  position: "absolute",
+  bottom: 0,
+  width: "100%",
+  display: "flex",
+  justifyContent: "space-between",
+})
 
 const ChartContainer = styled(motion.div, {
   position: "relative",
@@ -160,7 +180,6 @@ const ChartContainer = styled(motion.div, {
   width: "100%",
   cursor: "grab",
   userSelect: "none",
-  borderRight: "2px solid $borderContrast",
 })
 
 const ChartCanvas = styled(motion.div, {
