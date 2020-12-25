@@ -2,7 +2,7 @@
 import * as React from "react"
 import { styled, IconButton, TabButton } from "components/theme"
 import { Save, RefreshCcw, AlertCircle } from "react-feather"
-import { useFile } from "use-monaco"
+import { useFile, useMonacoContext } from "use-monaco"
 import { CodeEditorTab } from "types"
 import { DragHandleHorizontal } from "./drag-handles"
 import { CODE_COL_WIDTH } from "./index"
@@ -13,7 +13,6 @@ import { codeValidators, codeFormatValidators } from "lib/eval"
 import { Highlights } from "components/project/highlights"
 import useMotionResizeObserver from "use-motion-resize-observer"
 import useTheme from "hooks/useTheme"
-import useCustomMonaco from "hooks/useCustomMonaco"
 import useCustomEditor from "hooks/useCustomEditor"
 
 const EDITOR_TABS = ["state", "view", "static"]
@@ -326,13 +325,13 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   // Local state
   const local = useStateDesigner(codePanelState)
 
-  const { monaco } = useCustomMonaco("typescript")
+  const { monaco } = useMonacoContext()
 
   const stateModel = useFile({
     path: "state.js",
     monaco,
     defaultContents: "",
-    language: "typescript",
+    language: "javascript",
   })
 
   const viewModel = useFile({

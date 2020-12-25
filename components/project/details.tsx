@@ -2,9 +2,8 @@ import * as React from "react"
 import debounce from "lodash/debounce"
 import { animate } from "framer-motion"
 import { useStateDesigner } from "@state-designer/react"
-import { useFile } from "use-monaco"
+import { useFile, useMonacoContext } from "use-monaco"
 import useCustomEditor from "hooks/useCustomEditor"
-import useCustomMonaco from "hooks/useCustomMonaco"
 import {
   styled,
   IconButton,
@@ -39,7 +38,7 @@ export default function Details({}: DetailsProps) {
     view: null,
   })
 
-  const { monaco } = useCustomMonaco("json")
+  const { monaco } = useMonacoContext()
 
   const dataModel = useFile({
     path: "data.json",
