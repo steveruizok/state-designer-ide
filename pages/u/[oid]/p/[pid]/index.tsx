@@ -5,7 +5,6 @@ import { getProjectData, getProjectInfo } from "lib/database"
 import * as Types from "types"
 import { single } from "utils"
 import dynamic from "next/dynamic"
-import { setupUI } from "lib/local-data"
 const ProjectView = dynamic(() => import("components/project"))
 
 interface ProjectPageProps {
@@ -22,7 +21,6 @@ export default function ProjectPage({
   const [isMounted, setIsMounted] = React.useState(false)
 
   React.useEffect(() => {
-    setupUI()
     setIsMounted(true)
   }, [])
 

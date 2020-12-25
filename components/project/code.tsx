@@ -1,12 +1,8 @@
 // @refresh reset
 import * as React from "react"
-import prettier from "prettier/standalone"
-import parser from "prettier/parser-typescript"
-import debounce from "lodash/debounce"
 import { styled, IconButton, TabButton } from "components/theme"
 import { Save, RefreshCcw, AlertCircle } from "react-feather"
-import { useMonaco, useEditor, useFile } from "use-monaco"
-import themes from "use-monaco/themes"
+import { useFile } from "use-monaco"
 import { CodeEditorTab } from "types"
 import { DragHandleHorizontal } from "./drag-handles"
 import { CODE_COL_WIDTH } from "./index"
