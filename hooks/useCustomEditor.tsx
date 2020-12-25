@@ -48,9 +48,9 @@ export default function useCustomEditor(
       editor.onKeyDown((e) => {
         if (e.metaKey) {
           if (e.code === "KeyA") {
-            // e.preventDefault()
-            // const range = editor.getModel().getFullModelRange()
-            // editor.setSelection(range)
+            e.preventDefault()
+            const range = editor.getModel().getFullModelRange()
+            editor.setSelection(range)
           }
         }
       })
