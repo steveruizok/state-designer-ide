@@ -45,6 +45,8 @@ export default function useCustomEditor(
         readOnly,
       })
 
+      editor.setSelection(new monaco.Selection(0, 0, 0, 0))
+
       editor.onKeyDown((e) => {
         if (e.metaKey) {
           if (e.code === "KeyA") {
