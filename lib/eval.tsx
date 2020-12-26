@@ -1,7 +1,7 @@
-import * as Utils from "components/static/utils"
-import Colors from "components/static/colors"
 import { createState } from "@state-designer/react"
 import { consoleState } from "components/project/console-panel"
+import Colors from "components/static/colors"
+import * as Utils from "components/static/utils"
 
 function printFrom(source: string, ...messages: any[]) {
   let message = messages
@@ -33,9 +33,10 @@ export function getStaticValues(code: string, print = printFromStatic) {
     return Function(
       "Colors",
       "Utils",
+      "log",
       "print",
       `${code}\n\nreturn getStatic()`,
-    )(Colors, Utils, print)
+    )(Colors, Utils, print, print)
   } catch (err) {
     throw new Error(err.message)
   }
@@ -52,9 +53,10 @@ export function getCaptiveState(
       "Static",
       "Colors",
       "Utils",
+      "log",
       "print",
       `return ${stateCode}`,
-    )(createState, staticCode, Colors, Utils, print)
+    )(createState, staticCode, Colors, Utils, print, print)
   } catch (err) {
     throw new Error(err.message)
   }

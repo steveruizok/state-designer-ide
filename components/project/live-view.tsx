@@ -1,18 +1,11 @@
-import * as React from "react"
-import * as Motion from "framer-motion"
 import { S, useStateDesigner } from "@state-designer/react"
-import { motion } from "framer-motion"
-import useTheme from "hooks/useTheme"
 import Loading from "components/project/loading"
 import Colors from "components/static/colors"
 import * as Utils from "components/static/utils"
-import * as Icons from "react-feather"
 import {
-  styled,
-  css,
   Box,
-  Grid,
   Flex,
+  Grid,
   Heading1,
   Heading2,
   Heading3,
@@ -20,14 +13,21 @@ import {
   Heading5,
   Heading6,
   Input,
-  Text,
   PlainButton,
   PlainIconButton,
+  Text,
+  css,
+  styled,
 } from "components/theme"
-import { LiveProvider, LiveError, LivePreview } from "react-live"
+import * as Motion from "framer-motion"
+import { motion } from "framer-motion"
+import useTheme from "hooks/useTheme"
 import { printFromView } from "lib/eval"
-import projectState from "states/project"
+import * as React from "react"
+import * as Icons from "react-feather"
+import { LiveError, LivePreview, LiveProvider } from "react-live"
 import liveViewState from "states/live-view"
+import projectState from "states/project"
 
 const Components = {
   Box,
@@ -79,6 +79,7 @@ const Preview: React.FC<{}> = () => {
             state,
             styled,
             print: printFromView,
+            log: printFromView,
             css,
           }}
         >

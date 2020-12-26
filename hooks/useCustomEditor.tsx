@@ -1,9 +1,10 @@
-import * as React from "react"
-import { useEditor } from "use-monaco"
-import mergeRefs from "react-merge-refs"
-import useTheme from "./useTheme"
 import debounce from "lodash/debounce"
+import * as React from "react"
+import mergeRefs from "react-merge-refs"
+import { useEditor } from "use-monaco"
 import useMotionResizeObserver from "use-motion-resize-observer"
+
+import useTheme from "./useTheme"
 
 export default function useCustomEditor(
   monaco: any,
@@ -41,7 +42,7 @@ export default function useCustomEditor(
       renderLineHighlight: "all",
       cursorWidth: 3,
     },
-    editorDidMount: (editor) => {
+    onEditorDidMount: (editor) => {
       editor.updateOptions({
         readOnly,
       })

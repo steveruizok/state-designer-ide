@@ -1,9 +1,10 @@
 import { createState } from "@state-designer/react"
-import liveViewState from "./live-view"
 import { saveProjectCode } from "lib/database"
-import { codeValidators, codeFormatValidators } from "lib/eval"
+import { codeFormatValidators, codeValidators } from "lib/eval"
+import { saveCodeTab, ui } from "lib/local-data"
 import { CodeEditorTab } from "types"
-import { ui, saveCodeTab } from "lib/local-data"
+
+import liveViewState from "./live-view"
 
 const EDITOR_TABS = ["state", "view", "static"]
 
@@ -74,6 +75,18 @@ const codePanelState = createState({
               if: "codeMatchesClean",
               to: "noChanges",
             },
+            SAVED_CODE: {
+              unless: "errorInCurrentTab",
+              to: "saving",
+            },
+          },
+        },
+        saving: {
+          on: {
+            CHANGED_CODE: {
+              do: ["saveCode", "saveCurrentCleanViewState"],
+              to: ["noChanges", "noError"],
+            },
           },
         },
       },
@@ -81,24 +94,19 @@ const codePanelState = createState({
     error: {
       initial: "noError",
       states: {
-        noError: {
-          on: {
-            CHANGED_CODE: {
-              if: "errorInCurrentTab",
-              to: "hasError",
-            },
-            SAVED_CODE: {
-              unless: "errorInCurrentTab",
-              do: ["saveCode", "saveCurrentCleanViewState"],
-              to: "noChanges",
-            },
-          },
-        },
         hasError: {
           on: {
             CHANGED_CODE: {
               unless: "errorInCurrentTab",
               to: "noError",
+            },
+          },
+        },
+        noError: {
+          on: {
+            CHANGED_CODE: {
+              if: "errorInCurrentTab",
+              to: "hasError",
             },
           },
         },
@@ -298,9 +306,10 @@ const codePanelState = createState({
       const model = models[activeTab]
       model.setValue(code[activeTab].clean)
     },
-    saveCode(data, payload: { oid: string; pid: string }) {
-      const { activeTab } = data
+    saveCode(data, payload: { oid: string; pid: string; code: string }) {
+      const { code, activeTab } = data
       const { oid, pid } = payload
+      code[activeTab].dirty = payload.code
       saveProjectCode(pid, oid, activeTab, data.code[activeTab].dirty)
     },
     // Live View

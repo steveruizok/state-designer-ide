@@ -1,16 +1,20 @@
-// @refresh reset
+import { useStateDesigner } from "@state-designer/react"
+import { IconButton, TabButton, styled } from "components/theme"
+import useCustomEditor from "hooks/useCustomEditor"
+import { motionValues, ui } from "lib/local-data"
+import {
+  useMonacoContext,
+  useTextModel,
+} from "node_modules/use-monaco/dist/cjs/use-monaco"
 import * as React from "react"
-import { styled, IconButton, TabButton } from "components/theme"
-import { Save, RefreshCcw, AlertCircle } from "react-feather"
-import { useFile, useMonacoContext } from "use-monaco"
+import { AlertCircle, RefreshCcw, Save } from "react-feather"
+import codePanelState from "states/code-panel"
+import highlightsState from "states/highlights"
+import projectState from "states/project"
 import { CodeEditorTab } from "types"
+
 import { DragHandleHorizontal } from "./drag-handles"
 import { CODE_COL_WIDTH } from "./index"
-import { useStateDesigner } from "@state-designer/react"
-import { ui, motionValues } from "lib/local-data"
-import highlightsState from "states/highlights"
-import codePanelState from "states/code-panel"
-import useCustomEditor from "hooks/useCustomEditor"
 
 interface CodePanelProps {
   uid?: string
@@ -24,25 +28,25 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
 
   const { monaco } = useMonacoContext()
 
-  const stateModel = useFile({
+  const stateModel = useTextModel({
     path: "state.tsx",
     monaco,
     defaultContents: "",
-    language: "javascript",
+    language: "typescript",
   })
 
-  const viewModel = useFile({
+  const viewModel = useTextModel({
     path: "view.tsx",
     monaco,
     defaultContents: "",
-    language: "javascript",
+    language: "typescript",
   })
 
-  const staticModel = useFile({
+  const staticModel = useTextModel({
     path: "static.tsx",
     monaco,
     defaultContents: "",
-    language: "javascript",
+    language: "typescript",
   })
 
   const { editor, containerRef } = useCustomEditor(
@@ -52,7 +56,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
     false,
     undefined,
     (code) => {
-      local.send("CHANGED_CODE", { code })
+      local.send("CHANGED_CODE", { code, oid, pid })
     },
   )
 
@@ -142,10 +146,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
           editor
             .getAction("editor.action.formatDocument")
             .run()
-            .then(() => {
-              const code = editor.getValue()
-              local.send("SAVED_CODE", { code, oid, pid })
-            })
+            .then(() => local.send("SAVED_CODE"))
         }
       }
     })
@@ -173,6 +174,20 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
 
   const error = code[activeTab].error
   const dirty = local.isIn("hasChanges")
+
+  React.useEffect(() => {
+    // return projectState.onUpdate((update) => {
+    monaco.languages.typescript?.exposeGlobal(
+      `import { createState as _createState } from 'state-designer';`,
+
+      `
+        const _state = _${local.data.code.state.clean}
+        
+        export const state: typeof _state;
+      `,
+    )
+    // })
+  }, [local.data.code.state.clean])
 
   return (
     <CodeContainer>

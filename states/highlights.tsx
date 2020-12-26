@@ -1,8 +1,7 @@
 import { S, createState } from "@state-designer/react"
-
-import { HighlightData } from "types"
 import last from "lodash/last"
 import projectState from "states/project"
+import { HighlightData } from "types"
 
 const initialData: HighlightData = {
   event: null,

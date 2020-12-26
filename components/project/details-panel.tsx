@@ -1,22 +1,24 @@
-import * as React from "react"
-import { animate } from "framer-motion"
 import { useStateDesigner } from "@state-designer/react"
-import { useFile, useMonacoContext } from "use-monaco"
-import useCustomEditor from "hooks/useCustomEditor"
 import {
-  styled,
   IconButton,
-  TabsContainer,
   TabButton,
+  TabsContainer,
   TitleRow,
+  styled,
 } from "components/theme"
-import useTheme from "hooks/useTheme"
-import { Copy, AlignLeft, ChevronDown, ChevronUp } from "react-feather"
+import { animate } from "framer-motion"
+import useCustomEditor from "hooks/useCustomEditor"
+import { motionValues, saveWrapDetails, ui } from "lib/local-data"
+import {
+  useMonacoContext,
+  useTextModel,
+} from "node_modules/use-monaco/dist/cjs/use-monaco"
+import * as React from "react"
+import { AlignLeft, ChevronDown, ChevronUp, Copy } from "react-feather"
 import projectState from "states/project"
-import { DragHandleVertical } from "./drag-handles"
-import { ui, saveWrapDetails, motionValues } from "lib/local-data"
 import toastState from "states/toast"
-import useMotionResizeObserver from "use-motion-resize-observer"
+
+import { DragHandleVertical } from "./drag-handles"
 
 interface DetailsProps {}
 
@@ -39,14 +41,14 @@ export default function Details({}: DetailsProps) {
 
   const { monaco } = useMonacoContext()
 
-  const dataModel = useFile({
+  const dataModel = useTextModel({
     path: "data.json",
     monaco,
     defaultContents: JSON.stringify(captive.data, null, 2),
     language: "json",
   })
 
-  const valuesModel = useFile({
+  const valuesModel = useTextModel({
     path: "values.json",
     monaco,
     defaultContents: JSON.stringify(captive.values, null, 2),

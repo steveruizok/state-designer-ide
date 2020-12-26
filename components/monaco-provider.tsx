@@ -1,29 +1,9 @@
 import useTheme from "hooks/useTheme"
-import parser from "prettier/parser-typescript"
-import prettier from "prettier/standalone"
+import {
+  MonacoProvider,
+  plugins,
+} from "node_modules/use-monaco/dist/cjs/use-monaco"
 import * as React from "react"
-import { MonacoProvider } from "use-monaco"
-
-// setup prettier formatter
-const prettierFormatter = {
-  provideDocumentFormattingEdits(model: any) {
-    try {
-      const text = prettier.format(model.getValue(), {
-        parser: "typescript",
-        plugins: [parser],
-        semi: false,
-        trailingComma: "es5",
-        tabWidth: 2,
-      })
-
-      const range = model.getFullModelRange()
-
-      return [{ range, text }]
-    } catch (e) {
-      return []
-    }
-  },
-}
 
 const themes = {
   light: {
@@ -65,33 +45,45 @@ export default function CustomMonacoProvider({ children }) {
     <MonacoProvider
       themes={themes}
       theme={theme}
+      plugins={[
+        plugins.prettier(["javascript", "typescript", "json"], {
+          semi: false,
+          singleQuote: false,
+          trailingComma: "es5",
+          tabWidth: 2,
+        }),
+        plugins.typings({
+          allowJs: true,
+          checkJs: true,
+          esModuleInterop: true,
+          allowNonTsExtensions: true,
+          allowSyntheticDefaultImports: true,
+          strict: true,
+          noEmit: true,
+          noLib: false,
+          moduleResolution: 2,
+          module: 1,
+          target: 1,
+          jsx: 2,
+          skipLibCheck: true,
+          lib: ["dom", "dom.iterable", "esnext", "es2015"],
+          reactNamespace: "React",
+          jsxFactory: "React.createElement",
+        }),
+      ]}
       onLoad={(monaco) => {
         if (monaco) {
           rMonaco.current = monaco
 
-          // Compiler Options
-          const compilerOptions = {
-            allowJs: true,
-            checkJs: true,
-            esModuleInterop: true,
-            allowNonTsExtensions: true,
-            allowSyntheticDefaultImports: true,
-            strict: true,
-            noEmit: true,
-            noLib: true,
-            moduleResolution: 2,
-            module: 1,
-            target: 1,
-            jsx: 2,
-            skipLibCheck: true,
-            lib: ["dom", "dom.iterable", "esnext"],
-            reactNamespace: "React",
-            jsxFactory: "React.createElement",
-          }
+          // Model sync
+          monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true)
+          monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true)
+
+          // Types
 
           monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-            noSemanticValidation: true,
-            noSyntaxValidation: true,
+            noSemanticValidation: false,
+            noSyntaxValidation: false,
           })
 
           monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
@@ -99,42 +91,32 @@ export default function CustomMonacoProvider({ children }) {
             noSyntaxValidation: false,
           })
 
-          monaco.languages.typescript.typescriptDefaults.setCompilerOptions(
-            compilerOptions,
-          )
-          monaco.languages.typescript.javascriptDefaults.setCompilerOptions(
-            compilerOptions,
-          )
-
-          // Model sync
-          monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true)
-          monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true)
-
-          // Prettier
-
-          monaco.languages.registerDocumentFormattingEditProvider(
-            "typescript",
-            prettierFormatter,
-          )
-
-          monaco.languages.registerDocumentFormattingEditProvider(
-            "javascript",
-            prettierFormatter,
-          )
-
           // Types
+          monaco.languages.typescript?.loadTypes("react", "17.0.1")
+          monaco.languages.typescript?.loadTypes(
+            "@state-designer/react",
+            "1.3.35",
+          )
+          monaco.languages.typescript?.loadTypes(
+            "@state-designer/core",
+            "1.3.35",
+          )
+          monaco.languages.typescript?.loadTypes("state-designer", "1.3.35")
 
-          // monaco.languages.typescript?.loadTypes("react", "17.0.1")
+          monaco.languages.typescript?.exposeGlobal(
+            `import { createState as _createState, DesignedState, useStateDesigner as _useStateDesigner } from 'state-designer';
+             import React from 'react';`,
 
-          // monaco.languages.typescript?.loadTypes(
-          //   "@state-designer/react",
-          //   "1.3.35",
-          // )
+            `export const createState: typeof _createState;
+             export const useStateDesigner: typeof _useStateDesigner;
+             export const React: typeof React;
 
-          // monaco.languages.typescript?.exposeGlobal(
-          //   "@state-designer/react",
-          //   "createState",
-          // )
+             /**
+              * Log a message to the console.
+              */
+             export const log: (...messages: string[]) => void;
+          `,
+          )
 
           return null
         }
