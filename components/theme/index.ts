@@ -1,4 +1,4 @@
-import { styled, css, lightTheme, darkTheme } from "./core"
+import { css, darkTheme, lightTheme, styled } from "./core"
 
 export { styled, css, lightTheme, darkTheme }
 

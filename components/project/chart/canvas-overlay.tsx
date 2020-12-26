@@ -1,10 +1,11 @@
 import * as React from "react"
+
 import { MotionValue, motion } from "framer-motion"
-import { S, useStateDesigner } from "@state-designer/react"
-import ProjectState from "../../../states/project"
-import highlightsState from "../../../states/highlights"
-import { quadrant, theta, normal, gradient } from "./helpers"
+
 import { getBoxToBoxArrow } from "perfect-arrows"
+import highlightsState from "states/highlights"
+import { styled } from "components/theme"
+import { useStateDesigner } from "@state-designer/react"
 
 const CanvasOverlay: React.FC<{
   scale: MotionValue<number>
@@ -14,11 +15,12 @@ const CanvasOverlay: React.FC<{
   height: MotionValue<number>
   resizeRef: React.RefObject<any>
 }> = ({ scale, resizeRef, offsetX, offsetY, width, height }) => {
-  // const captive = useStateDesigner(ProjectState.data.captive)
   const local = useStateDesigner(highlightsState)
 
   const rCanvas = React.useRef<HTMLCanvasElement>()
   const rCtx = React.useRef<CanvasRenderingContext2D>()
+
+  const { targets, highlitStateRef } = local.values
 
   React.useEffect(() => {
     const updateCanvasSize = () => {
@@ -51,15 +53,14 @@ const CanvasOverlay: React.FC<{
     if (!ctx) return
 
     const sc = scale.get()
+    const hl = highlitStateRef
 
     ctx.clearRect(0, 0, cvs.width, cvs.height)
-
-    const { highlitStateRef: hl, targets } = local.values
 
     if (hl) {
       const cFrame = getFrame(cvs, sc, 0, 0)
 
-      const hFrame = getFrame(hl, sc, cFrame.x, cFrame.y)
+      // const hFrame = getFrame(hl, sc, cFrame.x, cFrame.y)
 
       if (local.data.event) {
         const eventButtons = local.data.eventButtonRefs
@@ -95,24 +96,17 @@ const CanvasOverlay: React.FC<{
         }
       }
     }
-  }, [local.values.highlitStateRef, local.values.targets])
+  }, [highlitStateRef, targets])
 
-  // React.useEffect(() => {
-  //   console.log("Targets", local.values.targets)
-  // }, [local.values.targets])
-
-  return (
-    <motion.canvas
-      ref={rCanvas}
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        pointerEvents: "none",
-      }}
-    />
-  )
+  return <CanvasContainer ref={rCanvas} />
 }
+
+const CanvasContainer = styled(motion.canvas, {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  pointerEvents: "none",
+})
 
 export default CanvasOverlay
 

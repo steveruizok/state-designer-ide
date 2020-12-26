@@ -1,40 +1,27 @@
 // @jsx jsx
 import * as React from "react"
-import { IconButton } from "components/theme"
-import { Compass } from "react-feather"
+
 import {
-  motion,
-  useMotionValue,
-  useAnimation,
   MotionProps,
   MotionValue,
+  motion,
+  useAnimation,
+  useMotionValue,
 } from "framer-motion"
+
+import { Compass } from "react-feather"
+import { IconButton } from "components/theme"
+import { styled } from "components/theme"
 import usePreventZooming from "hooks/usePreventZooming"
 import useScaleZooming from "hooks/useScaleZooming"
-import { styled } from "components/theme"
 
-type Props = React.HTMLProps<HTMLDivElement> &
-  MotionProps & {
-    mvScale?: MotionValue<number>
-    minZoom?: number
-    showResetView?: boolean
-    maxZoom?: number
-    fixed?: React.ReactNode
-  }
+interface CanvasProps extends MotionProps {
+  mvScale?: MotionValue<number>
+  fixed?: React.ReactNode
+}
 
-const Canvas = React.forwardRef<HTMLDivElement, Props>(
-  (
-    {
-      children,
-      fixed,
-      mvScale,
-      showResetView = true,
-      minZoom = 0.25,
-      maxZoom = 2.5,
-      ...rest
-    },
-    ref,
-  ) => {
+const Canvas = React.forwardRef<HTMLDivElement, CanvasProps>(
+  ({ children, fixed, mvScale }, ref) => {
     const mvX = useMotionValue(0)
     const mvY = useMotionValue(0)
     const animation = useAnimation()

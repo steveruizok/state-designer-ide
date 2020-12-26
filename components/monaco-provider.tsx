@@ -1,9 +1,8 @@
+import useTheme from "hooks/useTheme"
+import parser from "prettier/parser-typescript"
+import prettier from "prettier/standalone"
 import * as React from "react"
 import { MonacoProvider } from "use-monaco"
-import useTheme from "hooks/useTheme"
-import prettier from "prettier/standalone"
-import parser from "prettier/parser-typescript"
-import STATE_DESIGNER from "node_modules/@state-designer/react/dist/index"
 
 // setup prettier formatter
 const prettierFormatter = {
@@ -64,14 +63,8 @@ export default function CustomMonacoProvider({ children }) {
 
   return (
     <MonacoProvider
+      themes={themes}
       theme={theme}
-      plugins={{
-        theme: {
-          themes: themes,
-        },
-        typings: true,
-        prettier: ["javascript", "typescript", "json"],
-      }}
       onLoad={(monaco) => {
         if (monaco) {
           rMonaco.current = monaco
@@ -131,11 +124,17 @@ export default function CustomMonacoProvider({ children }) {
 
           // Types
 
-          monaco.languages.typescript?.loadTypes("react", "17.0.1")
-          monaco.languages.typescript?.loadTypes(
-            "@state-designer/react",
-            "1.3.35",
-          )
+          // monaco.languages.typescript?.loadTypes("react", "17.0.1")
+
+          // monaco.languages.typescript?.loadTypes(
+          //   "@state-designer/react",
+          //   "1.3.35",
+          // )
+
+          // monaco.languages.typescript?.exposeGlobal(
+          //   "@state-designer/react",
+          //   "createState",
+          // )
 
           return null
         }

@@ -1,7 +1,8 @@
-import { createState } from "@state-designer/react"
+import { getCaptiveState, getStaticValues } from "lib/eval"
+
 import codePanelState from "./code-panel"
 import consoleState from "./console"
-import { getStaticValues, getCaptiveState } from "lib/eval"
+import { createState } from "@state-designer/react"
 
 const projectState = createState({
   data: {

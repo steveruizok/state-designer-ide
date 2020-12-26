@@ -1,8 +1,10 @@
-import { useStateDesigner } from "@state-designer/react"
-import projectState from "states/project"
-import { styled } from "components/theme"
+import { AnimatePresence, AnimateSharedLayout } from "framer-motion"
+
 import ChartView from "components/project/chart"
 import Loading from "components/project/loading"
+import projectState from "states/project"
+import { styled } from "components/theme"
+import { useStateDesigner } from "@state-designer/react"
 
 export default function Chart() {
   const local = useStateDesigner(projectState)
@@ -12,7 +14,11 @@ export default function Chart() {
       {local.isIn("loading") ? (
         <Loading />
       ) : (
-        <ChartView state={local.data.captive} />
+        <AnimateSharedLayout>
+          <AnimatePresence>
+            <ChartView state={local.data.captive} />
+          </AnimatePresence>
+        </AnimateSharedLayout>
       )}
     </ChartContainer>
   )

@@ -1,15 +1,17 @@
 import * as React from "react"
-import throttle from "lodash/throttle"
+
+import { Button, IconButton, styled } from "components/theme"
 import { Compass, RotateCcw } from "react-feather"
-import { motion } from "framer-motion"
 import { S, useStateDesigner } from "@state-designer/react"
 import { useAnimation, useMotionValue } from "framer-motion"
-import StateNode from "./state-node"
+
 import CanvasOverlay from "./canvas-overlay"
+import StateNode from "./state-node"
+import { motion } from "framer-motion"
+import throttle from "lodash/throttle"
 import useMotionResizeObserver from "use-motion-resize-observer"
 import usePreventZooming from "hooks/usePreventZooming"
 import useScaleZooming from "hooks/useScaleZooming"
-import { styled, Button, IconButton } from "components/theme"
 
 interface ChartProps {
   state: S.DesignedState<any, any>
@@ -21,7 +23,7 @@ function Chart({ state, zoomedPath }: ChartProps) {
 
   const { ref: rCanvas, width: mvCanvasWidth } = useMotionResizeObserver()
   const {
-    ref: rStateNode,
+    ref: rRootNode,
     width: mvStateNodeWidth,
     height: mvStateNodeHeight,
   } = useMotionResizeObserver()
@@ -39,7 +41,7 @@ function Chart({ state, zoomedPath }: ChartProps) {
   // Centers and re-scales canvas
   const resetView = React.useCallback(
     throttle(() => {
-      const stateNode = rStateNode.current
+      const stateNode = rRootNode.current
       if (!stateNode) return
 
       const nodeWidth = mvStateNodeWidth.get()
@@ -82,7 +84,7 @@ function Chart({ state, zoomedPath }: ChartProps) {
 
   // Resize statenode on mount
   React.useEffect(() => {
-    const stateNode = rStateNode.current
+    const stateNode = rRootNode.current
     if (!stateNode) return
 
     const nodeWidth = mvStateNodeWidth.get()
@@ -128,15 +130,17 @@ function Chart({ state, zoomedPath }: ChartProps) {
         animate={animation}
         onDoubleClick={(e) => e.stopPropagation()}
       >
-        <StateNodeContainer id="chart-container" ref={rStateNode as any}>
-          <StateNode node={zoomed || captive.stateTree} />
+        <StateNodeContainer>
+          <RootNodeWrapper id="chart-container" ref={rRootNode as any}>
+            <StateNode node={zoomed || captive.stateTree} />
+          </RootNodeWrapper>
           <CanvasOverlay
             scale={mvScale}
             offsetX={mvX}
             offsetY={mvY}
             width={mvStateNodeWidth}
             height={mvStateNodeHeight}
-            resizeRef={rStateNode}
+            resizeRef={rRootNode}
           />
         </StateNodeContainer>
       </ChartCanvas>
@@ -163,6 +167,8 @@ function Chart({ state, zoomedPath }: ChartProps) {
 }
 
 export default React.memo(Chart)
+
+const RootNodeWrapper = styled.div({})
 
 const ChartContainer = styled(motion.div, {
   position: "relative",

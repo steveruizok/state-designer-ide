@@ -9,8 +9,8 @@ export const NodeContainer = styled.div({
     childOf: {
       leaf: {},
       branch: {
-        m: "$1",
         bg: "$node",
+        m: "$1",
         border: "2px solid $active",
         borderRadius: 12,
         overflow: "hidden",
@@ -19,17 +19,18 @@ export const NodeContainer = styled.div({
       },
       parallel: {
         width: "fit-content",
+        bg: "transparent",
       },
       root: {},
     },
     nodeLevel: {
-      child: {
-        bg: "$node",
-      },
+      child: {},
       root: {
+        p: "$1",
         bg: "$root",
-        border: "1px solid $active",
+        // border: "1px solid $active",
         borderRadius: 12,
+        boxShadow: "0px 0px 12px -2px $shadow",
       },
     },
     nodeState: {
@@ -47,7 +48,6 @@ export const NodeContainer = styled.div({
       },
       normal: {},
       highlight: {
-        // color: "$accent",
         border: "$accent",
       },
     },

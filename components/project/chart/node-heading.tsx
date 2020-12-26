@@ -1,9 +1,9 @@
-import { S, useStateDesigner } from "@state-designer/react"
 import { Disc, MoreHorizontal } from "react-feather"
+import { IconButton, styled } from "components/theme"
+import { S, useStateDesigner } from "@state-designer/react"
+
 // import IconSelect from "../icon-select"
 import ProjectState from "../../../states/project"
-
-import { styled, IconButton } from "components/theme"
 
 const NodeHeading: React.FC<{
   node: S.State<any, any>
@@ -58,9 +58,6 @@ const NodeHeadingContainer = styled.div({
   },
   "& > *[data-hidey='true']": {
     visibility: "hidden",
-  },
-  "&:hover > *[data-hidey='true']": {
-    visibility: "visible",
   },
   variants: {
     type: {

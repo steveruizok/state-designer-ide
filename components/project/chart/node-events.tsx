@@ -1,8 +1,10 @@
 import * as React from "react"
+
+import { Button, styled } from "components/theme"
 import { S, useStateDesigner } from "@state-designer/react"
+
 import ProjectState from "states/project"
-import highlightsState from "states/code-panel"
-import { styled, Button } from "components/theme"
+import highlightsState from "states/highlights"
 
 interface NodeEventsProps {
   node: S.State<any, any>
@@ -83,6 +85,12 @@ const EventButton: React.FC<{
       ref: rButton,
       path: node.path,
     })
+    return () =>
+      highlightsState.send("UNMOUNTED_EVENT_BUTTON", {
+        name,
+        ref: rButton,
+        path: node.path,
+      })
   }, [])
 
   return (

@@ -1,7 +1,8 @@
 import { S, createState } from "@state-designer/react"
-import projectState from "states/project"
-import last from "lodash/last"
+
 import { HighlightData } from "types"
+import last from "lodash/last"
+import projectState from "states/project"
 
 const initialData: HighlightData = {
   event: null,
@@ -15,7 +16,7 @@ const initialData: HighlightData = {
 
 const highlightsState = createState({
   data: initialData,
-  initial: "highlit",
+  initial: "idle",
   states: {
     idle: {
       on: {
@@ -56,8 +57,10 @@ const highlightsState = createState({
     },
   },
   on: {
-    MOUNTED_NODE: "updateNodeRefs",
-    MOUNTED_EVENT_BUTTON: "updateEventButtonRefs",
+    MOUNTED_NODE: "addNodeRef",
+    UNMOUNTED_NODE: "deleteNodeRef",
+    MOUNTED_EVENT_BUTTON: "addEventButtonRef",
+    UNMOUNTED_EVENT_BUTTON: "deleteEventButtonRef",
   },
   conditions: {
     highlitStateIsActive(data, { active }) {
@@ -66,8 +69,8 @@ const highlightsState = createState({
     eventIsAlreadyHighlit(data, { eventName }) {
       return data.event === eventName
     },
-    stateIsAlreadyHighlit(data, { stateName }) {
-      return data.state === stateName
+    stateIsAlreadyHighlit(data, { path }) {
+      return data.path === path
     },
   },
   actions: {
@@ -77,7 +80,7 @@ const highlightsState = createState({
       data.targets = targets || []
       data.scrollToLine = shiftKey
     },
-    setStateHighlight(data, { path, stateName, shiftKey, targets }) {
+    setStateHighlight(data, { path, stateName, shiftKey }) {
       data.state = stateName
       data.path = path
       data.scrollToLine = shiftKey
@@ -92,16 +95,26 @@ const highlightsState = createState({
       data.targets = []
       data.scrollToLine = false
     },
-    updateNodeRefs(data, { path, ref }) {
+    deleteNodeRef(data, { path, ref }) {
+      data.nodeRefs.delete(path)
+    },
+    addNodeRef(data, { path, ref }) {
       data.nodeRefs.set(path, ref)
     },
-    updateEventButtonRefs(data, { path, name, ref }) {
+    addEventButtonRef(data, { path, name, ref }) {
       let state = data.eventButtonRefs.get(path)
       if (!state) {
         state = new Map<string, React.RefObject<HTMLDivElement>>([])
       }
-      state.set(name, ref)
+      state.set(path, ref)
       data.eventButtonRefs.set(path, state)
+    },
+    deleteEventButtonRef(data, { path, name, ref }) {
+      let state = data.eventButtonRefs.get(path)
+      if (state) {
+        state.delete(path)
+      }
+      data.eventButtonRefs.delete(path)
     },
   },
   values: {
