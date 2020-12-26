@@ -1,7 +1,7 @@
 import * as React from "react"
 import { animate } from "framer-motion"
 import { useStateDesigner } from "@state-designer/react"
-import { useFile, useMonacoContext } from "use-monaco"
+import { useTextModel, useMonacoContext } from "use-monaco"
 import useCustomEditor from "hooks/useCustomEditor"
 import {
   styled,
@@ -39,14 +39,14 @@ export default function Details({}: DetailsProps) {
 
   const { monaco } = useMonacoContext()
 
-  const dataModel = useFile({
+  const dataModel = useTextModel({
     path: "data.json",
     monaco,
     defaultContents: JSON.stringify(captive.data, null, 2),
     language: "json",
   })
 
-  const valuesModel = useFile({
+  const valuesModel = useTextModel({
     path: "values.json",
     monaco,
     defaultContents: JSON.stringify(captive.values, null, 2),

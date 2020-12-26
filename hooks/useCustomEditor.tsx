@@ -1,7 +1,6 @@
 import * as React from "react"
 import { useEditor } from "use-monaco"
 import mergeRefs from "react-merge-refs"
-import useTheme from "./useTheme"
 import debounce from "lodash/debounce"
 import useMotionResizeObserver from "use-motion-resize-observer"
 
@@ -13,8 +12,6 @@ export default function useCustomEditor(
   onMount?: (editor: any) => void,
   onChange?: (code: string) => void,
 ) {
-  const { theme } = useTheme()
-
   const { editor, containerRef } = useEditor({
     monaco,
     model,
@@ -28,6 +25,7 @@ export default function useCustomEditor(
       smoothScrolling: true,
       lineDecorationsWidth: 4,
       fontLigatures: true,
+      readOnly,
       cursorBlinking: "smooth",
       lineNumbers: "off",
       scrollBeyondLastLine: false,
@@ -41,7 +39,7 @@ export default function useCustomEditor(
       renderLineHighlight: "all",
       cursorWidth: 3,
     },
-    editorDidMount: (editor) => {
+    onEditorDidMount: (editor) => {
       editor.updateOptions({
         readOnly,
       })
@@ -63,11 +61,6 @@ export default function useCustomEditor(
     },
   })
 
-  React.useEffect(() => {
-    if (!monaco) return
-    monaco.editor.setTheme(theme)
-  }, [monaco, editor, theme])
-
   // Resizing
   const resizeEditor = React.useCallback(
     debounce(() => {
@@ -79,22 +72,6 @@ export default function useCustomEditor(
   const { ref: resizeRef } = useMotionResizeObserver<HTMLDivElement>({
     onResize: resizeEditor,
   })
-
-  React.useEffect(() => {
-    if (editor) {
-      editor.updateOptions({
-        readOnly,
-      })
-    }
-  }, [editor, readOnly])
-
-  React.useEffect(() => {
-    if (editor) {
-      editor.updateOptions({
-        wordWrap: wrap ? "on" : "off",
-      })
-    }
-  }, [editor, wrap])
 
   return { editor, containerRef: mergeRefs([resizeRef, containerRef]) }
 }
