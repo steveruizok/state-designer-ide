@@ -221,8 +221,7 @@ export default function CustomMonacoProvider({ children }) {
               DarkGray: "#333c57",
             };
 
-            type ThemeProps = { css?: {[key: string]: any} }
-            type TC<T> = React.FC<React.HTMLProps<T> & ThemeProps & MotionProps>
+            type TC<T> = React.FC<React.HTMLProps<T> & MotionProps & { css?: {[key: string]: any} }>
 
             export const Colors: typeof _Colors;
             export const css: any
@@ -241,10 +240,12 @@ export default function CustomMonacoProvider({ children }) {
             export const Button: TC<HTMLButtonElement>;
             export const Text: TC<HTMLParagraphElement>;
             
+            export const ColorMode: "dark" | "light"
+            
              /**
               * Log a message to the console.
               */
-             export const log: (...messages: string[]) => void;
+             export const log: (...messages: any[]) => void;
           `,
           )
 

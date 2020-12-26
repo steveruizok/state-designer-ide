@@ -5,7 +5,7 @@ import * as Utils from "components/static/utils"
 
 function printFrom(source: string, ...messages: any[]) {
   let message = messages
-    .map((m) => (typeof m === "string" ? m : JSON.stringify(m)))
+    .map((m) => (typeof m === "string" ? m : JSON.stringify(m, null, 2)))
     .join(", ")
 
   consoleState.send("LOGGED", { source, message })

@@ -143,13 +143,12 @@ export default function Details({}: DetailsProps) {
 
   return (
     <DetailsContainer>
-      <TitleRow>
+      <TitleRow onDoubleClick={toggleExpanded}>
         <TabsContainer>
           <TabButton
             variant="details"
             activeState={activeTab === "data" ? "active" : "inactive"}
             onClick={() => handleTabChange("data")}
-            onDoubleClick={toggleExpanded}
           >
             Data
           </TabButton>
@@ -157,7 +156,6 @@ export default function Details({}: DetailsProps) {
             variant="details"
             activeState={activeTab === "values" ? "active" : "inactive"}
             onClick={() => handleTabChange("values")}
-            onDoubleClick={toggleExpanded}
           >
             Values
           </TabButton>

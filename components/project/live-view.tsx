@@ -79,7 +79,7 @@ const Preview: React.FC<{}> = () => {
             Icons,
             Utils,
             Colors,
-            ColorMode: theme,
+            ColorMode: theme.theme,
             useStateDesigner,
             Static: staticCode,
             state,
@@ -93,7 +93,10 @@ const Preview: React.FC<{}> = () => {
             <PreviewInnerContainer>
               <LivePreview />
             </PreviewInnerContainer>
-            <StyledLiveError />
+
+            <StyledLiveErrorWrapper>
+              <StyledLiveError />
+            </StyledLiveErrorWrapper>
           </PreviewScrollContainer>
         </LiveProvider>
       ) : (
@@ -131,18 +134,24 @@ const PreviewInnerContainer = styled.div({
   justifyContent: "center",
 })
 
-const StyledLiveError = styled(LiveError, {
+const StyledLiveErrorWrapper = styled.div({
+  display: "flex",
+  alignItems: "center",
   position: "absolute",
-  bottom: 40,
+  top: 0,
   left: 0,
-  m: 0,
+  width: "100%",
+  height: "100%",
+})
+
+const StyledLiveError = styled(LiveError, {
   padding: "$2",
   width: "100%",
   fontSize: "$1",
   fontFamily: "$monospace",
   height: "min-content",
   bg: "scrim",
-  zIndex: 99999,
+  zIndex: 800,
 })
 
 class ErrorBoundary extends React.Component {

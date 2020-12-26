@@ -1,17 +1,18 @@
-import * as React from "react"
-import { animate } from "framer-motion"
 import { createState, useStateDesigner } from "@state-designer/react"
 import {
-  styled,
   IconButton,
   TabButton,
   TabsContainer,
   TitleRow,
+  styled,
 } from "components/theme"
-import { Copy, ChevronDown, ChevronUp } from "react-feather"
-import { DragHandleVertical } from "./drag-handles"
-import { ui, motionValues } from "lib/local-data"
+import { animate } from "framer-motion"
+import { motionValues, ui } from "lib/local-data"
+import * as React from "react"
+import { ChevronDown, ChevronUp, Copy } from "react-feather"
 import toastState from "states/toast"
+
+import { DragHandleVertical } from "./drag-handles"
 
 export const consoleState = createState({
   data: {
@@ -90,13 +91,9 @@ export default function Console({}: ConsoleProps) {
 
   return (
     <ConsoleContainer>
-      <TitleRow>
+      <TitleRow onDoubleClick={toggleExpanded}>
         <TabsContainer>
-          <TabButton
-            variant="details"
-            activeState={"active"}
-            onDoubleClick={toggleExpanded}
-          >
+          <TabButton variant="details" activeState={"active"}>
             Console
           </TabButton>
         </TabsContainer>
@@ -107,9 +104,11 @@ export default function Console({}: ConsoleProps) {
           {expanded ? <ChevronDown /> : <ChevronUp />}
         </IconButton>
       </TitleRow>
-      <CodeContainer>
-        <code>{code}</code>
-      </CodeContainer>
+      <CodeWrapper>
+        <CodeContainer>
+          <code>{code}</code>
+        </CodeContainer>
+      </CodeWrapper>
       <DragHandleVertical
         motionValue={motionValues.console}
         height={CONSOLE_ROW_HEIGHT}
@@ -131,11 +130,14 @@ const ConsoleContainer = styled.div({
   gridTemplateRows: "auto 1fr",
   minWidth: 0,
   width: "calc(100% + 2px)",
-  zIndex: 99,
+  zIndex: 900,
+})
+
+const CodeWrapper = styled.div({
+  overflow: "scroll",
 })
 
 const CodeContainer = styled.pre({
-  overflow: "scroll",
   bg: "$codeBg",
   p: "$2",
   m: 0,
