@@ -83,7 +83,7 @@ const codePanelState = createState({
         },
         saving: {
           on: {
-            CHANGED_CODE: {
+            MODEL_CONTENT_UPDATED: {
               do: ["saveCode", "saveCurrentCleanViewState"],
               to: ["noChanges", "noError"],
             },

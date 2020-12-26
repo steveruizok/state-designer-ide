@@ -1,10 +1,9 @@
-import { AnimatePresence, AnimateSharedLayout } from "framer-motion"
-
+import { useStateDesigner } from "@state-designer/react"
 import ChartView from "components/project/chart"
 import Loading from "components/project/loading"
-import projectState from "states/project"
 import { styled } from "components/theme"
-import { useStateDesigner } from "@state-designer/react"
+import { AnimatePresence, AnimateSharedLayout } from "framer-motion"
+import projectState from "states/project"
 
 export default function Chart() {
   const local = useStateDesigner(projectState)
@@ -32,4 +31,5 @@ const ChartContainer = styled.div({
   height: "100%",
   width: "100%",
   borderRight: "2px solid $borderContrast",
+  borderTop: "2px solid $border",
 })

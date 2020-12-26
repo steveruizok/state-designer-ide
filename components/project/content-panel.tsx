@@ -1,10 +1,10 @@
-import * as React from "react"
+import { S, useStateDesigner } from "@state-designer/react"
 import { range } from "components/static/utils"
 import { styled } from "components/theme"
+import * as React from "react"
 import { Circle, Disc, MinusCircle } from "react-feather"
-import { S, useStateDesigner } from "@state-designer/react"
-import projectState from "states/project"
 import highlightsState from "states/highlights"
+import projectState from "states/project"
 
 interface ContentProps {
   children: React.ReactNode
@@ -154,6 +154,7 @@ const ContentContainer = styled.div({
   display: "flex",
   flexDirection: "column",
   gridTemplateRows: 40,
+  borderRight: "2px solid $border",
 })
 
 const ContentTitle = styled.div({

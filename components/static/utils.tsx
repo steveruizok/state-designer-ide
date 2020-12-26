@@ -1,17 +1,17 @@
-import * as React from "react"
 import {
   cloneDeep,
-  sample,
-  get,
-  union,
   debounce,
-  pull,
-  sortBy,
-  intersection,
-  without,
   difference,
+  get,
+  intersection,
+  pull,
+  sample,
+  sortBy,
+  union,
   uniq,
+  without,
 } from "lodash"
+import * as React from "react"
 
 // Shared helper functions for tutorials.
 
@@ -86,6 +86,16 @@ export function clamp(num: number, min: number, max: number) {
  */
 export async function delay(ms: number = 1000) {
   return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+/**
+ * Interpolate a new between two other numbers.
+ * @param {number} a The low end of the range, shown when t is 0.
+ * @param {number} b The high end of the range, shown when t is 1.
+ * @param {number} t How far to interpolate between the numbers.
+ */
+export function lerp(a: number, b: number, t: number) {
+  return a * (1 - t) + b * t
 }
 
 /**
@@ -166,16 +176,6 @@ export function useMouseInput(handlers: MouseEventHandlers) {
   }, [element])
 
   return ref
-}
-
-/**
- * Interpolate a new between two other numbers.
- * @param {number} a The low end of the range, shown when t is 0.
- * @param {number} b The high end of the range, shown when t is 1.
- * @param {number} t How far to interpolate between the numbers.
- */
-export function lerp(a: number, b: number, t: number) {
-  return a * (1 - t) + b * t
 }
 
 export {

@@ -1,7 +1,8 @@
-import db from "./firestore"
-import firebase from "./firebase"
 import router from "next/router"
 import * as Types from "types"
+
+import firebase from "./firebase"
+import db from "./firestore"
 
 export async function getProjectInfo(
   pid: string,
@@ -266,11 +267,6 @@ export async function forkProject(pid: string, oid: string, uid?: string) {
   }
 
   await doc.set({
-    ...data,
-    owner: uid,
-  })
-
-  console.log({
     ...data,
     owner: uid,
   })

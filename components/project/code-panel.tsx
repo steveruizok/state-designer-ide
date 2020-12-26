@@ -136,6 +136,14 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   React.useEffect(() => {
     if (!(monaco && editor)) return
 
+    editor.onDidChangeModelContent((e) =>
+      local.send("MODEL_CONTENT_UPDATED", {
+        code: editor.getValue(),
+        oid,
+        pid,
+      }),
+    )
+
     editor.onKeyDown((e) => {
       if (e.metaKey) {
         if (e.code === "KeyS") {
@@ -175,19 +183,14 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   const error = code[activeTab].error
   const dirty = local.isIn("hasChanges")
 
-  React.useEffect(() => {
-    // return projectState.onUpdate((update) => {
-    monaco.languages.typescript?.exposeGlobal(
-      `import { createState as _createState } from 'state-designer';`,
-
-      `
-        const _state = _${local.data.code.state.clean}
-        
-        export const state: typeof _state;
-      `,
-    )
-    // })
-  }, [local.data.code.state.clean])
+  // React.useEffect(() => {
+  //   monaco.languages.typescript?.exposeGlobal(
+  //     `import { createState as _createState } from 'state-designer';`,
+  //     `const _state = _${local.data.code.state.clean};
+  //      export const state: typeof _state;
+  //     `,
+  //   )
+  // }, [local.data.code.state.clean])
 
   return (
     <CodeContainer>
@@ -246,7 +249,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
               .run()
               .then(() => {
                 const code = editor.getValue()
-                local.send("SAVED_CODE", { code, oid, pid })
+                local.send("SAVED_CODE")
               })
           }}
         >

@@ -60,7 +60,6 @@ export default function StateNode({ node }: StateNodeProps) {
       }}
       onMouseLeave={(e) => {
         e.stopPropagation()
-        console.log("mouse left")
         local.send("CLEARED_STATE_HIGHLIGHT", { path: node.path })
       }}
       data-node={node.type}

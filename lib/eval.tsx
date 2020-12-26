@@ -8,7 +8,6 @@ function printFrom(source: string, ...messages: any[]) {
     .map((m) => (typeof m === "string" ? m : JSON.stringify(m)))
     .join(", ")
 
-  console.log(...messages)
   consoleState.send("LOGGED", { source, message })
 }
 
@@ -55,7 +54,7 @@ export function getCaptiveState(
       "Utils",
       "log",
       "print",
-      `return ${stateCode}`,
+      `return ${stateCode.slice("export default ".length)}`,
     )(createState, staticCode, Colors, Utils, print, print)
   } catch (err) {
     throw new Error(err.message)
@@ -94,7 +93,7 @@ export const codeValidators = {
 /* --------------------- Format --------------------- */
 
 export function validateStateCodeFormat(code: string) {
-  return !!code.match(/^createState\(\{\n.*?\n\}\)\n?$/gs)
+  return !!code.match(/^export default createState\(\{\n.*?\n\}\)\n?$/gs)
 }
 
 export function validateStaticCodeFormat(code: string) {
@@ -102,7 +101,9 @@ export function validateStaticCodeFormat(code: string) {
 }
 
 export function validateViewCodeFormat(code: string) {
-  return !!code.match(/(\n|^)function Component\(\) \{\n.*?\n\}\n?$/gs)
+  return !!code.match(
+    /(\n|^)import state from \"\.\/state\"\n\nfunction Component\(\) \{\n.*?\n\}\n?$/gs,
+  )
 }
 
 export const codeFormatValidators = {

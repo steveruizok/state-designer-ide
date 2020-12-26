@@ -65,7 +65,13 @@ const Preview: React.FC<{}> = () => {
     <LiveViewWrapper>
       {local.isIn("ready") ? (
         <LiveProvider
-          code={dirtyViewCode + "\n\nrender(<Component/>)"}
+          code={
+            dirtyViewCode.slice(
+              `import state from "./state"
+
+`.length,
+            ) + "\n\nrender(<Component/>)"
+          }
           noInline={true}
           scope={{
             ...Motion,
@@ -127,15 +133,16 @@ const PreviewInnerContainer = styled.div({
 
 const StyledLiveError = styled(LiveError, {
   position: "absolute",
-  bottom: 0,
+  bottom: 40,
   left: 0,
   m: 0,
-  padding: 2,
+  padding: "$2",
   width: "100%",
-  fontSize: 1,
+  fontSize: "$1",
+  fontFamily: "$monospace",
   height: "min-content",
-  fontFamily: "monospace",
   bg: "scrim",
+  zIndex: 99999,
 })
 
 class ErrorBoundary extends React.Component {

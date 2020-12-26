@@ -195,7 +195,6 @@ const DetailsContainer = styled.div({
   gridArea: "details",
   minWidth: 0,
   position: "relative",
-  borderLeft: "2px solid $border",
   borderRight: "2px solid $border",
 })
 

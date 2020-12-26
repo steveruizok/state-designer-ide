@@ -1,31 +1,30 @@
-import * as React from "react"
+import { useStateDesigner } from "@state-designer/react"
+import { Button, IconButton, Text, styled } from "components/theme"
+import useTheme from "hooks/useTheme"
+import { login, logout } from "lib/auth-client"
+import { forkProject, subscribeToDocSnapshot } from "lib/database"
+import { motionValues } from "lib/local-data"
+import Head from "next/head"
 import Link from "next/link"
 import Router from "next/router"
-import useTheme from "hooks/useTheme"
-import { useStateDesigner } from "@state-designer/react"
-import { Home, Sun, Copy, Plus, Minus } from "react-feather"
-import { subscribeToDocSnapshot, forkProject } from "lib/database"
-import { login, logout } from "lib/auth-client"
+import * as React from "react"
+import { Copy, Home, Minus, Plus, Sun } from "react-feather"
 import codePanelState from "states/code-panel"
-import projectState from "states/project"
 import liveViewState from "states/live-view"
-import { User, ProjectData } from "types"
+import projectState from "states/project"
+import { ProjectData, User } from "types"
 
-import { styled, IconButton, Text, Button } from "components/theme"
-
-import {
-  DragHandleHorizontalRelative,
-  DragHandleHorizontal,
-} from "./drag-handles"
-import Content from "./content-panel"
-import Code from "./code-panel"
-import Details, { DETAILS_ROW_HEIGHT } from "./details-panel"
-import Console from "./console-panel"
 import Chart from "./chart-view"
+import Code from "./code-panel"
+import Console from "./console-panel"
+import Content from "./content-panel"
+import Details, { DETAILS_ROW_HEIGHT } from "./details-panel"
+import {
+  DragHandleHorizontal,
+  DragHandleHorizontalRelative,
+} from "./drag-handles"
 import LiveView from "./live-view"
 import Loading from "./loading"
-
-import { motionValues } from "lib/local-data"
 
 export const CONTENT_COL_WIDTH = 200
 export const CODE_COL_WIDTH = 320
@@ -83,7 +82,7 @@ export default function ProjectView({
           <Button onClick={login}>Log in</Button>
         )}
       </MenuContainer>
-      <TitleContainer>Title</TitleContainer>
+      <Title />
       <ControlsContainer>
         {user?.authenticated && (
           <IconButton onClick={() => forkProject(pid, oid, user?.uid)}>
@@ -127,6 +126,18 @@ export default function ProjectView({
       </MainContainer>
       <Code oid={oid} pid={pid} uid={user?.uid} />
     </Layout>
+  )
+}
+
+function Title() {
+  const local = useStateDesigner(projectState)
+  return (
+    <TitleContainer>
+      <Head>
+        <title>{local.data.name} - State Designer</title>
+      </Head>
+      {local.data.name}
+    </TitleContainer>
   )
 }
 
