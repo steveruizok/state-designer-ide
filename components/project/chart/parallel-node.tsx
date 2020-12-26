@@ -10,11 +10,18 @@ import NodeEvents from "./node-events"
 interface NodeProps {
   node: S.State<any, any>
   highlight: boolean
+  isRoot: boolean
+  events: [string, S.EventHandler<any>][]
+  nodes: S.State<any, any>[]
 }
 
-export default function ParallelNode({ node, highlight }: NodeProps) {
-  const childNodes = Object.values(node.states)
-  const isRoot = node.parentType === null
+export default function ParallelNode({
+  node,
+  isRoot,
+  events,
+  nodes,
+  highlight,
+}: NodeProps) {
   return (
     <NodeContainer
       childOf={node.parentType || "branch"}
@@ -31,14 +38,14 @@ export default function ParallelNode({ node, highlight }: NodeProps) {
       }
     >
       <NodeHeading node={node} />
-      <NodeEvents node={node} />
+      <NodeEvents node={node} events={events} />
       <Divider state={node.active ? "active" : "inactive"} />
       <ChildNodesContainer type="parallel">
-        {childNodes.map((child, i) => {
+        {nodes.map((child, i) => {
           return (
             <React.Fragment key={i}>
               <StateNode node={child} />
-              {i < childNodes.length - 1 && (
+              {i < nodes.length - 1 && (
                 <ParallelDivider state={node.active ? "active" : "inactive"} />
               )}
             </React.Fragment>

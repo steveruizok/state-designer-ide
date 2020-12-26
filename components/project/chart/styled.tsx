@@ -20,6 +20,7 @@ export const NodeContainer = styled.div({
       parallel: {
         width: "fit-content",
       },
+      root: {},
     },
     nodeLevel: {
       child: {
@@ -27,6 +28,8 @@ export const NodeContainer = styled.div({
       },
       root: {
         bg: "$root",
+        border: "1px solid $active",
+        borderRadius: 12,
       },
     },
     nodeState: {

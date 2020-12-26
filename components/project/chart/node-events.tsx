@@ -4,23 +4,14 @@ import ProjectState from "states/project"
 import highlightsState from "states/code-panel"
 import { styled, Button } from "components/theme"
 
-const NodeEvents: React.FC<{ node: S.State<any, any> }> = ({ node }) => {
+interface NodeEventsProps {
+  node: S.State<any, any>
+  events: [string, S.EventHandler<any>][]
+}
+
+function NodeEvents({ node, events }: NodeEventsProps) {
   const local = useStateDesigner(ProjectState)
   const captiveData = local.data.captive.data
-
-  const events = Object.entries(node.on)
-
-  if (node.onEvent) {
-    events.unshift(["onEvent", node.onEvent])
-  }
-
-  if (node.onExit) {
-    events.unshift(["onExit", node.onExit])
-  }
-
-  if (node.onEnter) {
-    events.unshift(["onEnter", node.onEnter])
-  }
 
   return (
     <NodeEventsContainer type={node.type}>

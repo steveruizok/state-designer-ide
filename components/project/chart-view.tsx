@@ -2,6 +2,7 @@ import { useStateDesigner } from "@state-designer/react"
 import projectState from "states/project"
 import { styled } from "components/theme"
 import ChartView from "components/project/chart"
+import Loading from "components/project/loading"
 
 export default function Chart() {
   const local = useStateDesigner(projectState)
@@ -9,7 +10,7 @@ export default function Chart() {
   return (
     <ChartContainer>
       {local.isIn("loading") ? (
-        <div />
+        <Loading />
       ) : (
         <ChartView state={local.data.captive} />
       )}

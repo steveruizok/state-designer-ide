@@ -9,16 +9,18 @@ import NodeEvents from "./node-events"
 interface NodeProps {
   node: S.State<any, any>
   highlight: boolean
+  isRoot: boolean
+  events: [string, S.EventHandler<any>][]
+  nodes: S.State<any, any>[]
 }
 
-export default function BranchNode({ node, highlight }: NodeProps) {
-  const childNodes = Object.values(node.states)
-  const isRoot = node.parentType === null
-
-  function getSortedBranchChildNodes(nodes: S.State<any, any>[]) {
-    return sortBy(nodes, (n) => !n.isInitial)
-  }
-
+export default function BranchNode({
+  node,
+  isRoot,
+  events,
+  nodes,
+  highlight,
+}: NodeProps) {
   return (
     <NodeContainer
       childOf={node.parentType || "branch"}
@@ -34,11 +36,13 @@ export default function BranchNode({ node, highlight }: NodeProps) {
           : "normal"
       }
     >
-      <NodeHeading node={node} />
-      <NodeEvents node={node} />
-      <Divider state={node.active ? "active" : "inactive"} />
+      {!isRoot && <NodeHeading node={node} />}
+      {events.length > 0 && <NodeEvents node={node} events={events} />}
+      {(!isRoot || events.length) > 0 && (
+        <Divider state={node.active ? "active" : "inactive"} />
+      )}
       <ChildNodesContainer type="branch">
-        {getSortedBranchChildNodes(childNodes).map((child, i) => (
+        {nodes.map((child, i) => (
           <StateNode key={i} node={child} />
         ))}
       </ChildNodesContainer>

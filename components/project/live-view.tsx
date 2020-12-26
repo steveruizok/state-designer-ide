@@ -2,6 +2,8 @@ import * as React from "react"
 import * as Motion from "framer-motion"
 import { S, useStateDesigner } from "@state-designer/react"
 import { motion } from "framer-motion"
+import useTheme from "hooks/useTheme"
+import Loading from "components/project/loading"
 import Colors from "components/static/colors"
 import * as Utils from "components/static/utils"
 import * as Icons from "react-feather"
@@ -24,6 +26,8 @@ import {
 } from "components/theme"
 import { LiveProvider, LiveError, LivePreview } from "react-live"
 import { printFromView } from "lib/eval"
+import projectState from "states/project"
+import liveViewState from "states/live-view"
 
 const Components = {
   Box,
@@ -48,45 +52,55 @@ const WithMotionComponents = Object.fromEntries(
   }),
 )
 
-const Preview: React.FC<{
-  ready: boolean
-  code: string
-  statics: { [key: string]: any }
-  state: S.DesignedState<any, any>
-  theme: { [key: string]: any }
-}> = ({ ready, code, state, statics, theme }) => {
+const Preview: React.FC<{}> = () => {
+  const local = useStateDesigner(projectState)
+  const localEditor = useStateDesigner(liveViewState)
+  const theme = useTheme()
+
+  const state = local.data.captive
+  const dirtyViewCode = localEditor.data.code
+  const staticCode = local.data.static
+
   return (
-    <LiveProvider
-      code={code + "\n\nrender(<Component/>)"}
-      noInline={true}
-      scope={{
-        ...Motion,
-        ...WithMotionComponents,
-        Icons,
-        Utils,
-        Colors,
-        ColorMode: theme,
-        useStateDesigner,
-        Static: statics,
-        state,
-        styled,
-        print: printFromView,
-        css,
-      }}
-    >
-      <PreviewScrollContainer>
-        <PreviewInnerContainer>
-          {ready && <LivePreview />}
-        </PreviewInnerContainer>
-        <StyledLiveError
-          style={{
-            visibility: code ? "visible" : "hidden",
+    <LiveViewWrapper>
+      {local.isIn("ready") ? (
+        <LiveProvider
+          code={dirtyViewCode + "\n\nrender(<Component/>)"}
+          noInline={true}
+          scope={{
+            ...Motion,
+            ...WithMotionComponents,
+            Icons,
+            Utils,
+            Colors,
+            ColorMode: theme,
+            useStateDesigner,
+            Static: staticCode,
+            state,
+            styled,
+            print: printFromView,
+            css,
           }}
-        />
-      </PreviewScrollContainer>
-    </LiveProvider>
+        >
+          <PreviewScrollContainer>
+            <PreviewInnerContainer>
+              <LivePreview />
+            </PreviewInnerContainer>
+            <StyledLiveError />
+          </PreviewScrollContainer>
+        </LiveProvider>
+      ) : (
+        <Loading />
+      )}
+    </LiveViewWrapper>
   )
 }
+
+const LiveViewWrapper = styled.div({
+  width: "100%",
+  height: "100%",
+  pb: "40px",
+})
 
 const PreviewScrollContainer = styled.div({
   width: "100%",

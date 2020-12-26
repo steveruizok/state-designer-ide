@@ -23,6 +23,7 @@ import Details, { DETAILS_ROW_HEIGHT } from "./details-panel"
 import Console from "./console-panel"
 import Chart from "./chart-view"
 import LiveView from "./live-view"
+import Loading from "./loading"
 
 import { motionValues } from "lib/local-data"
 
@@ -114,7 +115,7 @@ export default function ProjectView({
         <Chart />
         <MainDragArea ref={rMainContainer} />
         <ViewContainer>
-          <LiveViewWrapper />
+          <LiveView />
           <Console />
         </ViewContainer>
         <Details />
@@ -126,22 +127,6 @@ export default function ProjectView({
       </MainContainer>
       <Code oid={oid} pid={pid} uid={user?.uid} />
     </Layout>
-  )
-}
-
-function LiveViewWrapper() {
-  const local = useStateDesigner(projectState)
-  const localEditor = useStateDesigner(liveViewState)
-  const theme = useTheme()
-
-  return (
-    <LiveView
-      code={localEditor.data.code}
-      statics={local.data.static}
-      state={local.data.captive}
-      theme={theme}
-      ready={local.isIn("ready")}
-    />
   )
 }
 
