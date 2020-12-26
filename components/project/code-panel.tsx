@@ -2,7 +2,7 @@
 import * as React from "react"
 import { styled, IconButton, TabButton } from "components/theme"
 import { Save, RefreshCcw, AlertCircle } from "react-feather"
-import { useFile, useMonacoContext } from "use-monaco"
+import { useTextModel, useMonacoContext } from "use-monaco"
 import { CodeEditorTab } from "types"
 import { DragHandleHorizontal } from "./drag-handles"
 import { CODE_COL_WIDTH } from "./index"
@@ -24,21 +24,21 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
 
   const { monaco } = useMonacoContext()
 
-  const stateModel = useFile({
+  const stateModel = useTextModel({
     path: "state.tsx",
     monaco,
     defaultContents: "",
-    language: "javascript",
+    language: "typescript",
   })
 
-  const viewModel = useFile({
+  const viewModel = useTextModel({
     path: "view.tsx",
     monaco,
     defaultContents: "",
-    language: "javascript",
+    language: "typescript",
   })
 
-  const staticModel = useFile({
+  const staticModel = useTextModel({
     path: "static.tsx",
     monaco,
     defaultContents: "",
