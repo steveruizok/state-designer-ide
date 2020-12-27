@@ -100,47 +100,44 @@ const highlightsState = createState({
     addNodeRef(data, { path, ref }) {
       data.nodeRefs.set(path, ref)
     },
-    addEventButtonRef(data, { path, name, ref }) {
-      let state = data.eventButtonRefs.get(path)
-      if (!state) {
-        state = new Map<string, React.RefObject<HTMLDivElement>>([])
-      }
-      state.set(path, ref)
-      data.eventButtonRefs.set(path, state)
+    addEventButtonRef(
+      data,
+      { id, ref }: { id: string; ref: React.RefObject<HTMLDivElement> },
+    ) {
+      data.eventButtonRefs.set(id, ref)
     },
-    deleteEventButtonRef(data, { path, name, ref }) {
-      let state = data.eventButtonRefs.get(path)
-      if (state) {
-        state.delete(path)
-      }
-      data.eventButtonRefs.delete(path)
+    deleteEventButtonRef(data, { id }) {
+      data.eventButtonRefs.delete(id)
     },
   },
   values: {
     highlitStateRef(data) {
       const current = data.nodeRefs.get(data.path)?.current
-
       if (!current) return null
-
       return current
     },
+    highlitEventRef(data) {
+      const { path, event, eventButtonRefs } = data
+      if (path && event) {
+        return eventButtonRefs.get(path + "_" + event)?.current
+      }
+    },
     targets(data) {
-      const nodes = data.targets
-        .map((path) => {
-          const targets = findTransitionTargets(
-            projectState.data.captive.stateTree,
-            path,
-          )
-          return last(targets)
-        })
+      const { targets, path, event, eventButtonRefs } = data
+
+      const nodes = targets
+        .map((path) =>
+          last(
+            findTransitionTargets(projectState.data.captive.stateTree, path),
+          ),
+        )
         .filter(Boolean)
 
-      const targets = nodes.map((node) => ({
+      return nodes.map((node) => ({
         node,
-        ref: data.nodeRefs.get(node.path),
+        fromRef: eventButtonRefs.get(path + "_" + event)?.current,
+        toRef: data.nodeRefs.get(node.path)?.current,
       }))
-
-      return targets
     },
   },
 })

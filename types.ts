@@ -64,6 +64,6 @@ export interface HighlightData {
   path: string | null
   scrollToLine: boolean
   targets: string[]
-  eventButtonRefs: Map<string, Map<string, React.RefObject<HTMLDivElement>>>
+  eventButtonRefs: Map<string, React.RefObject<HTMLDivElement>>
   nodeRefs: Map<string, React.RefObject<HTMLDivElement>>
 }

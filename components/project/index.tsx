@@ -10,7 +10,6 @@ import Router from "next/router"
 import * as React from "react"
 import { Copy, Home, Minus, Plus, Sun } from "react-feather"
 import codePanelState from "states/code-panel"
-import liveViewState from "states/live-view"
 import projectState from "states/project"
 import { ProjectData, User } from "types"
 

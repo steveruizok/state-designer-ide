@@ -26,6 +26,12 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   // Local state
   const local = useStateDesigner(codePanelState)
 
+  const { code } = local.data
+  const { error, isDirty } = local.values
+  const hasError = !!error
+
+  // Monaco Stuff
+
   const { monaco } = useMonacoContext()
 
   const stateModel = useTextModel({
@@ -61,9 +67,9 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   )
 
   // Highlights
+
   const rPreviousDecorations = React.useRef<any[]>([])
 
-  // Subscribe to highlights state
   React.useEffect(() => {
     return highlightsState.onUpdate(
       ({ data: { state, event, scrollToLine } }) => {
@@ -133,28 +139,21 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   }, [editor, monaco])
 
   // Setup save action and load up the state machine
+
   React.useEffect(() => {
     if (!(monaco && editor)) return
-
-    editor.onDidChangeModelContent((e) =>
-      local.send("MODEL_CONTENT_UPDATED", {
-        code: editor.getValue(),
-        oid,
-        pid,
-      }),
-    )
 
     editor.onKeyDown((e) => {
       if (e.metaKey) {
         if (e.code === "KeyS") {
           e.preventDefault()
-          if (error) return
+          if (hasError) return
           if (uid !== oid) return // Unsafe!
 
           editor
             .getAction("editor.action.formatDocument")
             .run()
-            .then(() => local.send("SAVED_CODE"))
+            .then(() => local.send("SAVED_CODE", { oid, pid }))
         }
       }
     })
@@ -170,27 +169,6 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
       activeTab: ui.code.activeTab,
     })
   }, [monaco, editor])
-
-  const { code } = local.data
-
-  const activeTab: CodeEditorTab = local.whenIn({
-    "tab.state": "state",
-    "tab.view": "view",
-    "tab.static": "static",
-    default: "state",
-  })
-
-  const error = code[activeTab].error
-  const dirty = local.isIn("hasChanges")
-
-  // React.useEffect(() => {
-  //   monaco.languages.typescript?.exposeGlobal(
-  //     `import { createState as _createState } from 'state-designer';`,
-  //     `const _state = _${local.data.code.state.clean};
-  //      export const state: typeof _state;
-  //     `,
-  //   )
-  // }, [local.data.code.state.clean])
 
   return (
     <CodeContainer>
@@ -228,29 +206,29 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
       />
       <CodeEditorControls>
         <ErrorMessage>
-          {error && (
+          {hasError && (
             <>
               <AlertCircle size={16} />
-              {error}
+              {code[local.data.activeTab].error}
             </>
           )}
         </ErrorMessage>
-        <IconButton disabled={!dirty} onClick={() => local.send("RESET_CODE")}>
+        <IconButton
+          disabled={!isDirty}
+          onClick={() => local.send("RESET_CODE")}
+        >
           <RefreshCcw />
         </IconButton>
         <IconButton
           disabled={!local.can("SAVED_CODE")}
           onClick={async () => {
-            if (error) return
+            if (hasError) return
             if (uid !== oid) return // Unsafe!
 
             editor
               .getAction("editor.action.formatDocument")
               .run()
-              .then(() => {
-                const code = editor.getValue()
-                local.send("SAVED_CODE")
-              })
+              .then(() => local.send("SAVED_CODE", { oid, pid }))
           }}
         >
           <Save />
@@ -260,7 +238,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
         motionValue={motionValues.code}
         align="right"
         width={CODE_COL_WIDTH}
-        left={300}
+        left={360}
         right={280}
         offset="code"
       />
@@ -279,7 +257,7 @@ const CodeContainer = styled.div({
   gridTemplateRows: `40px 1fr 40px`,
   borderTop: "2px solid $border",
   borderLeft: "2px solid $border",
-  overflow: "hidden",
+  // overflow: "hidden",
 })
 
 const EditorContainer = styled.div({
@@ -332,7 +310,7 @@ const ErrorMessage = styled.div({
   display: "flex",
   alignItems: "center",
   fontSize: "$0",
-  color: "$Red",
+  color: "$accent",
   overflow: "hidden",
   whiteSpace: "nowrap",
   borderRadius: 4,

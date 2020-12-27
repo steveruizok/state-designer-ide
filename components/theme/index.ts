@@ -138,6 +138,9 @@ export const PlainIconButton = styled.button({
   outline: "none",
   display: "flex",
   alignItems: "center",
+  "&:disabled": {
+    opacity: 0.5,
+  },
   "& > p": {
     pr: "$1",
   },

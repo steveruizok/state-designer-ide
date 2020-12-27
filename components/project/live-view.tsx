@@ -1,4 +1,4 @@
-import { S, useStateDesigner } from "@state-designer/react"
+import { useStateDesigner } from "@state-designer/react"
 import Loading from "components/project/loading"
 import Colors from "components/static/colors"
 import * as Utils from "components/static/utils"
@@ -29,6 +29,8 @@ import { LiveError, LivePreview, LiveProvider } from "react-live"
 import liveViewState from "states/live-view"
 import projectState from "states/project"
 
+import ErrorBoundary from "./error-boundary"
+
 const Components = {
   Box,
   Grid,
@@ -46,13 +48,14 @@ const Components = {
 }
 
 // Wrap Theme-UI components in Framer Motion
-const WithMotionComponents = Object.fromEntries(
+// Typed as any because the unions here were choking TS
+const WithMotionComponents: any = Object.fromEntries(
   Object.entries(Components).map(([k, v]) => {
     return [k, motion.custom(v as any)]
   }),
 )
 
-const Preview: React.FC<{}> = () => {
+function Preview() {
   const local = useStateDesigner(projectState)
   const localEditor = useStateDesigner(liveViewState)
   const theme = useTheme()
@@ -60,6 +63,8 @@ const Preview: React.FC<{}> = () => {
   const state = local.data.captive
   const dirtyViewCode = localEditor.data.code
   const staticCode = local.data.static
+
+  console.log(dirtyViewCode)
 
   return (
     <LiveViewWrapper>
@@ -69,8 +74,8 @@ const Preview: React.FC<{}> = () => {
             dirtyViewCode.slice(
               `import state from "./state"
 
-`.length,
-            ) + "\n\nrender(<Component/>)"
+export default `.length,
+            ) + "\n\nrender(<App/>)"
           }
           noInline={true}
           scope={{
@@ -142,6 +147,7 @@ const StyledLiveErrorWrapper = styled.div({
   left: 0,
   width: "100%",
   height: "100%",
+  pointerEvents: "none",
 })
 
 const StyledLiveError = styled(LiveError, {
@@ -152,37 +158,8 @@ const StyledLiveError = styled(LiveError, {
   height: "min-content",
   bg: "scrim",
   zIndex: 800,
+  pointerEvents: "all",
 })
-
-class ErrorBoundary extends React.Component {
-  state = {
-    hasError: false,
-    errorMessage: "",
-  }
-
-  constructor(props) {
-    super(props)
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    // Update state so the next render will show the fallback UI.
-    return { hasError: true, errorMessage: error.message }
-  }
-
-  componentDidCatch(error, errorInfo) {
-    // You can also log the error to an error reporting service
-    console.log("Error in Preview:", error, errorInfo)
-  }
-
-  render() {
-    if (this.state.hasError) {
-      // You can render any custom fallback UI
-      return <h1>Something went wrong.</h1>
-    }
-
-    return this.props.children
-  }
-}
 
 const MemoizedPreview = React.memo(Preview)
 

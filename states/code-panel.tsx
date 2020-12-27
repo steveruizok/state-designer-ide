@@ -52,62 +52,38 @@ const codePanelState = createState({
   },
   on: {
     LOADED: ["loadData", "notifyLiveViewClean"],
-    UNLOADED: { to: ["loading", "noError"] },
+    UNLOADED: { to: ["loading"] },
     SOURCE_UPDATED: ["updateFromDatabase"],
-    CHANGED_CODE: { secretlyDo: "updateDirtyCode" },
+    CHANGED_CODE: "updateDirtyCode",
     RESET_CODE: ["resetCode", "restoreActiveTabCleanViewState"],
   },
   states: {
-    changes: {
-      initial: "noChanges",
+    editor: {
+      initial: "editing",
       states: {
-        noChanges: {
+        editing: {
           on: {
-            CHANGED_CODE: {
-              unless: "codeMatchesClean",
-              to: "hasChanges",
+            SAVED_CODE: {
+              unless: "errorInCurrentTab",
+              to: "waitingToSave",
             },
           },
         },
-        hasChanges: {
+        waitingToSave: {
+          onEnter: {
+            wait: 0.5,
+            to: "saving",
+          },
           on: {
             CHANGED_CODE: {
-              if: "codeMatchesClean",
-              to: "noChanges",
-            },
-            SAVED_CODE: {
-              unless: "errorInCurrentTab",
               to: "saving",
             },
           },
         },
         saving: {
-          on: {
-            MODEL_CONTENT_UPDATED: {
-              do: ["saveCode", "saveCurrentCleanViewState"],
-              to: ["noChanges", "noError"],
-            },
-          },
-        },
-      },
-    },
-    error: {
-      initial: "noError",
-      states: {
-        hasError: {
-          on: {
-            CHANGED_CODE: {
-              unless: "errorInCurrentTab",
-              to: "noError",
-            },
-          },
-        },
-        noError: {
-          on: {
-            CHANGED_CODE: {
-              if: "errorInCurrentTab",
-              to: "hasError",
-            },
+          onEnter: {
+            do: ["saveCodeToFirebase", "saveCurrentCleanViewState"],
+            to: ["editing"],
           },
         },
       },
@@ -140,15 +116,7 @@ const codePanelState = createState({
           },
         },
         state: {
-          onEnter: [
-            "setStateActiveTab",
-            "restoreActiveTabDirtyViewState",
-            {
-              if: "errorInCurrentTab",
-              to: "hasError",
-              else: { to: "noError" },
-            },
-          ],
+          onEnter: ["setStateActiveTab", "restoreActiveTabDirtyViewState"],
           onExit: "saveCurrentViewState",
           on: {
             SELECTED_VIEW_TAB: { to: "tab.view" },
@@ -156,15 +124,7 @@ const codePanelState = createState({
           },
         },
         view: {
-          onEnter: [
-            "setViewActiveTab",
-            "restoreActiveTabDirtyViewState",
-            {
-              if: "errorInCurrentTab",
-              to: "hasError",
-              else: { to: "noError" },
-            },
-          ],
+          onEnter: ["setViewActiveTab", "restoreActiveTabDirtyViewState"],
           onExit: "saveCurrentViewState",
           on: {
             CHANGED_CODE: { secretlyDo: "notifyLiveViewDirty" },
@@ -173,15 +133,7 @@ const codePanelState = createState({
           },
         },
         static: {
-          onEnter: [
-            "setStaticActiveTab",
-            "restoreActiveTabDirtyViewState",
-            {
-              if: "errorInCurrentTab",
-              to: "hasError",
-              else: { to: "noError" },
-            },
-          ],
+          onEnter: ["setStaticActiveTab", "restoreActiveTabDirtyViewState"],
           onExit: "saveCurrentViewState",
           on: {
             SELECTED_STATE_TAB: { to: "tab.state" },
@@ -306,11 +258,14 @@ const codePanelState = createState({
       const model = models[activeTab]
       model.setValue(code[activeTab].clean)
     },
-    saveCode(data, payload: { oid: string; pid: string; code: string }) {
+    saveCodeToFirebase(
+      data,
+      payload: { oid: string; pid: string; code: string },
+    ) {
       const { code, activeTab } = data
       const { oid, pid } = payload
-      code[activeTab].dirty = payload.code
-      saveProjectCode(pid, oid, activeTab, data.code[activeTab].dirty)
+      code[activeTab].clean = code[activeTab].dirty
+      saveProjectCode(pid, oid, activeTab, code[activeTab].dirty)
     },
     // Live View
     notifyLiveViewDirty(data) {
@@ -320,6 +275,18 @@ const codePanelState = createState({
       liveViewState.send("CHANGED_CODE", { code: data.code.view.clean })
     },
   },
+  values: {
+    error(data) {
+      const { activeTab, code } = data
+      return code[activeTab].error
+    },
+    isDirty(data) {
+      const { activeTab, code } = data
+      return code[activeTab].clean === code[activeTab].dirty
+    },
+  },
 })
 
 export default codePanelState
+
+// codePanelState.onUpdate((d) => console.log(d.active))

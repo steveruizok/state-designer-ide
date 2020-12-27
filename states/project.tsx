@@ -1,8 +1,8 @@
+import { createState } from "@state-designer/react"
 import { getCaptiveState, getStaticValues } from "lib/eval"
 
 import codePanelState from "./code-panel"
 import consoleState from "./console"
-import { createState } from "@state-designer/react"
 
 const projectState = createState({
   data: {
@@ -50,10 +50,10 @@ const projectState = createState({
   },
   actions: {
     updateFromDatabase(data, { source }) {
-      const stateCode = JSON.parse(source.code)
-      const viewCode = JSON.parse(source.jsx)
-      const staticCode = JSON.parse(source.statics)
       const name = source.name
+      const stateCode = source.code.state
+      const viewCode = source.code.view
+      const staticCode = source.code.static
 
       data.code.state = stateCode
       data.code.view = viewCode
@@ -61,9 +61,9 @@ const projectState = createState({
       data.name = name
 
       codePanelState.send("SOURCE_LOADED", {
-        state: data.code.state,
-        view: data.code.view,
-        static: data.code.static,
+        state: stateCode,
+        view: viewCode,
+        static: staticCode,
       })
     },
     updateCodePanelState(data) {

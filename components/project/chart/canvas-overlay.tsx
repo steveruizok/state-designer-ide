@@ -1,11 +1,9 @@
-import * as React from "react"
-
-import { MotionValue, motion } from "framer-motion"
-
-import { getBoxToBoxArrow } from "perfect-arrows"
-import highlightsState from "states/highlights"
-import { styled } from "components/theme"
 import { useStateDesigner } from "@state-designer/react"
+import { styled } from "components/theme"
+import { MotionValue, motion } from "framer-motion"
+import { getBoxToBoxArrow } from "perfect-arrows"
+import * as React from "react"
+import highlightsState from "states/highlights"
 
 const CanvasOverlay: React.FC<{
   scale: MotionValue<number>
@@ -47,56 +45,35 @@ const CanvasOverlay: React.FC<{
     return () => unsubs.forEach((fn) => fn())
   }, [])
 
+  const isDirty = React.useRef(false)
+
   React.useEffect(() => {
     const cvs = rCanvas.current
     const ctx = rCtx.current
     if (!ctx) return
 
-    const sc = scale.get()
-    const hl = highlitStateRef
+    const { targets } = local.values
 
-    ctx.clearRect(0, 0, cvs.width, cvs.height)
+    if (targets.length > 0) {
+      ctx.clearRect(0, 0, cvs.width, cvs.height)
 
-    if (hl) {
+      const sc = scale.get()
       const cFrame = getFrame(cvs, sc, 0, 0)
 
-      // const hFrame = getFrame(hl, sc, cFrame.x, cFrame.y)
-
-      if (local.data.event) {
-        const eventButtons = local.data.eventButtonRefs
-        if (!eventButtons) {
-          return
-        }
-        const pathEvents = eventButtons.get(local.data.path)
-        if (!pathEvents) {
-          return
-        }
-        const buttonRef = pathEvents.get(local.data.event)
-
-        if (!buttonRef) return
-
-        const button = buttonRef.current
-
-        if (!button) return
-
-        const bFrame = getFrame(button, sc, cFrame.x, cFrame.y)
-
-        // fillRectWithScale(ctx, bFrame, sc)
-
-        if (targets) {
-          for (let target of targets) {
-            const targ = target.ref.current
-            if (!targ) continue
-
-            const tFrame = getFrame(targ, sc, cFrame.x, cFrame.y)
-
-            // fillRectWithScale(ctx, tFrame, sc)
-            drawLineFromEventButtonToStateNode(ctx, bFrame, tFrame)
-          }
-        }
+      for (let { fromRef, toRef } of targets) {
+        if (!(fromRef && toRef)) return
+        drawLineFromEventButtonToStateNode(
+          ctx,
+          getFrame(fromRef, sc, cFrame.x, cFrame.y),
+          getFrame(toRef, sc, cFrame.x, cFrame.y),
+        )
       }
+      isDirty.current = true
+    } else if (isDirty.current) {
+      ctx.clearRect(0, 0, cvs.width, cvs.height)
+      isDirty.current = false
     }
-  }, [highlitStateRef, targets])
+  }, [targets])
 
   return <CanvasContainer ref={rCanvas} />
 }

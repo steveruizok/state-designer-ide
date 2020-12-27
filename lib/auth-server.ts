@@ -1,12 +1,12 @@
+import pick from "lodash/pick"
 import { GetServerSidePropsContext } from "next"
 import { parseCookies } from "nookies"
-import pick from "lodash/pick"
-
-import admin from "./firebase-admin"
 import * as Types from "types"
 
+import admin from "./firebase-admin"
+
 async function verifyCookie(
-  cookie: string
+  cookie: string,
 ): Promise<{
   authenticated: boolean
   user: Types.User
@@ -43,7 +43,7 @@ export function redirectToAuthPage(context: GetServerSidePropsContext) {
 
 export function redirectToUserPage(
   context: GetServerSidePropsContext,
-  uid: string
+  uid: string,
 ) {
   context.res.writeHead(303, { Location: `/u/${uid}` })
   context.res.end()
@@ -57,7 +57,7 @@ export function redirectToNotFoundPage(context: GetServerSidePropsContext) {
 }
 
 export async function getCurrentUser(
-  context?: GetServerSidePropsContext
+  context?: GetServerSidePropsContext,
 ): Promise<Types.AuthState> {
   const cookies = parseCookies(context)
 
@@ -73,7 +73,7 @@ export async function getCurrentUser(
   }
 
   const authentication = await verifyCookie(
-    cookies[process.env.NEXT_PUBLIC_COOKIE_NAME]
+    cookies[process.env.NEXT_PUBLIC_COOKIE_NAME],
   )
 
   if (!authentication) {

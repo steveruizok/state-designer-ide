@@ -34,7 +34,7 @@ export function getStaticValues(code: string, print = printFromStatic) {
       "Utils",
       "log",
       "print",
-      `${code}\n\nreturn getStatic()`,
+      `${code.slice("export default ".length)}\n\nreturn getStatic()`,
     )(Colors, Utils, print, print)
   } catch (err) {
     throw new Error(err.message)
@@ -47,6 +47,7 @@ export function getCaptiveState(
   print = printFromState,
 ) {
   try {
+    let Static = getStaticValues(staticCode)
     return Function(
       "createState",
       "Static",
@@ -55,7 +56,7 @@ export function getCaptiveState(
       "log",
       "print",
       `return ${stateCode.slice("export default ".length)}`,
-    )(createState, staticCode, Colors, Utils, print, print)
+    )(createState, Static, Colors, Utils, print, print)
   } catch (err) {
     throw new Error(err.message)
   }
@@ -64,25 +65,22 @@ export function getCaptiveState(
 /* --------------------- Errors --------------------- */
 
 export function validateStaticCode(staticCode: string) {
-  let error = ""
   try {
     getStaticValues(staticCode, fakePrint)
   } catch (err) {
-    error = err.message
+    return err.message
   }
 
-  return error
+  return ""
 }
 
 export function validateStateCode(stateCode: string, staticCode: string) {
-  let error = ""
   try {
     getCaptiveState(stateCode, staticCode, fakePrint)
   } catch (err) {
-    error = err.message
+    return err.message
   }
-
-  return error
+  return ""
 }
 
 export const codeValidators = {
@@ -93,17 +91,18 @@ export const codeValidators = {
 /* --------------------- Format --------------------- */
 
 export function validateStateCodeFormat(code: string) {
-  return !!code.match(/^export default createState\(\{\n.*?\n\}\)\n?$/gs)
-}
-
-export function validateStaticCodeFormat(code: string) {
-  return !!code.match(/function getStatic\(\) \{\n.*?\}\n\}(\n?)$/gs)
+  return !!code.match(/^export default createState\(\{\n.*?\n\}\);\n$/gs)
 }
 
 export function validateViewCodeFormat(code: string) {
+  // return true
   return !!code.match(
-    /(\n|^)import state from \"\.\/state\"\n\nfunction Component\(\) \{\n.*?\n\}\n?$/gs,
+    /^import state from \'\.\/state\';\n(.*)export default function App\(\) \{\n.*?\n\}\n$/gs,
   )
+}
+
+export function validateStaticCodeFormat(code: string) {
+  return !!code.match(/.*function getStatic\(\) \{\n.*?\};\n\}\n$/gs)
 }
 
 export const codeFormatValidators = {

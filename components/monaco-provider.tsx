@@ -82,13 +82,13 @@ export default function CustomMonacoProvider({ children }) {
           // Types
 
           monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-            noSemanticValidation: false,
-            noSyntaxValidation: false,
+            noSemanticValidation: true,
+            noSyntaxValidation: true,
           })
 
           monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
-            noSemanticValidation: false,
-            noSyntaxValidation: false,
+            noSemanticValidation: true,
+            noSyntaxValidation: true,
           })
 
           monaco.languages.typescript // Types

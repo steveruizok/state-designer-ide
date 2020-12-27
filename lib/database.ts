@@ -4,6 +4,148 @@ import * as Types from "types"
 import firebase from "./firebase"
 import db from "./firestore"
 
+// New
+
+/* 
+How the backend works
+
+> Users
+--> user
+----> Projects
+------> project
+--------> id
+--------> name
+--------> lastModified
+--------> code
+----------> state
+----------> view
+----------> static
+*/
+
+// New Users
+export async function addUser(uid: string) {
+  const doc = db.collection("users").doc(uid)
+  const initial = await doc.get()
+
+  if (initial.exists) {
+    console.log("User exists, updating user data")
+    if (!initial.data().exists) {
+      doc
+        .update({ exists: true, dateLastLoggedIn: new Date().toUTCString() })
+        .catch((e) => {
+          console.log("Error setting user", uid, e.message)
+        })
+    }
+  } else {
+    console.log("Creating new user")
+    const dateString = new Date().toUTCString()
+
+    doc
+      .set({
+        id: uid,
+        exists: true,
+        dateCreated: dateString,
+        dateLastLoggedIn: dateString,
+      })
+      .catch((e) => {
+        console.log("Error setting user", uid, e.message)
+      })
+
+    doc.collection("projects").add({
+      name: "Toggle",
+      dateCreated: dateString,
+      lastModified: dateString,
+      code: {
+        state: `export default createState({
+  data: {
+    count: 0,
+  },
+  initial: 'off',
+  states: {
+    off: {
+      on: {
+        TURNED_ON: {
+          to: 'running',
+        },
+      },
+    },
+    running: {
+      on: {
+        TURNED_OFF: {
+          to: 'off',
+        },
+        DECREMENTED: {
+          unless: 'atMin',
+          do: 'decrement',
+        },
+        INCREMENTED: {
+          unless: 'atMax',
+          do: 'increment',
+        },
+      },
+    },
+  },
+  conditions: {
+    atMin(data) {
+      return data.count <= 0;
+    },
+    atMax(data) {
+      return data.count >= 10;
+    },
+  },
+  actions: {
+    increment(data) {
+      data.count++;
+    },
+    decrement(data) {
+      data.count--;
+    },
+  },
+});
+`,
+        view: `import state from './state';
+
+export default function App() {
+  const local = useStateDesigner(state);
+
+  return (
+    <Box css={{ textAlign: 'center' }}>
+      <h1>{Static.name}</h1>
+      <Flex>
+        <IconButton
+          css={{ bg: '$muted', px: '$3', mx: '$2' }}
+          disabled={!state.can('DECREMENTED')}
+          onClick={() => state.send('DECREMENTED')}
+        >
+          <Icons.Minus />
+        </IconButton>
+        <h2>{local.data.count}</h2>
+        <IconButton
+          css={{ bg: '$muted', px: '$3', mx: '$2' }}
+          disabled={!state.can('INCREMENTED')}
+          onClick={() => local.send('INCREMENTED')}
+        >
+          <Icons.Plus />
+        </IconButton>
+      </Flex>
+    </Box>
+  );
+}
+`,
+        static: `export default function getStatic() {
+  return {
+    name: "Julian",
+    age: 93,
+    height: 184
+  }
+}`,
+      },
+    })
+  }
+}
+
+// Old
+
 export async function getProjectInfo(
   pid: string,
   oid: string,
@@ -37,7 +179,7 @@ export async function getProjectData(
 
   if (initial.exists) {
     const data = initial.data()
-    return { ...data, pid, oid: data.owner } as Types.ProjectData
+    return { ...data, pid, oid: data.ownerId } as Types.ProjectData
   } else {
     return undefined
   }
@@ -95,12 +237,6 @@ export function saveProjectStaticCode(pid: string, oid: string, code: string) {
   })
 }
 
-const codeKeys = {
-  state: "code",
-  view: "jsx",
-  static: "statics",
-}
-
 export function saveProjectCode(
   pid: string,
   oid: string,
@@ -112,18 +248,14 @@ export function saveProjectCode(
     .collection("projects")
     .doc(pid)
     .update({
-      [codeKeys[activeTab]]: JSON.stringify(code),
+      [`code.${activeTab}`]: code,
     })
 }
 
 export function saveProjectName(pid: string, oid: string, name: string) {
-  db.collection("users")
-    .doc(oid)
-    .collection("projects")
-    .doc(pid)
-    .update({
-      name: JSON.stringify(name),
-    })
+  db.collection("users").doc(oid).collection("projects").doc(pid).update({
+    name,
+  })
 }
 
 /* -------------------- Unsorted -------------------- */
@@ -140,30 +272,6 @@ export async function getTemplate(pid: string) {
 
 export function getProject(pid: string, oid: string) {
   return db.collection("users").doc(oid).collection("projects").doc(pid)
-}
-
-// This is mostly a stupid fix to prevent "ghost entries" for
-// users. We need to define some property on the user doc in order
-// to fetch a list of existing users in admin. So if the user
-// is new, create an entry with `exists: true`, otherwise add
-// that entry (if missing) to the user's doc.
-export async function addUser(uid: string) {
-  const user = db.collection("users").doc(uid)
-  const initial = await user.get()
-
-  if (initial.exists) {
-    if (!initial.data().exists) {
-      user.update({ exists: true, loggedIn: Date.now() }).catch((e) => {
-        console.log("Error setting user", uid, e.message)
-      })
-    }
-  } else {
-    user
-      .set({ exists: true, created: Date.now(), loggedIn: Date.now() })
-      .catch((e) => {
-        console.log("Error setting user", uid, e.message)
-      })
-  }
 }
 
 export async function addProject(
@@ -206,20 +314,6 @@ export async function createProject(
   return await addProject(pid, uid, template.data())
 }
 
-export async function updateProjectJsx(
-  pid: string,
-  oid: string,
-  uid: string,
-  code: string,
-) {
-  // must be owner
-  if (uid === oid) {
-    return updateProject(pid, oid, {
-      jsx: JSON.stringify(code),
-    })
-  }
-}
-
 export async function updateProjectCode(
   pid: string,
   oid: string,
@@ -229,7 +323,7 @@ export async function updateProjectCode(
   // must be owner
   if (uid === oid) {
     return updateProject(pid, oid, {
-      code: JSON.stringify(code),
+      code,
     })
   }
 }

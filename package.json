@@ -27,7 +27,7 @@
     "react-live": "^2.2.3",
     "react-merge-refs": "^1.1.0",
     "react-use-gesture": "^9.0.0-beta.11",
-    "use-monaco": "^0.0.36",
+    "use-monaco": "^0.0.39",
     "use-motion-resize-observer": "^2.0.0"
   },
   "devDependencies": {

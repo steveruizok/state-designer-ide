@@ -40,12 +40,10 @@ interface ConsoleProps {}
 
 export default function Console({}: ConsoleProps) {
   const local = useStateDesigner(consoleState)
+
   const [expanded, setExpanded] = React.useState(
     CONSOLE_ROW_HEIGHT - initialOffset > 40,
   )
-
-  const { logs } = local.data
-  const code = logs.join("\n")
 
   // Copy the editor's current text to the clipboard
   function copyCurrent() {
@@ -89,6 +87,16 @@ export default function Console({}: ConsoleProps) {
     )
   }
 
+  const { logs } = local.data
+  const code = logs.join("\n")
+
+  const rCodeScroll = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    const elm = rCodeScroll.current!
+    elm.scrollTo(0, elm.scrollHeight)
+  }, [code])
+
   return (
     <ConsoleContainer>
       <TitleRow onDoubleClick={toggleExpanded}>
@@ -104,10 +112,10 @@ export default function Console({}: ConsoleProps) {
           {expanded ? <ChevronDown /> : <ChevronUp />}
         </IconButton>
       </TitleRow>
-      <CodeWrapper>
-        <CodeContainer>
+      <CodeWrapper ref={rCodeScroll}>
+        <pre>
           <code>{code}</code>
-        </CodeContainer>
+        </pre>
       </CodeWrapper>
       <DragHandleVertical
         motionValue={motionValues.console}
@@ -131,23 +139,22 @@ const ConsoleContainer = styled.div({
   minWidth: 0,
   width: "calc(100% + 2px)",
   zIndex: 900,
+  bg: "$codeBg",
 })
 
 const CodeWrapper = styled.div({
-  overflow: "scroll",
-})
-
-const CodeContainer = styled.pre({
-  bg: "$codeBg",
-  p: "$2",
-  m: 0,
   display: "flex",
-  flexDirection: "column",
-  justifyContent: "flex-end",
+  alignItems: "flex-end",
+  overflow: "scroll",
+  "& pre": {
+    bg: "$codeBg",
+    p: "$2",
+    m: 0,
+  },
   "& code": {
     fontFamily: "$monospace",
     lineHeight: "$body",
-    fontSize: 13,
+    fontSize: "$1",
     fontWeight: 400,
   },
 })
