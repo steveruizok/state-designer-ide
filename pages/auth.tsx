@@ -1,19 +1,19 @@
-import { useEffect } from "react"
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
-import { getCurrentUser, redirectToUserPage } from "lib/auth-server"
+import { Button } from "components/theme"
 import { login } from "lib/auth-client"
+import { getCurrentUser } from "lib/auth-server"
+import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 import * as Types from "types"
 
 export default function Auth({ error }: Types.AuthState) {
-  useEffect(() => {
-    login()
-  }, [])
-
-  return <div></div>
+  return (
+    <div>
+      <Button onClick={login}>Log in</Button>
+    </div>
+  )
 }
 
 export async function getServerSideProps(
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ): Promise<GetServerSidePropsResult<Types.AuthState>> {
   const authState = await getCurrentUser(context)
 
