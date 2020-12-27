@@ -49,7 +49,7 @@ const projectState = createState({
     },
   },
   actions: {
-    updateFromDatabase(data, { source }) {
+    updateFromDatabase(data, { source, oid, pid }) {
       const name = source.name
       const stateCode = source.code.state
       const viewCode = source.code.view
@@ -59,7 +59,10 @@ const projectState = createState({
       data.code.view = viewCode
       data.code.static = staticCode
       data.name = name
+      data.oid = oid
+      data.pid = pid
 
+      consoleState.send("RESET")
       codePanelState.send("SOURCE_LOADED", {
         state: stateCode,
         view: viewCode,
@@ -67,6 +70,7 @@ const projectState = createState({
       })
     },
     updateCodePanelState(data) {
+      consoleState.send("RESET")
       codePanelState.send("SOURCE_UPDATED", {
         state: data.code.state,
         view: data.code.view,

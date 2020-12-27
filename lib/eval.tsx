@@ -1,15 +1,20 @@
 import { createState } from "@state-designer/react"
-import { consoleState } from "components/project/console-panel"
 import Colors from "components/static/colors"
 import * as Utils from "components/static/utils"
+import throttle from "lodash/throttle"
+import consoleState from "states/console"
 
-function printFrom(source: string, ...messages: any[]) {
+export const printFrom = throttle(function printFrom(
+  source: string,
+  ...messages: any[]
+) {
   let message = messages
     .map((m) => (typeof m === "string" ? m : JSON.stringify(m, null, 2)))
     .join(", ")
 
   consoleState.send("LOGGED", { source, message })
-}
+},
+32)
 
 export function printFromState(...messages: any[]) {
   return printFrom("state", ...messages)
@@ -23,18 +28,19 @@ export function printFromStatic(...messages: any[]) {
   return printFrom("static", ...messages)
 }
 
-function fakePrint(message: string | number | any) {}
+export const fakePrint = throttle(function fakePrint(...messages: any[]) {}, 32)
 
 /* --------------------- Values --------------------- */
 
-export function getStaticValues(code: string, print = printFromStatic) {
+export function getStaticValues(staticCode: string, print = printFromStatic) {
+  const code = staticCode.replace("export default ", "")
   try {
     return Function(
       "Colors",
       "Utils",
       "log",
       "print",
-      `${code.slice("export default ".length)}\n\nreturn getStatic()`,
+      `${code}\n\nreturn getStatic()`,
     )(Colors, Utils, print, print)
   } catch (err) {
     throw new Error(err.message)
@@ -48,6 +54,7 @@ export function getCaptiveState(
 ) {
   try {
     let Static = getStaticValues(staticCode)
+    const code = stateCode.replace("export default ", "")
     return Function(
       "createState",
       "Static",
@@ -55,7 +62,7 @@ export function getCaptiveState(
       "Utils",
       "log",
       "print",
-      `return ${stateCode.slice("export default ".length)}`,
+      `return ${code}`,
     )(createState, Static, Colors, Utils, print, print)
   } catch (err) {
     throw new Error(err.message)

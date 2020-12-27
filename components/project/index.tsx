@@ -1,10 +1,8 @@
-import { useStateDesigner } from "@state-designer/react"
 import { Button, IconButton, Text, styled } from "components/theme"
 import useTheme from "hooks/useTheme"
 import { login, logout } from "lib/auth-client"
 import { forkProject, subscribeToDocSnapshot } from "lib/database"
 import { motionValues } from "lib/local-data"
-import Head from "next/head"
 import Link from "next/link"
 import Router from "next/router"
 import * as React from "react"
@@ -14,18 +12,14 @@ import projectState from "states/project"
 import { ProjectData, User } from "types"
 
 import Chart from "./chart-view"
-import Code from "./code-panel"
+import CodePanel from "./code-panel"
 import Console from "./console-panel"
-import Content from "./content-panel"
-import Details, { DETAILS_ROW_HEIGHT } from "./details-panel"
-import {
-  DragHandleHorizontal,
-  DragHandleHorizontalRelative,
-} from "./drag-handles"
+import ContentPanel, { CONTENT_COL_WIDTH } from "./content-panel"
+import DetailsPanel, { DETAILS_ROW_HEIGHT } from "./details-panel"
+import { DragHandleHorizontalRelative } from "./drag-handles"
 import LiveView from "./live-view"
-import Loading from "./loading"
+import Title from "./title"
 
-export const CONTENT_COL_WIDTH = 200
 export const CODE_COL_WIDTH = 320
 
 interface ProjectViewProps {
@@ -49,7 +43,7 @@ export default function ProjectView({
   React.useEffect(() => {
     return subscribeToDocSnapshot(pid, oid, (doc) => {
       const source = doc.data()
-      projectState.send("SOURCE_UPDATED", { source })
+      projectState.send("SOURCE_UPDATED", { source, oid, pid })
     })
   }, [oid, pid])
 
@@ -89,26 +83,17 @@ export default function ProjectView({
             <Copy />
           </IconButton>
         )}
-        <IconButton>
+        <IconButton onClick={() => codePanelState.send("DECREASED_FONT_SIZE")}>
           <Minus />
         </IconButton>
-        <IconButton>
+        <IconButton onClick={() => codePanelState.send("INCREASED_FONT_SIZE")}>
           <Plus />
         </IconButton>
         <IconButton onClick={toggle}>
           <Sun />
         </IconButton>
       </ControlsContainer>
-      <Content>
-        <DragHandleHorizontal
-          motionValue={motionValues.content}
-          align="left"
-          width={CONTENT_COL_WIDTH}
-          left={60}
-          right={100}
-          offset="content"
-        />
-      </Content>
+      <ContentPanel />
       <MainContainer>
         <Chart />
         <MainDragArea ref={rMainContainer} />
@@ -116,27 +101,15 @@ export default function ProjectView({
           <LiveView />
           <Console />
         </ViewContainer>
-        <Details />
+        <DetailsPanel />
         <DragHandleHorizontalRelative
           motionValue={motionValues.main}
           containerRef={rMainContainer}
           offset="main"
         />
       </MainContainer>
-      <Code oid={oid} pid={pid} uid={user?.uid} />
+      <CodePanel oid={oid} pid={pid} uid={user?.uid} />
     </Layout>
-  )
-}
-
-function Title() {
-  const local = useStateDesigner(projectState)
-  return (
-    <TitleContainer>
-      <Head>
-        <title>{local.data.name} - State Designer</title>
-      </Head>
-      {local.data.name}
-    </TitleContainer>
   )
 }
 
@@ -164,14 +137,6 @@ const MenuContainer = styled.div({
   gridArea: "menu",
   display: "flex",
   alignItems: "center",
-})
-
-const TitleContainer = styled.div({
-  gridArea: "title",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  textAlign: "center",
 })
 
 const ControlsContainer = styled.div({

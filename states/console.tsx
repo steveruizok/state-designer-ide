@@ -13,7 +13,14 @@ const consoleState = createState({
       data.logs.push("› " + payload.message)
     },
     clearLogs(data) {
+      console.log("resetting")
       data.logs = []
+    },
+  },
+  values: {
+    value(data) {
+      const { logs } = data
+      return logs.join("\n")
     },
   },
 })

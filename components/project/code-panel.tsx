@@ -10,8 +10,6 @@ import * as React from "react"
 import { AlertCircle, RefreshCcw, Save } from "react-feather"
 import codePanelState from "states/code-panel"
 import highlightsState from "states/highlights"
-import projectState from "states/project"
-import { CodeEditorTab } from "types"
 
 import { DragHandleHorizontal } from "./drag-handles"
 import { CODE_COL_WIDTH } from "./index"
@@ -61,9 +59,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
     oid !== uid,
     false,
     undefined,
-    (code) => {
-      local.send("CHANGED_CODE", { code, oid, pid })
-    },
+    (code) => local.send("CHANGED_CODE", { code, oid, pid }),
   )
 
   // Highlights

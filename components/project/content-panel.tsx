@@ -1,16 +1,19 @@
 import { S, useStateDesigner } from "@state-designer/react"
 import { range } from "components/static/utils"
 import { styled } from "components/theme"
+import { motionValues } from "lib/local-data"
 import * as React from "react"
 import { Circle, Disc, MinusCircle } from "react-feather"
 import highlightsState from "states/highlights"
 import projectState from "states/project"
 
-interface ContentProps {
-  children: React.ReactNode
-}
+import { DragHandleHorizontal } from "./drag-handles"
 
-export default function Content({ children }: ContentProps) {
+export const CONTENT_COL_WIDTH = 200
+
+interface ContentProps {}
+
+export default function Content({}: ContentProps) {
   const local = useStateDesigner(projectState)
   const captive = local.data.captive
 
@@ -38,7 +41,15 @@ export default function Content({ children }: ContentProps) {
       </ContentSection>
       <Spacer />
       <ContentTitle align="bottom">Event Payloads</ContentTitle>
-      {children}
+
+      <DragHandleHorizontal
+        motionValue={motionValues.content}
+        align="left"
+        width={CONTENT_COL_WIDTH}
+        left={60}
+        right={100}
+        offset="content"
+      />
     </ContentContainer>
   )
 }

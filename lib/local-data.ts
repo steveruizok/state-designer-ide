@@ -1,17 +1,19 @@
-import { LayoutOffset, CodeEditorTab } from "types"
-import { motionValue, MotionValue } from "framer-motion"
-import { lightTheme, darkTheme } from "components/theme"
 import { createState } from "@state-designer/react"
+import { darkTheme, lightTheme } from "components/theme"
+import { MotionValue, motionValue } from "framer-motion"
+import { CodeEditorTab, LayoutOffset } from "types"
 
 export const ui = {
   details: {
     activeTab: "data",
     wrap: false,
+    fontSize: 13,
   },
   content: {
     payloadsOpen: false,
   },
   code: {
+    fontSize: 13,
     activeTab: "state",
   },
   panelOffsets: {
@@ -132,6 +134,22 @@ export function saveDetailsTab(value: "data" | "values") {
 export function saveCodeTab(value: CodeEditorTab) {
   ui.code.activeTab = value
   saveUI()
+}
+
+export function decreaseFontSize() {
+  if (ui.code.fontSize > 8) {
+    ui.code.fontSize--
+  }
+  saveUI()
+  return ui.code.fontSize
+}
+
+export function increaseFontSize() {
+  if (ui.code.fontSize < 32) {
+    ui.code.fontSize++
+  }
+  saveUI()
+  return ui.code.fontSize
 }
 
 // Theme

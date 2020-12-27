@@ -1,10 +1,10 @@
+import { useStateDesigner } from "@state-designer/react"
+import { IconButton, Text, styled } from "components/theme"
+import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion"
 import * as React from "react"
 import { X } from "react-feather"
-import { styled, Text, IconButton } from "components/theme"
-import { useStateDesigner } from "@state-designer/react"
-import { motion, AnimateSharedLayout, AnimatePresence } from "framer-motion"
-import { ToastMessage } from "types"
 import toastState from "states/toast"
+import { ToastMessage } from "types"
 
 export default function Toast() {
   const local = useStateDesigner(toastState)
@@ -70,6 +70,7 @@ const ToastContainer = styled(motion.div, {
   alignItems: "center",
   pointerEvents: "none",
   flexDirection: "column-reverse",
+  zIndex: 999999999,
   variants: {
     type: {
       warn: {},

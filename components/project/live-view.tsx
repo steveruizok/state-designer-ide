@@ -22,7 +22,7 @@ import {
 import * as Motion from "framer-motion"
 import { motion } from "framer-motion"
 import useTheme from "hooks/useTheme"
-import { printFromView } from "lib/eval"
+import { fakePrint, printFromView } from "lib/eval"
 import * as React from "react"
 import * as Icons from "react-feather"
 import { LiveError, LivePreview, LiveProvider } from "react-live"
@@ -61,22 +61,20 @@ function Preview() {
   const theme = useTheme()
 
   const state = local.data.captive
+  const staticResults = local.data.static
   const dirtyViewCode = localEditor.data.code
-  const staticCode = local.data.static
 
-  console.log(dirtyViewCode)
+  const printFn = localEditor.data.shouldLog ? printFromView : fakePrint
+
+  let code = dirtyViewCode
+    .replace(`import state from './state';`, "")
+    .replace(`export default `, "")
 
   return (
     <LiveViewWrapper>
       {local.isIn("ready") ? (
         <LiveProvider
-          code={
-            dirtyViewCode.slice(
-              `import state from "./state"
-
-export default `.length,
-            ) + "\n\nrender(<App/>)"
-          }
+          code={`${code}\n\nrender(<App/>)`}
           noInline={true}
           scope={{
             ...Motion,
@@ -86,11 +84,11 @@ export default `.length,
             Colors,
             ColorMode: theme.theme,
             useStateDesigner,
-            Static: staticCode,
+            Static: staticResults,
             state,
             styled,
-            print: printFromView,
-            log: printFromView,
+            print: printFn,
+            log: printFn,
             css,
           }}
         >

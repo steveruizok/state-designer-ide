@@ -1,16 +1,33 @@
 import { createState } from "@state-designer/react"
 import { saveProjectCode } from "lib/database"
 import { codeFormatValidators, codeValidators } from "lib/eval"
-import { saveCodeTab, ui } from "lib/local-data"
+import {
+  decreaseFontSize,
+  increaseFontSize,
+  saveCodeTab,
+  ui,
+} from "lib/local-data"
 import { CodeEditorTab } from "types"
 
 import liveViewState from "./live-view"
 
 const EDITOR_TABS = ["state", "view", "static"]
+let INITIAL_FONT_SIZE = 13
+let INITIAL_TAB = "state"
+
+if (typeof window !== "undefined") {
+  const savedUI = window.localStorage.getItem(`sd_ui`)
+  if (savedUI !== null) {
+    const saved = JSON.parse(savedUI)
+    INITIAL_FONT_SIZE = saved.code.fontSize
+    INITIAL_TAB = saved.code.activeTab
+  }
+}
 
 const codePanelState = createState({
   data: {
-    activeTab: "state" as CodeEditorTab,
+    fontSize: INITIAL_FONT_SIZE,
+    activeTab: INITIAL_TAB as CodeEditorTab,
     monaco: null as any,
     editor: null as any,
     models: {
@@ -53,9 +70,11 @@ const codePanelState = createState({
   on: {
     LOADED: ["loadData", "notifyLiveViewClean"],
     UNLOADED: { to: ["loading"] },
-    SOURCE_UPDATED: ["updateFromDatabase"],
+    SOURCE_UPDATED: ["updateFromDatabase", "notifyLiveViewClean"],
     CHANGED_CODE: "updateDirtyCode",
     RESET_CODE: ["resetCode", "restoreActiveTabCleanViewState"],
+    INCREASED_FONT_SIZE: "increaseFontSize",
+    DECREASED_FONT_SIZE: "decreaseFontSize",
   },
   states: {
     editor: {
@@ -180,6 +199,12 @@ const codePanelState = createState({
       data.models = models
       data.monaco = monaco
       data.editor = editor
+
+      if (editor) {
+        editor.updateOptions({
+          fontSize: data.fontSize,
+        })
+      }
     },
     initialLoadFromDatabase(data, payload = {}) {
       EDITOR_TABS.forEach((tab) => {
@@ -269,10 +294,35 @@ const codePanelState = createState({
     },
     // Live View
     notifyLiveViewDirty(data) {
-      liveViewState.send("CHANGED_CODE", { code: data.code.view.dirty })
+      liveViewState.send("CHANGED_CODE", {
+        code: data.code.view.dirty,
+        shouldLog: false,
+      })
     },
     notifyLiveViewClean(data) {
-      liveViewState.send("CHANGED_CODE", { code: data.code.view.clean })
+      liveViewState.send("CHANGED_CODE", {
+        code: data.code.view.clean,
+        shouldLog: true,
+      })
+    },
+    // Font Size
+    increaseFontSize(data) {
+      const { editor } = data
+      if (!editor) return
+      const next = increaseFontSize()
+      console.log(next)
+      editor.updateOptions({
+        fontSize: next,
+      })
+    },
+    decreaseFontSize(data) {
+      const { editor } = data
+      if (!editor) return
+      const next = decreaseFontSize()
+      data.fontSize = next
+      editor.updateOptions({
+        fontSize: next,
+      })
     },
   },
   values: {

@@ -10,27 +10,10 @@ import { animate } from "framer-motion"
 import { motionValues, ui } from "lib/local-data"
 import * as React from "react"
 import { ChevronDown, ChevronUp, Copy } from "react-feather"
+import consoleState from "states/console"
 import toastState from "states/toast"
 
 import { DragHandleVertical } from "./drag-handles"
-
-export const consoleState = createState({
-  data: {
-    logs: [] as string[],
-  },
-  on: {
-    LOGGED: "addLog",
-    RESET: "clearLogs",
-  },
-  actions: {
-    addLog(data, payload: { source: string; message: string }) {
-      data.logs.push("› " + payload.message)
-    },
-    clearLogs(data) {
-      data.logs = []
-    },
-  },
-})
 
 const initialOffset = ui.panelOffsets.console
 
@@ -87,15 +70,14 @@ export default function Console({}: ConsoleProps) {
     )
   }
 
-  const { logs } = local.data
-  const code = logs.join("\n")
-
   const rCodeScroll = React.useRef<HTMLDivElement>(null)
+
+  const { value } = local.values
 
   React.useEffect(() => {
     const elm = rCodeScroll.current!
     elm.scrollTo(0, elm.scrollHeight)
-  }, [code])
+  }, [value])
 
   return (
     <ConsoleContainer>
@@ -114,7 +96,7 @@ export default function Console({}: ConsoleProps) {
       </TitleRow>
       <CodeWrapper ref={rCodeScroll}>
         <pre>
-          <code>{code}</code>
+          <code>{value}</code>
         </pre>
       </CodeWrapper>
       <DragHandleVertical
