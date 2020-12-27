@@ -152,6 +152,11 @@ export function increaseFontSize() {
   return ui.code.fontSize
 }
 
+export function resetFontSize() {
+  ui.code.fontSize = 13
+  saveUI()
+  return ui.code.fontSize
+}
 // Theme
 
 export function setTheme(theme: "dark" | "light") {

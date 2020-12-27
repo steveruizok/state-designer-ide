@@ -141,6 +141,18 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
 
     editor.onKeyDown((e) => {
       if (e.metaKey) {
+        if (e.code === "Digit0") {
+          e.preventDefault()
+          local.send("RESET_FONT_SIZE")
+        }
+        if (e.code === "Equal") {
+          e.preventDefault()
+          local.send("INCREASED_FONT_SIZE")
+        }
+        if (e.code === "Minus") {
+          e.preventDefault()
+          local.send("DECREASED_FONT_SIZE")
+        }
         if (e.code === "KeyS") {
           e.preventDefault()
           if (hasError) return

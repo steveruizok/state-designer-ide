@@ -4,6 +4,7 @@ import { codeFormatValidators, codeValidators } from "lib/eval"
 import {
   decreaseFontSize,
   increaseFontSize,
+  resetFontSize,
   saveCodeTab,
   ui,
 } from "lib/local-data"
@@ -75,6 +76,7 @@ const codePanelState = createState({
     RESET_CODE: ["resetCode", "restoreActiveTabCleanViewState"],
     INCREASED_FONT_SIZE: "increaseFontSize",
     DECREASED_FONT_SIZE: "decreaseFontSize",
+    RESET_FONT_SIZE: "resetFontSize",
   },
   states: {
     editor: {
@@ -319,6 +321,15 @@ const codePanelState = createState({
       const { editor } = data
       if (!editor) return
       const next = decreaseFontSize()
+      data.fontSize = next
+      editor.updateOptions({
+        fontSize: next,
+      })
+    },
+    resetFontSize(data) {
+      const { editor } = data
+      if (!editor) return
+      const next = resetFontSize()
       data.fontSize = next
       editor.updateOptions({
         fontSize: next,
