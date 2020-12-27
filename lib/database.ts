@@ -1,6 +1,7 @@
 import router from "next/router"
 import * as Types from "types"
 
+import { verifyCookie } from "./auth-server"
 import firebase from "./firebase"
 import db from "./firestore"
 
@@ -21,6 +22,24 @@ How the backend works
 ----------> view
 ----------> static
 */
+
+let customToken: string
+
+export async function setCustomToken(token: string) {
+  customToken = token
+}
+
+async function checkAuth() {
+  if (!db.app.auth().currentUser) {
+    console.log("Signing in with custom token")
+
+    if (!customToken) {
+      console.error("No custom token set!")
+    }
+
+    await db.app.auth().signInWithCustomToken(customToken)
+  }
+}
 
 // New Users
 export async function addUser(uid: string) {
@@ -224,30 +243,13 @@ export function subscribeToDocSnapshot(
   return () => unsub && unsub()
 }
 
-export function saveProjectStateCode(pid: string, oid: string, code: string) {
-  db.collection("users").doc(oid).collection("projects").doc(pid).update({
-    code: code,
-  })
-}
-
-export function saveProjectViewCode(pid: string, oid: string, code: string) {
-  db.collection("users").doc(oid).collection("projects").doc(pid).update({
-    jsx: code,
-  })
-}
-
-export function saveProjectStaticCode(pid: string, oid: string, code: string) {
-  db.collection("users").doc(oid).collection("projects").doc(pid).update({
-    statics: code,
-  })
-}
-
-export function saveProjectCode(
+export async function saveProjectCode(
   pid: string,
   oid: string,
   activeTab: Types.CodeEditorTab,
   code: string,
 ) {
+  await checkAuth()
   db.collection("users")
     .doc(oid)
     .collection("projects")
@@ -257,7 +259,8 @@ export function saveProjectCode(
     })
 }
 
-export function saveProjectName(pid: string, oid: string, name: string) {
+export async function saveProjectName(pid: string, oid: string, name: string) {
+  await checkAuth()
   db.collection("users").doc(oid).collection("projects").doc(pid).update({
     name,
   })
@@ -300,11 +303,12 @@ export async function addProject(
   })
 }
 
-export function updateProject(
+export async function updateProject(
   pid: string,
   oid: string,
   changes: { [key: string]: any },
 ) {
+  await checkAuth()
   return getProject(pid, oid).update({
     ...changes,
   })
@@ -315,6 +319,7 @@ export async function createProject(
   uid: string,
   templateId = "toggle",
 ) {
+  await checkAuth()
   const template = await db.collection("templates").doc(templateId).get()
   return await addProject(pid, uid, template.data())
 }
@@ -325,6 +330,7 @@ export async function updateProjectCode(
   uid: string,
   code: string,
 ) {
+  await checkAuth()
   // must be owner
   if (uid === oid) {
     return updateProject(pid, oid, {
@@ -334,11 +340,13 @@ export async function updateProjectCode(
 }
 
 export async function createNewProject(pid: string, oid: string, uid: string) {
+  await checkAuth()
   await createProject(pid, uid, "toggle")
   router.push(`/${uid}/${pid}`)
 }
 
 export async function forkProject(pid: string, oid: string, uid?: string) {
+  await checkAuth()
   const project = await getProject(pid, oid).get()
 
   if (!project.exists) {
@@ -414,5 +422,6 @@ export async function updateProjectName(
   uid: string,
   name: string,
 ) {
+  await checkAuth()
   updateProject(pid, uid, { name })
 }

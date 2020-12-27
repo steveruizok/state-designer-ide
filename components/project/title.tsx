@@ -5,7 +5,11 @@ import Head from "next/head"
 import * as React from "react"
 import projectState from "states/project"
 
-export default function Title() {
+interface TitleProps {
+  readOnly: boolean
+}
+
+export default function Title({ readOnly }: TitleProps) {
   const local = useStateDesigner(projectState)
   const [name, setName] = React.useState(local.data.name)
   React.useEffect(() => {
@@ -19,6 +23,7 @@ export default function Title() {
       </Head>
       <TitleInput
         value={name}
+        readOnly={readOnly}
         onChange={(e) => {
           const { oid, pid } = local.data
           setName(e.currentTarget.value)

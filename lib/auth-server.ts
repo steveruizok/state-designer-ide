@@ -5,7 +5,7 @@ import * as Types from "types"
 
 import admin from "./firebase-admin"
 
-async function verifyCookie(
+export async function verifyCookie(
   cookie: string,
 ): Promise<{
   authenticated: boolean
@@ -60,21 +60,23 @@ export async function getCurrentUser(
   context?: GetServerSidePropsContext,
 ): Promise<Types.AuthState> {
   const cookies = parseCookies(context)
+  const [cookie, customToken] = cookies[
+    process.env.NEXT_PUBLIC_COOKIE_NAME
+  ]?.split("+")
 
   const result = {
+    token: "",
     user: null,
     authenticated: false,
     error: "",
   }
 
-  if (!cookies[process.env.NEXT_PUBLIC_COOKIE_NAME]) {
+  if (!cookie) {
     result.error = "No cookie."
     return result
   }
 
-  const authentication = await verifyCookie(
-    cookies[process.env.NEXT_PUBLIC_COOKIE_NAME],
-  )
+  const authentication = await verifyCookie(cookie)
 
   if (!authentication) {
     result.error = "Could not verify cookie."
@@ -83,6 +85,7 @@ export async function getCurrentUser(
 
   const { user = null, authenticated = false } = authentication
 
+  result.token = customToken
   result.user = user
   result.authenticated = authenticated
 

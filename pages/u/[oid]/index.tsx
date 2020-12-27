@@ -1,10 +1,10 @@
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
-import Link from "next/link"
-import { getCurrentUser, redirectToAuthPage } from "lib/auth-server"
-import { getUserProjects } from "lib/database"
-import { AuthState, UserProjectsResponse } from "types"
 import { styled } from "components/theme"
 import { logout } from "lib/auth-client"
+import { getCurrentUser, redirectToAuthPage } from "lib/auth-server"
+import { getUserProjects } from "lib/database"
+import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
+import Link from "next/link"
+import { AuthState, UserProjectsResponse } from "types"
 
 interface UserPageProps {
   authState: AuthState
@@ -22,7 +22,7 @@ export default function UserPage({ authState, data }: UserPageProps) {
       </pre>
       <ul>
         {data.projects.map((pid) => (
-          <li>
+          <li key={pid}>
             <Link href={`/u/${data.oid}/p/${pid}`}>
               <a>{pid}</a>
             </Link>
@@ -35,7 +35,7 @@ export default function UserPage({ authState, data }: UserPageProps) {
 }
 
 export async function getServerSideProps(
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ): Promise<GetServerSidePropsResult<UserPageProps>> {
   const authState = await getCurrentUser(context)
 

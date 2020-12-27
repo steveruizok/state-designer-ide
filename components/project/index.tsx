@@ -1,7 +1,11 @@
 import { Button, IconButton, Text, styled } from "components/theme"
 import useTheme from "hooks/useTheme"
 import { login, logout } from "lib/auth-client"
-import { forkProject, subscribeToDocSnapshot } from "lib/database"
+import {
+  forkProject,
+  setCustomToken,
+  subscribeToDocSnapshot,
+} from "lib/database"
 import { motionValues } from "lib/local-data"
 import Link from "next/link"
 import Router from "next/router"
@@ -23,6 +27,7 @@ import Title from "./title"
 export const CODE_COL_WIDTH = 320
 
 interface ProjectViewProps {
+  token: string
   pid: string
   oid: string
   user: User
@@ -32,6 +37,7 @@ interface ProjectViewProps {
 }
 
 export default function ProjectView({
+  token,
   user,
   oid,
   pid,
@@ -39,6 +45,10 @@ export default function ProjectView({
 }: ProjectViewProps) {
   const { toggle } = useTheme()
   const rMainContainer = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    setCustomToken(token)
+  }, [token])
 
   React.useEffect(() => {
     return subscribeToDocSnapshot(pid, oid, (doc) => {
@@ -75,7 +85,7 @@ export default function ProjectView({
           <Button onClick={login}>Log in</Button>
         )}
       </MenuContainer>
-      <Title />
+      <Title readOnly={!isOwner} />
       <ControlsContainer>
         {user?.authenticated && (
           <IconButton onClick={() => forkProject(pid, oid, user?.uid)}>

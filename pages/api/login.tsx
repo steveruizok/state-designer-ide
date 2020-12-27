@@ -1,8 +1,8 @@
 // /pages/api/login.tsx
 
 import { serialize } from "cookie"
-import { NextApiResponse, NextApiRequest } from "next"
 import admin from "lib/firebase-admin"
+import { NextApiRequest, NextApiResponse } from "next"
 
 const SESSION_DURATION_IN_DAYS = 5
 
@@ -16,9 +16,11 @@ export default async function login(req: NextApiRequest, res: NextApiResponse) {
   }
 
   var idToken = req.body.token.toString()
+  var uid = req.body.uid.toString()
 
   const decodedIdToken = await admin.auth().verifyIdToken(idToken)
   const cookie = await admin.auth().createSessionCookie(idToken, { expiresIn })
+  const customToken = await admin.auth().createCustomToken(uid)
 
   if (!cookie) {
     res.status(401).send({ response: "Invalid authentication" })
@@ -39,10 +41,14 @@ export default async function login(req: NextApiRequest, res: NextApiResponse) {
 
   res.setHeader(
     "Set-Cookie",
-    serialize(process.env.NEXT_PUBLIC_COOKIE_NAME, cookie, options)
+    serialize(
+      process.env.NEXT_PUBLIC_COOKIE_NAME,
+      `${cookie}+${customToken}`,
+      options,
+    ),
   )
 
-  res.send({ response: "Logged in." })
+  res.send({ response: "Logged in.", customToken })
 }
 
 export const config = {

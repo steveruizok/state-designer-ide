@@ -1,10 +1,10 @@
-import * as React from "react"
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 import { getCurrentUser } from "lib/auth-server"
 import { getProjectData, getProjectInfo } from "lib/database"
+import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
+import dynamic from "next/dynamic"
+import * as React from "react"
 import * as Types from "types"
 import { single } from "utils"
-import dynamic from "next/dynamic"
 const ProjectView = dynamic(() => import("components/project"))
 
 interface ProjectPageProps {
@@ -14,7 +14,7 @@ interface ProjectPageProps {
 }
 
 export default function ProjectPage({
-  authState: { user, authenticated },
+  authState: { token, user, authenticated },
   projectResponse: { pid, oid, isOwner },
   projectData,
 }: ProjectPageProps) {
@@ -26,6 +26,7 @@ export default function ProjectPage({
 
   return isMounted ? (
     <ProjectView
+      token={token}
       pid={pid}
       oid={oid}
       user={user}

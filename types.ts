@@ -20,6 +20,7 @@ export interface AuthState {
   user: User | null
   error: string
   authenticated: boolean
+  token?: string
 }
 
 export type ProjectResponse = {

@@ -1,12 +1,13 @@
-import { NextApiResponse, NextApiRequest } from "next"
+import { NextApiRequest, NextApiResponse } from "next"
+
 import admin from "../../lib/firebase-admin"
 
 export default async function logout(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   if (req.method === "POST") {
-    const cookie = req.cookies[process.env.NEXT_PUBLIC_COOKIE_NAME]
+    const [cookie] = req.cookies[process.env.NEXT_PUBLIC_COOKIE_NAME].split("+")
     const decodedClaims = await admin.auth().verifySessionCookie(cookie)
     await admin.auth().revokeRefreshTokens(decodedClaims.sub)
     res.status(200)

@@ -16,17 +16,17 @@ async function clearUserToken() {
   })
 }
 
-async function postUserToken(token: string) {
+async function postUserToken(token: string, uid: string) {
   var path = "/api/login"
   var url = process.env.NEXT_PUBLIC_BASE_API_URL + path
-  var data = { token }
-  return fetch(url, {
+  var data = { token, uid }
+  return await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
-  })
+  }).then((d) => d.json())
 }
 
 // API
@@ -34,9 +34,10 @@ async function postUserToken(token: string) {
 export async function login() {
   const provider = new firebase.auth.GoogleAuthProvider()
   const auth = await firebase.auth().signInWithPopup(provider)
+
   const token = await auth.user.getIdToken()
 
-  await postUserToken(token)
+  await postUserToken(token, auth.user.uid)
 
   await addUser(auth.user.uid)
 
