@@ -107,6 +107,7 @@ export default function CustomMonacoProvider({ children }) {
           monaco.languages.typescript?.exposeGlobal(
             `import { createState as _createState, DesignedState, useStateDesigner as _useStateDesigner } from '@state-designer/react';
              import React from 'react';
+             import _getStatic from './static'
              import * as _Icons from 'react-feather';
              import { MotionProps, motion as _motion, CustomDomComponent as _CustomDomComponent } from 'framer-motion';
              `,
@@ -240,7 +241,9 @@ export default function CustomMonacoProvider({ children }) {
             export const Button: TC<HTMLButtonElement>;
             export const Text: TC<HTMLParagraphElement>;
             
-            export const ColorMode: "dark" | "light"
+            export const ColorMode: "dark" | "light";
+
+            export const Static: ReturnType<typeof _getStatic>;
             
              /**
               * Log a message to the console.
