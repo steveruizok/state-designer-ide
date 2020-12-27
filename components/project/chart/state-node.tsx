@@ -68,7 +68,13 @@ export default function StateNode({ node }: StateNodeProps) {
       nodeLevel={isRoot ? "root" : "child"}
       data-highlight={highlight}
     >
-      {isRoot ? <RootNodeHeading /> : <NodeHeading node={node} />}
+      {isRoot ? (
+        events.length > 0 ? (
+          <RootNodeHeading />
+        ) : null
+      ) : (
+        <NodeHeading node={node} />
+      )}
       {events.length > 0 && <NodeEvents node={node} events={events} />}
       {(isRoot && events.length === 0) ||
         (childNodes.length > 0 && (
