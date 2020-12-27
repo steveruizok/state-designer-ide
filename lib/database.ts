@@ -30,7 +30,7 @@ export async function addUser(uid: string) {
   if (initial.exists) {
     console.log("User exists, updating user data")
     if (!initial.data().exists) {
-      doc
+      await doc
         .update({ exists: true, dateLastLoggedIn: new Date().toUTCString() })
         .catch((e) => {
           console.log("Error setting user", uid, e.message)
@@ -40,7 +40,7 @@ export async function addUser(uid: string) {
     console.log("Creating new user")
     const dateString = new Date().toUTCString()
 
-    doc
+    await doc
       .set({
         id: uid,
         exists: true,
@@ -51,28 +51,29 @@ export async function addUser(uid: string) {
         console.log("Error setting user", uid, e.message)
       })
 
-    doc.collection("projects").add({
+    await doc.collection("projects").add({
       name: "Toggle",
       dateCreated: dateString,
       lastModified: dateString,
+      ownerId: uid,
       code: {
         state: `export default createState({
   data: {
     count: 0,
   },
-  initial: 'off',
+  initial: 'turnedOff',
   states: {
-    off: {
+    turnedOff: {
       on: {
-        TURNED_ON: {
-          to: 'running',
+        TOGGLED: {
+          to: 'turnedOn',
         },
       },
     },
-    running: {
+    turnedOn: {
       on: {
-        TURNED_OFF: {
-          to: 'off',
+        TOGGLED: {
+          to: 'turnedOff',
         },
         DECREMENTED: {
           unless: 'atMin',
@@ -109,35 +110,39 @@ export default function App() {
   const local = useStateDesigner(state);
 
   return (
-    <Box css={{ textAlign: 'center' }}>
-      <h1>{Static.name}</h1>
+    <Grid css={{ bg: '$border', textAlign: 'center' }}>
+      <Text>Hello {Static.name}</Text>
       <Flex>
         <IconButton
-          css={{ bg: '$muted', px: '$3', mx: '$2' }}
           disabled={!state.can('DECREMENTED')}
           onClick={() => state.send('DECREMENTED')}
         >
           <Icons.Minus />
         </IconButton>
-        <h2>{local.data.count}</h2>
+        <Heading1 css={{ p: '$3' }}>{local.data.count}</Heading1>
         <IconButton
-          css={{ bg: '$muted', px: '$3', mx: '$2' }}
           disabled={!state.can('INCREMENTED')}
           onClick={() => local.send('INCREMENTED')}
         >
           <Icons.Plus />
         </IconButton>
       </Flex>
-    </Box>
+      <Button onClick={() => state.send('TOGGLED')}>
+        {local.whenIn({
+          turnedOff: 'Turn On',
+          turnedOn: 'Turn Off',
+        })}
+      </Button>
+    </Grid>
   );
 }
 `,
         static: `export default function getStatic() {
   return {
-    name: "Julian",
+    name: "Kitoko",
     age: 93,
     height: 184
-  }
+  };
 }`,
       },
     })

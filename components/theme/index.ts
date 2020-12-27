@@ -63,6 +63,8 @@ export const Heading6 = styled.h6({ color: "$text", m: 0, p: 0 })
 export const Text = styled.p({
   m: 0,
   p: 0,
+  fontSize: "$2",
+  lineHeight: "$body",
   color: "$text",
   variants: {
     variant: {
@@ -80,11 +82,16 @@ export const Text = styled.p({
 
 export const Input = styled.input({
   fontFamily: "$body",
-  fontSize: "$1",
+  fontSize: "$2",
   color: "$text",
   bg: "$muted",
-  px: "$1",
-  py: "$0",
+  px: "$2",
+  py: "$2",
+  border: "none",
+  outline: "none",
+  "&:focus": {
+    bg: "$hover",
+  },
 })
 
 export const Label = styled.label({
@@ -93,13 +100,13 @@ export const Label = styled.label({
 
 export const PlainButton = styled.button({
   color: "$text",
-  fontSize: "$1",
+  fontSize: "$2",
   fontWeight: "bold",
   fontFamily: "$body",
   lineHeight: "$ui",
   textAlign: "center",
-  px: "$2",
-  py: "$1",
+  px: "$3",
+  py: "$2",
   borderRadius: "$1",
   bg: "$muted",
   border: "none",
@@ -132,7 +139,7 @@ export const PlainIconButton = styled.button({
   bg: "transparent",
   borderRadius: "$1",
   fontFamily: "$body",
-  fontSize: "$0",
+  fontSize: "$2",
   fontWeight: "bold",
   border: "none",
   outline: "none",

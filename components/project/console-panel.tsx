@@ -23,6 +23,7 @@ interface ConsoleProps {}
 
 export default function Console({}: ConsoleProps) {
   const local = useStateDesigner(consoleState)
+  const { value } = local.values
 
   const [expanded, setExpanded] = React.useState(
     CONSOLE_ROW_HEIGHT - initialOffset > 40,
@@ -32,7 +33,7 @@ export default function Console({}: ConsoleProps) {
   function copyCurrent() {
     const elm = document.createElement("textarea")
     document.body.appendChild(elm)
-    elm.value = code
+    elm.value = value
     elm.select()
     document.execCommand("copy")
     document.body.removeChild(elm)
@@ -71,8 +72,6 @@ export default function Console({}: ConsoleProps) {
   }
 
   const rCodeScroll = React.useRef<HTMLDivElement>(null)
-
-  const { value } = local.values
 
   React.useEffect(() => {
     const elm = rCodeScroll.current!
