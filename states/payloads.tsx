@@ -28,7 +28,7 @@ const payloadsState = createState({
       data.payloads[eventName] = code
     },
     saveToDatabase(data, { oid, pid }) {
-      saveLocalPayloads(data.payloads)
+      saveLocalPayloads({ ...data.payloads })
       savePayloads(pid, oid, { ...data.payloads })
     },
     resetPayloads(data) {
