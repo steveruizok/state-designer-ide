@@ -68,11 +68,11 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
 
   React.useEffect(() => {
     return highlightsState.onUpdate(
-      ({ data: { state, event, scrollToLine } }) => {
+      ({ data: { states, event, scrollToLine } }) => {
         if (local.data.activeTab !== "state") return
         if (!editor) return
         const previous = rPreviousDecorations.current
-        const search = state || event
+        const search = states[0] || event
         const code = editor.getValue()
 
         if (search === null) {

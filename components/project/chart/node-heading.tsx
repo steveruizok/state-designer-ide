@@ -1,6 +1,6 @@
-import { Disc, MoreHorizontal } from "react-feather"
-import { IconButton, styled } from "components/theme"
 import { S, useStateDesigner } from "@state-designer/react"
+import { IconButton, styled } from "components/theme"
+import { Disc, MoreHorizontal } from "react-feather"
 
 // import IconSelect from "../icon-select"
 import ProjectState from "../../../states/project"

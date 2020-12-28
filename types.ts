@@ -1,3 +1,5 @@
+import { S } from "@state-designer/react"
+
 // App
 
 export type LayoutOffset = "content" | "main" | "code" | "detail" | "console"
@@ -62,11 +64,27 @@ export interface ToastMessage {
 }
 
 export interface HighlightData {
-  event: string | null
-  state: string | null
-  path: string | null
+  event: {
+    eventName: string
+    statePaths: string[]
+    targets: {
+      from: React.RefObject<HTMLDivElement>
+      to: React.RefObject<HTMLDivElement>
+    }[]
+  } | null
+  states: Record<string, { name: string; path: string }>
   scrollToLine: boolean
-  targets: string[]
   eventButtonRefs: Map<string, React.RefObject<HTMLDivElement>>
-  nodeRefs: Map<string, React.RefObject<HTMLDivElement>>
+  stateNodeRefs: Map<string, React.RefObject<HTMLDivElement>>
+}
+
+export interface EventDetails {
+  eventName: string
+  states: Set<S.State<any, any>>
+  targets: {
+    from: S.State<any, any>
+    to: S.State<any, any>
+    isConditional: boolean
+    isSecondary: boolean
+  }[]
 }

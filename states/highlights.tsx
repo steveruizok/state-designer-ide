@@ -1,104 +1,105 @@
 import { S, createState } from "@state-designer/react"
 import last from "lodash/last"
 import projectState from "states/project"
-import { HighlightData } from "types"
+import { EventDetails, HighlightData } from "types"
 
 const initialData: HighlightData = {
   event: null,
-  state: null,
-  path: null,
+  states: {},
   scrollToLine: false,
-  targets: [],
   eventButtonRefs: new Map([]),
-  nodeRefs: new Map([]),
+  stateNodeRefs: new Map([]),
 }
 
 const highlightsState = createState({
   data: initialData,
-  initial: "idle",
-  states: {
-    idle: {
-      on: {
-        HIGHLIT_EVENT: { do: "setEventHighlight", to: "highlit" },
-        HIGHLIT_STATE: { do: "setStateHighlight", to: "highlit" },
-      },
-    },
-    highlit: {
-      on: {
-        CHANGED_ACTIVE_STATES: {
-          unless: "highlitStateIsActive",
-          do: ["clearEventHighlight", "clearStateHighlight"],
-          to: "idle",
-        },
-        CLEARED_HIGHLIGHTS: {
-          do: ["clearEventHighlight", "clearStateHighlight"],
-          to: "idle",
-        },
-        CLEARED_EVENT_HIGHLIGHT: {
-          if: "eventIsAlreadyHighlit",
-          do: "clearEventHighlight",
-          to: "idle",
-        },
-        CLEARED_STATE_HIGHLIGHT: {
-          if: "stateIsAlreadyHighlit",
-          do: "clearStateHighlight",
-          to: "idle",
-        },
-        HIGHLIT_EVENT: {
-          unless: "eventIsAlreadyHighlit",
-          do: ["clearEventHighlight", "setEventHighlight"],
-        },
-        HIGHLIT_STATE: {
-          unless: "stateIsAlreadyHighlit",
-          do: ["clearStateHighlight", "setStateHighlight"],
-        },
-      },
-    },
-  },
   on: {
-    MOUNTED_NODE: "addNodeRef",
+    CHANGED_ACTIVE_STATES: {
+      do: ["clearEventHighlight"],
+    },
+    CLEARED_HIGHLIGHTS: {
+      do: ["clearEventHighlight", "clearStateHighlight"],
+    },
+    CLEARED_EVENT_HIGHLIGHT: {
+      if: "eventIsHighlit",
+      do: "clearEventHighlight",
+    },
+    CLEARED_STATE_HIGHLIGHT: {
+      if: "stateIsHighlit",
+      do: "clearStateHighlight",
+    },
+    HIGHLIT_EVENT: {
+      unless: "eventIsHighlit",
+      do: ["clearEventHighlight", "setEventHighlight"],
+    },
+    HIGHLIT_STATE: {
+      unless: "stateIsHighlit",
+      do: ["clearStateHighlight", "setStateHighlight"],
+    },
+    MOUNTED_NODE: "addStateNodeRef",
     UNMOUNTED_NODE: "deleteNodeRef",
     MOUNTED_EVENT_BUTTON: "addEventButtonRef",
     UNMOUNTED_EVENT_BUTTON: "deleteEventButtonRef",
   },
   conditions: {
-    highlitStateIsActive(data, { active }) {
-      return active.includes(data.state)
+    isHighlightingDifferentEvent(data, { eventName }) {
+      return data.event?.eventName !== eventName
     },
-    eventIsAlreadyHighlit(data, { eventName }) {
-      return data.event === eventName
+    eventIsHighlit(data, { eventName }) {
+      return data.event?.eventName === eventName
     },
-    stateIsAlreadyHighlit(data, { path }) {
-      return data.path === path
+    stateIsHighlit(data, { path }) {
+      return data.states[path] !== undefined
     },
   },
   actions: {
-    setEventHighlight(data, { eventName, shiftKey, targets }) {
-      data.state = null
-      data.event = eventName
-      data.targets = targets || []
+    setEventHighlight(
+      data,
+      {
+        eventName,
+        statePaths,
+        targets,
+        shiftKey,
+      }: {
+        eventName: string
+        statePaths: string[]
+        targets: {
+          from: string
+          to: string
+        }[]
+
+        shiftKey: boolean
+      },
+    ) {
+      const { eventButtonRefs, stateNodeRefs } = data
+
+      data.event = {
+        eventName,
+        statePaths,
+        targets: targets.map((target) => ({
+          from: eventButtonRefs.get(target.from + "_" + eventName),
+          to: stateNodeRefs.get(target.to),
+        })),
+      }
+
       data.scrollToLine = shiftKey
     },
     setStateHighlight(data, { path, stateName, shiftKey }) {
-      data.state = stateName
-      data.path = path
+      data.states[path] = { path, name: stateName }
       data.scrollToLine = shiftKey
     },
-    clearStateHighlight(data) {
-      data.state = null
-      data.path = null
-      data.scrollToLine = false
+    clearStateHighlight(data, { path }) {
+      delete data.states[path]
     },
     clearEventHighlight(data) {
       data.event = null
-      data.targets = []
       data.scrollToLine = false
     },
-    deleteNodeRef(data, { path, ref }) {
-      data.nodeRefs.delete(path)
+    deleteNodeRef(data, { path }) {
+      data.stateNodeRefs.delete(path)
     },
-    addNodeRef(data, { path, ref }) {
-      data.nodeRefs.set(path, ref)
+    addStateNodeRef(data, { path, ref }) {
+      data.stateNodeRefs.set(path, ref)
     },
     addEventButtonRef(
       data,
@@ -111,33 +112,45 @@ const highlightsState = createState({
     },
   },
   values: {
-    highlitStateRef(data) {
-      const current = data.nodeRefs.get(data.path)?.current
-      if (!current) return null
-      return current
-    },
-    highlitEventRef(data) {
-      const { path, event, eventButtonRefs } = data
-      if (path && event) {
-        return eventButtonRefs.get(path + "_" + event)?.current
+    highlitEventName(data) {
+      if (data.event) {
+        return data.event.eventName
       }
     },
+    highlitStates(data) {
+      return Object.values(data.states).map((state) => {
+        return {
+          ...state,
+          ref: data.stateNodeRefs.get(state.path),
+        }
+      })
+    },
+    highlitStateRef(data) {
+      // const current = data.nodeRefs.get(data.path)?.current
+      // if (!current) return null
+      // return current
+    },
+    highlitEventRef(data) {
+      // const { path, event, eventButtonRefs } = data
+      // if (path && event) {
+      //   return eventButtonRefs.get(path + "_" + event)?.current
+      // }
+    },
     targets(data) {
-      const { targets, path, event, eventButtonRefs } = data
-
-      const nodes = targets
-        .map((path) =>
-          last(
-            findTransitionTargets(projectState.data.captive.stateTree, path),
-          ),
-        )
-        .filter(Boolean)
-
-      return nodes.map((node) => ({
-        node,
-        fromRef: eventButtonRefs.get(path + "_" + event)?.current,
-        toRef: data.nodeRefs.get(node.path)?.current,
-      }))
+      return []
+      // const { targets, path, event, eventButtonRefs } = data
+      // const nodes = targets
+      //   .map((path) =>
+      //     last(
+      //       findTransitionTargets(projectState.data.captive.stateTree, path),
+      //     ),
+      //   )
+      //   .filter(Boolean)
+      // return nodes.map((node) => ({
+      //   node,
+      //   fromRef: eventButtonRefs.get(path + "_" + event)?.current,
+      //   toRef: data.nodeRefs.get(node.path)?.current,
+      // }))
     },
   },
 })

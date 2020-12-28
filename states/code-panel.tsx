@@ -312,7 +312,6 @@ const codePanelState = createState({
       const { editor } = data
       if (!editor) return
       const next = increaseFontSize()
-      console.log(next)
       editor.updateOptions({
         fontSize: next,
       })

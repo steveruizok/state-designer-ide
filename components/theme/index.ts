@@ -189,7 +189,18 @@ export const Button = styled.button({
   "&:disabled": {
     opacity: 0.5,
   },
+  "&[data-disabled=true]": {
+    opacity: 0.5,
+  },
   variants: {
+    highlight: {
+      on: {
+        color: "$accent",
+      },
+      off: {
+        color: "$text",
+      },
+    },
     variant: {
       iconLeft: {
         "& > svg": {

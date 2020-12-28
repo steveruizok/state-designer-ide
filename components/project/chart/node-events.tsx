@@ -3,6 +3,7 @@ import { Button, styled } from "components/theme"
 import * as React from "react"
 import highlightsState from "states/highlights"
 import ProjectState from "states/project"
+import { EventDetails } from "types"
 
 interface NodeEventsProps {
   node: S.State<any, any>
@@ -11,7 +12,11 @@ interface NodeEventsProps {
 
 function NodeEvents({ node, events }: NodeEventsProps) {
   const local = useStateDesigner(ProjectState)
+  const highlights = useStateDesigner(highlightsState)
   const captiveData = local.data.captive.data
+
+  const { highlitEventName } = highlights.values
+  const { eventMap } = local.data
 
   return (
     <NodeEventsContainer type={node.type}>
@@ -39,25 +44,16 @@ function NodeEvents({ node, events }: NodeEventsProps) {
 
         const isDisabled = !isActive || !canHandleEvent
 
-        let targets: string[] = []
-
-        for (let handler of handlers) {
-          if (handler.to.length > 0) {
-            for (let transition of handler.to) {
-              targets.push(transition(captiveData, payload, undefined))
-            }
-          }
-        }
-
         return (
           <EventButton
             key={i}
-            name={name}
+            eventName={name}
             node={node}
             payload={payload}
-            targets={targets}
             isDisabled={isDisabled}
             isActive={isActive}
+            isHighlit={highlitEventName === name}
+            event={eventMap[name]}
           />
         )
       })}
@@ -67,65 +63,80 @@ function NodeEvents({ node, events }: NodeEventsProps) {
 export default NodeEvents
 
 const EventButton: React.FC<{
-  name: string
+  eventName: string
   node: S.State<any, any>
   payload: any
-  targets: any
+  isHighlit: boolean
   isDisabled: boolean
   isActive: boolean
-}> = ({ name, node, payload, targets, isDisabled, isActive }) => {
+  event: EventDetails
+}> = ({ eventName, event, node, payload, isHighlit, isDisabled, isActive }) => {
   const rButton = React.useRef<HTMLButtonElement>(null)
   const { captive } = ProjectState.data
 
   React.useEffect(() => {
     highlightsState.send("MOUNTED_EVENT_BUTTON", {
-      id: node.path + "_" + name,
-      name,
+      id: node.path + "_" + eventName,
       ref: rButton,
-      path: node.path,
     })
     return () =>
       highlightsState.send("UNMOUNTED_EVENT_BUTTON", {
-        id: node.path + "_" + name,
-        name,
+        id: node.path + "_" + eventName,
         ref: rButton,
-        path: node.path,
       })
   }, [])
+
+  function sendHighlightEvent(shiftKey = false) {
+    highlightsState.send("HIGHLIT_EVENT", {
+      eventName,
+      statePaths: Array.from(event.states.values()).map((state) => ({
+        statePath: state.path,
+        active: state.active,
+      })),
+      targets: event.targets
+        .filter((target) => target.from.active)
+        .map((target) => ({
+          from: target.from.path,
+          to: target.to.path,
+        })),
+      shiftKey,
+    })
+  }
 
   return (
     <Button
       ref={rButton}
       variant="nodeEvent"
+      highlight={isHighlit ? "on" : "off"}
+      data-disabled={isDisabled.toString()}
       title={
         !isDisabled
-          ? `Click to send the ${name} event`
+          ? `Click to send the ${eventName} event`
           : !isActive
-          ? "The state cannot handle events while it is inactive."
+          ? "The state cannot handle this event while it is inactive."
           : "The state cannot handle this event due to its current payload."
       }
-      disabled={isDisabled}
       onClick={() => {
-        captive.send(name, payload)
+        captive.send(eventName, payload)
         captive.getUpdate(({ active }) =>
           highlightsState.send("CHANGED_ACTIVE_STATES", { active }),
         )
+        requestAnimationFrame(() => sendHighlightEvent())
       }}
-      onMouseEnter={(e) => {
+      onMouseOver={(e) => {
         e.stopPropagation()
-        highlightsState.send("HIGHLIT_EVENT", {
-          eventName: name,
-          shiftKey: e.shiftKey,
-          targets,
-        })
+        sendHighlightEvent(e.shiftKey)
       }}
       onMouseLeave={() =>
-        highlightsState.send("CLEARED_EVENT_HIGHLIGHT", {
-          eventName: name,
-        })
+        requestAnimationFrame(() =>
+          highlightsState.send("CLEARED_EVENT_HIGHLIGHT", {
+            eventName,
+            statePath: node.path,
+          }),
+        )
       }
     >
-      {name}
+      {eventName}
     </Button>
   )
 }

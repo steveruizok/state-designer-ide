@@ -1,6 +1,7 @@
 import "../styles/globals.css"
-import Toast from "../components/toast"
-import MonacoProvider from "../components/monaco-provider"
+
+import MonacoProvider from "components/monaco-provider"
+import Toast from "components/toast"
 
 function MyApp({ Component, pageProps }) {
   return (

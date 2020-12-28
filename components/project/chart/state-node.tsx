@@ -13,16 +13,27 @@ interface StateNodeProps {
 
 export default function StateNode({ node }: StateNodeProps) {
   const rContainer = React.useRef<HTMLDivElement>(null)
-  const local = useStateDesigner(highlightsState)
-  const highlight = local.data.path === node.path
+  const localHighlight = useStateDesigner(highlightsState)
   const isRoot = node.parentType === null
   const childNodes = sortBy(
     Object.values(node.states || {}),
     (n: S.State<any, any>) => !n.isInitial,
   )
-  const highlitChildIndex = childNodes.findIndex(
-    (c) => local.data.path === c.path,
-  )
+
+  const isHighlit =
+    localHighlight.values.highlitStates.find(
+      ({ name }) => name === node.name,
+    ) !== undefined
+
+  const paths = Object.keys(localHighlight.data.states)
+
+  const highlitChildIndexes: number[] = []
+
+  childNodes.forEach((child, i) => {
+    if (paths.includes(child.path)) {
+      highlitChildIndexes.push(i)
+    }
+  })
 
   // Events
   const events = Object.entries(node.on)
@@ -41,8 +52,8 @@ export default function StateNode({ node }: StateNodeProps) {
 
   // Send ref to highlights state and canvas on mount
   React.useEffect(() => {
-    local.send("MOUNTED_NODE", { path: node.path, ref: rContainer })
-    return () => local.send("UNMOUNTED_NODE", { path: node.path })
+    highlightsState.send("MOUNTED_NODE", { path: node.path, ref: rContainer })
+    return () => highlightsState.send("UNMOUNTED_NODE", { path: node.path })
   }, [node])
 
   return (
@@ -51,8 +62,7 @@ export default function StateNode({ node }: StateNodeProps) {
       data-type="node-container"
       onMouseOver={(e) => {
         e.stopPropagation()
-        if (isRoot) return
-        local.send("HIGHLIT_STATE", {
+        highlightsState.send("HIGHLIT_STATE", {
           stateName: node.name,
           shiftKey: e.shiftKey,
           path: node.path,
@@ -60,13 +70,16 @@ export default function StateNode({ node }: StateNodeProps) {
       }}
       onMouseLeave={(e) => {
         e.stopPropagation()
-        local.send("CLEARED_STATE_HIGHLIGHT", { path: node.path })
+        highlightsState.send("CLEARED_STATE_HIGHLIGHT", {
+          stateName: node.name,
+          path: node.path,
+        })
       }}
       data-node={node.type}
       data-active={node.active.toString()}
       childOf={node.parentType || "root"}
       nodeLevel={isRoot ? "root" : "child"}
-      data-highlight={highlight}
+      data-highlight={isHighlit}
     >
       {isRoot ? (
         events.length > 0 ? (
@@ -86,8 +99,8 @@ export default function StateNode({ node }: StateNodeProps) {
         {node.type === "parallel"
           ? childNodes.map((child, i) => {
               const hideDivider =
-                highlitChildIndex > -1 &&
-                (i === highlitChildIndex || i === highlitChildIndex - 1)
+                highlitChildIndexes.includes(i) ||
+                highlitChildIndexes.includes(i + 1)
 
               return (
                 <React.Fragment key={i}>
@@ -123,13 +136,13 @@ export const NodeContainer = styled.div({
     visibility: "visible",
   },
   "&[data-highlight=true]": {
-    borderColor: "$accent",
+    borderColor: "$accentInactive",
   },
   "&[data-active=true]": {
     borderColor: "$active",
-    "&[data-highlight=true]": {
-      borderColor: "$accent",
-    },
+  },
+  "&[data-active=true][data-highlight=true]": {
+    borderColor: "$accent",
   },
   variants: {
     childOf: {
@@ -163,9 +176,9 @@ export const NodeContainer = styled.div({
         },
         "&[data-active=true]": {
           borderColor: "transparent",
-          "&[data-highlight=true]": {
-            borderColor: "$accent",
-          },
+        },
+        "&[data-active=true][data-highlight=true]": {
+          borderColor: "$accent",
         },
       },
       root: {

@@ -18,7 +18,7 @@ const CanvasOverlay: React.FC<{
   const rCanvas = React.useRef<HTMLCanvasElement>()
   const rCtx = React.useRef<CanvasRenderingContext2D>()
 
-  const { targets, highlitStateRef } = local.values
+  const { event } = local.data
 
   React.useEffect(() => {
     const updateCanvasSize = () => {
@@ -52,7 +52,10 @@ const CanvasOverlay: React.FC<{
     const ctx = rCtx.current
     if (!ctx) return
 
-    const { targets } = local.values
+    ctx.clearRect(0, 0, cvs.width, cvs.height)
+
+    if (!event) return
+    const { targets } = event
 
     if (targets.length > 0) {
       ctx.clearRect(0, 0, cvs.width, cvs.height)
@@ -60,12 +63,18 @@ const CanvasOverlay: React.FC<{
       const sc = scale.get()
       const cFrame = getFrame(cvs, sc, 0, 0)
 
-      for (let { fromRef, toRef } of targets) {
-        if (!(fromRef && toRef)) return
+      for (let { from, to } of targets) {
+        if (!(from && to)) return
+
+        const fElm = from.current
+        const tElm = to.current
+
+        if (!(fElm && tElm)) return
+
         drawLineFromEventButtonToStateNode(
           ctx,
-          getFrame(fromRef, sc, cFrame.x, cFrame.y),
-          getFrame(toRef, sc, cFrame.x, cFrame.y),
+          getFrame(fElm, sc, cFrame.x, cFrame.y),
+          getFrame(tElm, sc, cFrame.x, cFrame.y),
         )
       }
       isDirty.current = true
@@ -73,7 +82,7 @@ const CanvasOverlay: React.FC<{
       ctx.clearRect(0, 0, cvs.width, cvs.height)
       isDirty.current = false
     }
-  }, [targets])
+  }, [event])
 
   return <CanvasContainer ref={rCanvas} />
 }
