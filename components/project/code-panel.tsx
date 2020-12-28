@@ -72,10 +72,10 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
         if (local.data.activeTab !== "state") return
         if (!editor) return
         const previous = rPreviousDecorations.current
-        const search = states[0] || event
+        const search = Object.values(states)[0]?.name || event?.eventName
         const code = editor.getValue()
 
-        if (search === null) {
+        if (search === null || search === "root") {
           rPreviousDecorations.current = editor.deltaDecorations(previous, [])
         } else {
           const searchString = search + ":"
