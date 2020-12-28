@@ -89,7 +89,7 @@ export default function ProjectView({
       <ControlsContainer>
         {user?.authenticated && (
           <IconButton onClick={() => forkProject(pid, oid, user?.uid)}>
-            {!isOwner && <Text>Copy Project</Text>}
+            {!isOwner && <Text variant="ui">Copy Project</Text>}
             <Copy />
           </IconButton>
         )}

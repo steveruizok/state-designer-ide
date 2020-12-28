@@ -3,6 +3,7 @@ import { GetServerSidePropsContext } from "next"
 import { parseCookies } from "nookies"
 import * as Types from "types"
 
+import firebase from "./firebase"
 import admin from "./firebase-admin"
 
 export async function verifyCookie(
@@ -55,6 +56,8 @@ export function redirectToNotFoundPage(context: GetServerSidePropsContext) {
   context.res.end()
   return null
 }
+
+export async function updateUserToken() {}
 
 export async function getCurrentUser(
   context?: GetServerSidePropsContext,

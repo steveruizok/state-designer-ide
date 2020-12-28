@@ -256,7 +256,7 @@ export const IconButton = styled.button({
   bg: "transparent",
   borderRadius: 4,
   fontFamily: "$body",
-  fontSize: "$0",
+  fontSize: "$1",
   fontWeight: "bold",
   border: "none",
   outline: "none",
@@ -264,6 +264,7 @@ export const IconButton = styled.button({
   alignItems: "center",
   "& > p": {
     pr: "$1",
+    color: "currentColor",
   },
   "&:hover": {
     bg: "$shadowLight",

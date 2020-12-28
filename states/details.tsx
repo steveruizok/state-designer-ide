@@ -2,7 +2,6 @@ import { createState } from "@state-designer/react"
 import { ui } from "lib/local-data"
 import { DetailsTab } from "types"
 
-const TABS = ["data", "values"]
 let INITIAL_FONT_SIZE = 13
 let INITIAL_TAB = "data"
 let INITIAL_WRAPPED = false

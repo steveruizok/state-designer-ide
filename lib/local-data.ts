@@ -23,6 +23,7 @@ export const ui = {
     detail: 0,
     console: 0,
   },
+  payloads: {},
   theme: "light" as "dark" | "light",
 }
 
@@ -157,6 +158,14 @@ export function resetFontSize() {
   saveUI()
   return ui.code.fontSize
 }
+
+// Payloads
+
+export function saveLocalPayloads(payloads: Record<string, string>) {
+  ui.payloads = payloads
+  saveUI()
+}
+
 // Theme
 
 export function setTheme(theme: "dark" | "light") {

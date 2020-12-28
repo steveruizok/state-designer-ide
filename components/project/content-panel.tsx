@@ -5,6 +5,7 @@ import { motionValues } from "lib/local-data"
 import * as React from "react"
 import { Circle, Disc, MinusCircle } from "react-feather"
 import highlightsState from "states/highlights"
+import payloadsState from "states/payloads"
 import projectState from "states/project"
 import { EventDetails } from "types"
 
@@ -45,7 +46,7 @@ export default function Content({}: ContentProps) {
         ))}
       </ContentSection>
       <Spacer />
-      <ContentTitle align="bottom">Event Payloads</ContentTitle>
+      <Payloads events={events} />
       <DragHandleHorizontal
         motionValue={motionValues.content}
         align="left"
@@ -57,6 +58,123 @@ export default function Content({}: ContentProps) {
     </ContentContainer>
   )
 }
+
+interface PayloadsProps {
+  events: [string, EventDetails][]
+}
+
+function Payloads({ events }: PayloadsProps) {
+  const localPayloads = useStateDesigner(payloadsState)
+  const [selected, setSelected] = React.useState(
+    events[0]?.[0] || "Select an Event",
+  )
+  const [value, setValue] = React.useState("")
+  const [error, setError] = React.useState("")
+
+  React.useEffect(() => {
+    setValue(localPayloads.data.payloads[selected] || "")
+  }, [selected])
+
+  React.useEffect(() => {
+    setValue(payloadsState.data.payloads[selected])
+  }, [payloadsState.data.payloads])
+
+  function handleChange(code: string) {
+    setValue(code)
+    try {
+      Function("Static", `return ${code}`)(projectState.data.static)
+      setError("")
+      const { pid, oid } = projectState.data
+
+      payloadsState.send("UPDATED_PAYLOAD", {
+        eventName: selected,
+        code,
+        pid,
+        oid,
+      })
+    } catch (e) {
+      setError(e.message)
+    }
+  }
+
+  return (
+    <PayloadsContainer>
+      <ContentTitle align="bottom">Event Payloads</ContentTitle>
+      <Select
+        value={selected}
+        onChange={(e) => {
+          setSelected(e.currentTarget.value)
+        }}
+      >
+        <option>Select an Event</option>
+        {events.map(([eventName]) => (
+          <option key={eventName}>{eventName}</option>
+        ))}
+      </Select>
+      <TextArea
+        disabled={selected === "Select an Event"}
+        autoCapitalize="false"
+        autoComplete="false"
+        placeholder="Enter a payload of data to send with the event."
+        value={value}
+        onChange={(e) => handleChange(e.currentTarget.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Tab") {
+            e.preventDefault()
+          }
+        }}
+      />
+      <ErrorOverlay>{error}</ErrorOverlay>
+    </PayloadsContainer>
+  )
+}
+
+const PayloadsContainer = styled.div({
+  display: "grid",
+  gridTemplateRows: "40px 40px 200px",
+  gap: "$1",
+  position: "relative",
+})
+
+const TextArea = styled.textarea({
+  bg: "$muted",
+  border: "none",
+  outline: "none",
+  py: "$2",
+  px: "$1",
+  fontFamily: "$monospace",
+  fontSize: "$1",
+  color: "$text",
+  resize: "none",
+  overflow: "scroll",
+  "&:disabled": {
+    opacity: 0.3,
+  },
+})
+
+const Select = styled.select({
+  bg: "transparent",
+  border: "none",
+  color: "$text",
+  px: 0,
+  mx: "$1",
+  outline: "none",
+  fontSize: "$1",
+  fontFamily: "$body",
+  fontWeight: "bold",
+})
+
+const ErrorOverlay = styled.div({
+  position: "absolute",
+  bottom: 40,
+  width: "100%",
+  pointerEvents: "none",
+  fontFamily: "$monospace",
+  fontSize: "$0",
+  px: "$1",
+  py: "$2",
+  color: "$accent",
+})
 
 interface StateItemProps {
   node: S.State<any, any>
@@ -119,15 +237,16 @@ interface EventItemProps {
 }
 
 function EventItem({ eventName, event }: EventItemProps) {
+  useStateDesigner(payloadsState)
   const local = useStateDesigner(projectState.data.captive)
   const rTimeout = React.useRef<any>(null)
   const [isHighlit, setIsHighlit] = React.useState(false)
 
-  // The button is active if one or more state on which it occurs is active.
-  // const isActive = Array.from(event.states.values()).some((node) => node.active)
-
   // Can any of the states handle the event?
-  const canBeHandled = projectState.data.captive.can(eventName)
+  const canBeHandled = projectState.data.captive.can(
+    eventName,
+    payloadsState.data.payloads[eventName],
+  )
 
   // The button is zapped if it was the most recent event fired
   React.useEffect(() => {
@@ -166,7 +285,10 @@ function EventItem({ eventName, event }: EventItemProps) {
       onClick={() => {
         // local.send("FIRED_CAPTIVE_EVENT", { eventName })
         if (!canBeHandled) return
-        projectState.data.captive.send(eventName)
+        projectState.data.captive.send(
+          eventName,
+          payloadsState.data.payloads[eventName],
+        )
         projectState.data.captive.getUpdate(({ active }) =>
           highlightsState.send("CHANGED_ACTIVE_STATES", { active }),
         )
@@ -213,6 +335,21 @@ const Button = styled.button({
     bg: "$codeHl",
   },
   variants: {
+    display: {
+      wide: {
+        width: "100%",
+        justifyContent: "center",
+        "&:active": {
+          bg: "$muted",
+        },
+        "&:hover": {
+          color: "$accent",
+        },
+        "&:disabled": {
+          opacity: 0.5,
+        },
+      },
+    },
     zapped: {
       on: {
         transition: "none",

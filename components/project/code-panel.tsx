@@ -213,7 +213,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
         visibility={local.isIn("loading") ? "hidden" : "visible"}
       />
       <CodeEditorControls>
-        <ErrorMessage>
+        <ErrorMessage title={code[local.data.activeTab].error}>
           {hasError && (
             <>
               <AlertCircle size={16} />

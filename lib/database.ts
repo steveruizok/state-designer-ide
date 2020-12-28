@@ -37,7 +37,23 @@ async function checkAuth() {
       console.error("No custom token set!")
     }
 
-    await db.app.auth().signInWithCustomToken(customToken)
+    await db.app
+      .auth()
+      .signInWithCustomToken(customToken)
+      .catch(async (e) => {
+        console.log("Could not use the current token, time to make a new one.")
+        var path = "/api/refresh"
+        var url = process.env.NEXT_PUBLIC_BASE_API_URL + path
+        const results = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }).then((d) => d.json())
+        console.log("Got a new custom token", results)
+        customToken = results.customToken
+        return checkAuth()
+      })
   }
 }
 
@@ -47,7 +63,6 @@ export async function addUser(uid: string) {
   const initial = await doc.get()
 
   if (initial.exists) {
-    console.log("User exists, updating user data")
     if (!initial.data().exists) {
       await doc
         .update({ exists: true, dateLastLoggedIn: new Date().toUTCString() })
@@ -56,7 +71,6 @@ export async function addUser(uid: string) {
         })
     }
   } else {
-    console.log("Creating new user")
     const dateString = new Date().toUTCString()
 
     await doc
@@ -75,6 +89,11 @@ export async function addUser(uid: string) {
       dateCreated: dateString,
       lastModified: dateString,
       ownerId: uid,
+      payloads: {
+        TOGGLED: "",
+        DECREMENTED: "",
+        INCREMENTED: "",
+      },
       code: {
         state: `export default createState({
   data: {
@@ -257,6 +276,17 @@ export async function saveProjectCode(
     .update({
       [`code.${activeTab}`]: code,
     })
+}
+
+export async function savePayloads(
+  pid: string,
+  oid: string,
+  payloads: Record<string, string>,
+) {
+  await checkAuth()
+  db.collection("users").doc(oid).collection("projects").doc(pid).update({
+    payloads,
+  })
 }
 
 export async function saveProjectName(pid: string, oid: string, name: string) {
