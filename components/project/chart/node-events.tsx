@@ -2,7 +2,8 @@ import { S, useStateDesigner } from "@state-designer/react"
 import { Button, styled } from "components/theme"
 import * as React from "react"
 import highlightsState from "states/highlights"
-import ProjectState from "states/project"
+import payloadsState from "states/payloads"
+import projectState from "states/project"
 import { EventDetails } from "types"
 
 interface NodeEventsProps {
@@ -11,9 +12,9 @@ interface NodeEventsProps {
 }
 
 function NodeEvents({ node, events }: NodeEventsProps) {
-  const local = useStateDesigner(ProjectState)
+  const local = useStateDesigner(projectState)
+  useStateDesigner(payloadsState)
   const highlights = useStateDesigner(highlightsState)
-  const captiveData = local.data.captive.data
 
   const { highlitEventName } = highlights.values
   const { eventMap } = local.data
@@ -21,16 +22,10 @@ function NodeEvents({ node, events }: NodeEventsProps) {
   return (
     <NodeEventsContainer type={node.type}>
       {events.map(([name, handlers], i) => {
-        const payloadStringValue = "nothing" //local.data.code.payloads[name]
-
-        let payload: any
-
-        if (!!payloadStringValue) {
-          try {
-            const fn = Function("Static", `return ${payloadStringValue}`)
-            payload = fn(local.data.code.static)
-          } catch (e) {}
-        }
+        const payload = Function(
+          "Static",
+          `return ${payloadsState.data.payloads[name]}`,
+        )(projectState.data.static)
 
         const isActive = node.active
 
@@ -72,7 +67,7 @@ const EventButton: React.FC<{
   event: EventDetails
 }> = ({ eventName, event, node, payload, isHighlit, isDisabled, isActive }) => {
   const rButton = React.useRef<HTMLButtonElement>(null)
-  const { captive } = ProjectState.data
+  const { captive } = projectState.data
 
   React.useEffect(() => {
     highlightsState.send("MOUNTED_EVENT_BUTTON", {

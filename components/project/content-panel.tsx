@@ -84,6 +84,7 @@ function Payloads({ events }: PayloadsProps) {
     try {
       Function("Static", `return ${code}`)(projectState.data.static)
       setError("")
+
       const { pid, oid } = projectState.data
 
       payloadsState.send("UPDATED_PAYLOAD", {
@@ -245,7 +246,10 @@ function EventItem({ eventName, event }: EventItemProps) {
   // Can any of the states handle the event?
   const canBeHandled = projectState.data.captive.can(
     eventName,
-    payloadsState.data.payloads[eventName],
+    Function(
+      "Static",
+      `return ${payloadsState.data.payloads[eventName]}`,
+    )(projectState.data.static),
   )
 
   // The button is zapped if it was the most recent event fired
@@ -287,7 +291,10 @@ function EventItem({ eventName, event }: EventItemProps) {
         if (!canBeHandled) return
         projectState.data.captive.send(
           eventName,
-          payloadsState.data.payloads[eventName],
+          Function(
+            "Static",
+            `return ${payloadsState.data.payloads[eventName]}`,
+          )(projectState.data.static),
         )
         projectState.data.captive.getUpdate(({ active }) =>
           highlightsState.send("CHANGED_ACTIVE_STATES", { active }),
@@ -410,6 +417,7 @@ const ContentTitle = styled.div({
 const ContentSection = styled.ul({
   m: 0,
   pl: 0,
+  overflowY: "scroll",
 })
 
 /* --------------------- Helpers -------------------- */

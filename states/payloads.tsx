@@ -29,7 +29,7 @@ const payloadsState = createState({
     },
     saveToDatabase(data, { oid, pid }) {
       saveLocalPayloads({ ...data.payloads })
-      savePayloads(pid, oid, { ...data.payloads })
+      // savePayloads(pid, oid, { ...data.payloads })
     },
     resetPayloads(data) {
       data.payloads = {}
