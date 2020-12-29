@@ -82,7 +82,7 @@ export default function ProjectView({
       <Title readOnly={oid !== uid} />
       <Controls
         oid={oid}
-        pid={oid}
+        pid={pid}
         uid={uid}
         isAuthenticated={user?.authenticated}
       />

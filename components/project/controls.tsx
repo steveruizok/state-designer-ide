@@ -18,6 +18,7 @@ export default function Controls({
   isAuthenticated,
 }: ControlsProps) {
   const { toggle } = useTheme()
+  console.log(pid, oid, uid)
   return (
     <ControlsContainer>
       {isAuthenticated && (

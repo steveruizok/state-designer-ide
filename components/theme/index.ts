@@ -76,6 +76,12 @@ export const Text = styled.p({
         fontSize: "$1",
         lineHeight: "$ui",
       },
+      detail: {
+        fontSize: "$1",
+        lineHeight: "$ui",
+        color: "$inactive",
+        fontWeight: "normal",
+      },
     },
   },
 })
@@ -342,4 +348,19 @@ export const TabsContainer = styled.div({
   overflow: "hidden",
   justifyContent: "flex-start",
   flexGrow: 2,
+})
+
+export const Select = styled.select({
+  cursor: "pointer",
+  bg: "transparent",
+  border: "none",
+  color: "$text",
+  px: "$0",
+  outline: "none",
+  fontSize: "$1",
+  fontFamily: "$body",
+  fontWeight: "bold",
+  "&:hover": {
+    color: "$accent",
+  },
 })

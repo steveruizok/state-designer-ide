@@ -1,17 +1,10 @@
 import { useStateDesigner } from "@state-designer/react"
 import { DragHandleVertical } from "components/project/drag-handles"
-import {
-  IconButton,
-  TabButton,
-  TabsContainer,
-  Text,
-  TitleRow,
-  styled,
-} from "components/theme"
+import { IconButton, Select, Text, styled } from "components/theme"
 import { animate } from "framer-motion"
 import { motionValues, ui } from "lib/local-data"
 import * as React from "react"
-import { AlignLeft, ChevronDown, ChevronUp, Copy } from "react-feather"
+import { ChevronDown, ChevronUp } from "react-feather"
 import payloadsState from "states/payloads"
 import projectState from "states/project"
 import { EventDetails } from "types"
@@ -103,6 +96,7 @@ export default function Payloads({ events }: PayloadsProps) {
         </IconButton>
       </ContentTitle>
       <Select
+        css={SelectCss}
         value={selected}
         onChange={(e) => {
           setSelected(e.currentTarget.value)
@@ -162,19 +156,6 @@ const TextArea = styled.textarea({
   },
 })
 
-const Select = styled.select({
-  bg: "transparent",
-  border: "none",
-  color: "$text",
-  px: 0,
-  mx: "$1",
-  mr: "12px",
-  outline: "none",
-  fontSize: "$1",
-  fontFamily: "$body",
-  fontWeight: "bold",
-})
-
 const ErrorOverlay = styled.div({
   position: "absolute",
   bottom: 40,
@@ -201,3 +182,9 @@ const ContentTitle = styled.div({
     flexGrow: 1,
   },
 })
+
+const SelectCss = {
+  p: 0,
+  mx: "$1",
+  mr: "12px",
+}

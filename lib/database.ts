@@ -203,7 +203,9 @@ export async function getUserProjects(uid: string, oid: string) {
     .collection("projects")
     .get()
 
-  const projects = snapshot.docs.map((doc) => doc.id)
+  const projects = snapshot.docs.map(
+    (doc) => ({ id: doc.id, ...doc.data() } as Types.ProjectData),
+  )
 
   return {
     uid,
@@ -295,6 +297,7 @@ export async function saveProjectCode(
     .update({
       [`code.${activeTab}`]: code,
       payloads: ui.payloads,
+      lastModified: new Date().toUTCString(),
     })
 }
 
@@ -311,6 +314,7 @@ export async function savePayloads(
     .doc(pid)
     .update({
       payloads,
+      lastModified: new Date().toUTCString(),
     })
 }
 
@@ -323,10 +327,37 @@ export async function saveProjectName(pid: string, oid: string, name: string) {
     .doc(pid)
     .update({
       name,
+      lastModified: new Date().toUTCString(),
     })
 }
 
-/* -------------------- Not used yet? -------------------- */
+export async function forkProject(pid: string, oid: string, uid?: string) {
+  await checkAuth()
+  const project = await getProject(pid, oid).get()
+  const dateString = new Date().toUTCString()
+
+  if (!project.exists) {
+    console.log("That project doesn't exist!")
+    return
+  }
+
+  const data = project.data()
+
+  const docRef = await db
+    .collection("users")
+    .doc(uid)
+    .collection("projects")
+    .add({
+      ...data,
+      dateCreated: dateString,
+      lastModified: dateString,
+      owner: uid,
+    })
+
+  router.push(`/u/${uid}/p/${docRef.id}`)
+}
+
+/* -------------------- Not used yet -------------------- */
 
 export async function getTemplate(pid: string) {
   const doc = await db.collection("templates").doc(pid).get()
@@ -388,42 +419,6 @@ export async function createNewProject(pid: string, oid: string, uid: string) {
   await checkAuth()
   await createProject(pid, uid, "toggle")
   router.push(`/${uid}/${pid}`)
-}
-
-export async function forkProject(pid: string, oid: string, uid?: string) {
-  await checkAuth()
-  const project = await getProject(pid, oid).get()
-
-  if (!project.exists) {
-    console.log("That project doesn't exist!")
-    return
-  }
-
-  const data = project.data()
-
-  let doc = db.collection("users").doc(uid).collection("projects").doc(pid)
-
-  let initial = await doc.get()
-
-  let i = 0
-  let id = pid
-  let exists = initial.exists
-
-  while (exists) {
-    i++
-    id = `${pid}_copy_${i}`
-
-    doc = db.collection("users").doc(uid).collection("projects").doc(id)
-    initial = await doc.get()
-    exists = initial.exists
-  }
-
-  await doc.set({
-    ...data,
-    owner: uid,
-  })
-
-  router.push(`/u/${uid}/p/${id}`)
 }
 
 export async function getUserProjectById(uid: string, pid: string) {
