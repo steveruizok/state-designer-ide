@@ -1,116 +1,99 @@
-import { Button, IconButton, Text, styled } from "components/theme"
-import useTheme from "hooks/useTheme"
-import { login, logout } from "lib/auth-client"
-import {
-  forkProject,
-  setCustomToken,
-  subscribeToDocSnapshot,
-} from "lib/database"
-import { motionValues } from "lib/local-data"
-import Link from "next/link"
+import { styled } from "components/theme"
+import { checkAuth, setCustomToken, subscribeToDocSnapshot } from "lib/database"
+import { motionValues, updatePanelOffsets } from "lib/local-data"
 import Router from "next/router"
 import * as React from "react"
-import { Copy, Home, Minus, Plus, Sun } from "react-feather"
 import codePanelState from "states/code-panel"
 import projectState from "states/project"
-import { ProjectData, User } from "types"
+import * as Types from "types"
 
-import Chart from "./chart-view"
+import ChartView from "./chart-view"
 import CodePanel from "./code-panel"
 import Console from "./console-panel"
 import ContentPanel, { CONTENT_COL_WIDTH } from "./content-panel"
+import Controls from "./controls"
 import DetailsPanel, { DETAILS_ROW_HEIGHT } from "./details-panel"
 import { DragHandleHorizontalRelative } from "./drag-handles"
 import LiveView from "./live-view"
+import Menu from "./menu"
 import Title from "./title"
 
 export const CODE_COL_WIDTH = 320
 
 interface ProjectViewProps {
-  token: string
-  pid: string
   oid: string
-  user: User
-  isOwner: boolean
-  authenticated: boolean
-  project: ProjectData
+  pid: string
+  uid?: string
+  user: Types.User
+  token?: string
+  isOwner?: boolean
+  projectData: Types.ProjectData
 }
 
 export default function ProjectView({
-  token,
-  user,
   oid,
   pid,
+  uid,
+  user,
+  token,
   isOwner,
+  projectData,
 }: ProjectViewProps) {
-  const { toggle } = useTheme()
   const rMainContainer = React.useRef<HTMLDivElement>(null)
-
-  React.useEffect(() => {
-    setCustomToken(token)
-  }, [token])
-
-  React.useEffect(() => {
-    return subscribeToDocSnapshot(pid, oid, (doc) => {
-      const source = doc.data()
-      projectState.send("SOURCE_UPDATED", { source, oid, pid })
-    })
-  }, [oid, pid])
+  const rUnsub = React.useRef<any>()
 
   React.useEffect(() => {
     function handleRouteChange() {
       projectState.send("UNLOADED")
       codePanelState.send("UNLOADED")
+      rUnsub.current?.()
     }
 
+    setCustomToken(token)
+
+    // Subscribe to the firebase document on mount.
+    subscribeToDocSnapshot(pid, oid, (doc) => {
+      projectState.send("SOURCE_UPDATED", {
+        source: doc.data(),
+        oid,
+        pid,
+      })
+    }).then((unsub) => (rUnsub.current = unsub))
+
+    // Consider removing this—we'll get the custom token when we need it.
+    checkAuth()
+
+    // Let's make sure that the panels are set up right, too.
+    updatePanelOffsets()
+
+    // Cleanup the project when when we leave this route, even if we
+    // change to a different project.
     Router.events.on("routeChangeStart", handleRouteChange)
+
     return () => {
       Router.events.off("routeChangeStart", handleRouteChange)
-      projectState.send("UNLOADED")
-      codePanelState.send("UNLOADED")
+      handleRouteChange()
     }
-  }, [])
+  }, [oid, pid])
 
   return (
     <Layout>
-      <MenuContainer>
-        <Link href={user ? `/u/${user.uid}` : "/"}>
-          <IconButton>
-            <Home />
-          </IconButton>
-        </Link>
-        {user ? (
-          <Button onClick={() => logout()}>Log Out</Button>
-        ) : (
-          <Button onClick={login}>Log in</Button>
-        )}
-      </MenuContainer>
+      <Menu user={user} />
       <Title readOnly={!isOwner} />
-      <ControlsContainer>
-        {user?.authenticated && (
-          <IconButton onClick={() => forkProject(pid, oid, user?.uid)}>
-            {!isOwner && <Text variant="ui">Copy Project</Text>}
-            <Copy />
-          </IconButton>
-        )}
-        <IconButton onClick={() => codePanelState.send("DECREASED_FONT_SIZE")}>
-          <Minus />
-        </IconButton>
-        <IconButton onClick={() => codePanelState.send("INCREASED_FONT_SIZE")}>
-          <Plus />
-        </IconButton>
-        <IconButton onClick={toggle}>
-          <Sun />
-        </IconButton>
-      </ControlsContainer>
+      <Controls
+        oid={oid}
+        pid={oid}
+        uid={uid}
+        isAuthenticated={user?.authenticated}
+      />
       <ContentPanel />
       <MainContainer>
-        <Chart />
+        <ChartView />
         <MainDragArea ref={rMainContainer} />
-        <ViewContainer>
+        <LiveViewContainer>
           <LiveView />
           <Console />
-        </ViewContainer>
+        </LiveViewContainer>
         <DetailsPanel />
         <DragHandleHorizontalRelative
           motionValue={motionValues.main}
@@ -118,7 +101,7 @@ export default function ProjectView({
           offset="main"
         />
       </MainContainer>
-      <CodePanel oid={oid} pid={pid} uid={user?.uid} />
+      <CodePanel oid={oid} pid={pid} uid={uid} />
     </Layout>
   )
 }
@@ -141,19 +124,6 @@ const Layout = styled.div({
   gridTemplateAreas: `
 	"menu    title controls"
 	"content main  code"`,
-})
-
-const MenuContainer = styled.div({
-  gridArea: "menu",
-  display: "flex",
-  alignItems: "center",
-})
-
-const ControlsContainer = styled.div({
-  gridArea: "controls",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "flex-end",
 })
 
 const MainContainer = styled.div({
@@ -181,29 +151,7 @@ const MainDragArea = styled.div({
   height: "100%",
 })
 
-const ViewContainer = styled.div({
+const LiveViewContainer = styled.div({
   gridArea: "view",
   position: "relative",
 })
-
-// function MovingPanel() {
-//   const offsetY = useTransform(
-//     [motionValues.detail, motionValues.console],
-//     ([d, c]: number[]) => {
-//       return Math.min(d - c)
-//     },
-//   )
-//   const height = useTransform(
-//     [motionValues.detail, motionValues.console],
-//     ([d, c]: number[]) => {
-//       return Math.abs(d - c)
-//     },
-//   )
-//   return <MovingPanelBorder style={{}} />
-// }
-
-// const MovingPanelBorder = styled(motion.div, {
-//   bg: "$borderContrast",
-//   width: 2,
-//   pointerEvents: "none",
-// })

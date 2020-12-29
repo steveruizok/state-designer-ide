@@ -1,26 +1,36 @@
 import router from "next/router"
 import * as Types from "types"
 
-import { verifyCookie } from "./auth-server"
 import firebase from "./firebase"
 import db from "./firestore"
+import { ui } from "./local-data"
 
 // New
 
 /* 
-How the backend works
+Database structure
 
-> Users
---> user
-----> Projects
-------> project
---------> id
---------> name
---------> lastModified
---------> code
-----------> state
-----------> view
-----------> static
+users: collection
+  user: document
+    id: string
+    exists: boolean
+    dateCreated: string
+    dateLastLoggedIn: string
+    projects: collection
+      project: document
+        id: string
+        name: string
+        ownerId: string
+        dateCreated: string
+        lastModified: string
+        payloads: {
+          [eventName]: string
+        }
+        code: {
+          state: string
+          view: string
+          static: string
+        }
 */
 
 let customToken: string
@@ -29,10 +39,8 @@ export async function setCustomToken(token: string) {
   customToken = token
 }
 
-async function checkAuth() {
+export async function checkAuth() {
   if (!db.app.auth().currentUser) {
-    console.log("Signing in with custom token")
-
     if (!customToken) {
       console.error("No custom token set!")
     }
@@ -50,7 +58,6 @@ async function checkAuth() {
             "Content-Type": "application/json",
           },
         }).then((d) => d.json())
-        console.log("Got a new custom token", results)
         customToken = results.customToken
         return checkAuth()
       })
@@ -187,13 +194,32 @@ export default function App() {
   }
 }
 
-// Old
+/* ------------------- Users Page ------------------- */
 
-export async function getProjectInfo(
+export async function getUserProjects(uid: string, oid: string) {
+  const snapshot = await db
+    .collection("users")
+    .doc(uid)
+    .collection("projects")
+    .get()
+
+  const projects = snapshot.docs.map((doc) => doc.id)
+
+  return {
+    uid,
+    oid,
+    projects,
+    isOwner: uid === oid,
+  }
+}
+
+/* ------ Used by server while loading project ------ */
+
+export async function getProjectExists(
   pid: string,
   oid: string,
   uid?: string,
-): Promise<Types.ProjectResponse> {
+): Promise<{ isProject: boolean }> {
   const project = await db
     .collection("users")
     .doc(oid)
@@ -202,10 +228,7 @@ export async function getProjectInfo(
     .get()
 
   return {
-    oid,
-    pid,
     isProject: project.exists,
-    isOwner: oid === uid,
   }
 }
 
@@ -221,8 +244,7 @@ export async function getProjectData(
     .get()
 
   if (initial.exists) {
-    const data = initial.data()
-    return { ...data, pid, oid: data.ownerId } as Types.ProjectData
+    return initial.data() as Types.ProjectData
   } else {
     return undefined
   }
@@ -230,23 +252,21 @@ export async function getProjectData(
 
 /* ----------------- Project Editing ---------------- */
 
-export function subscribeToDocSnapshot(
+export async function subscribeToDocSnapshot(
   pid: string,
   oid: string,
   callback: (
     doc: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>,
   ) => void,
 ) {
-  let unsub: any
-
-  getProject(pid, oid)
+  return getProject(pid, oid)
     .get()
     .then((doc) => {
       if (!doc.exists) {
         console.log("No project with that owner / id!")
       }
 
-      unsub = db
+      return db
         .collection("users")
         .doc(oid)
         .collection("projects")
@@ -258,8 +278,6 @@ export function subscribeToDocSnapshot(
           callback(doc)
         })
     })
-
-  return () => unsub && unsub()
 }
 
 export async function saveProjectCode(
@@ -269,12 +287,14 @@ export async function saveProjectCode(
   code: string,
 ) {
   await checkAuth()
-  db.collection("users")
+  return db
+    .collection("users")
     .doc(oid)
     .collection("projects")
     .doc(pid)
     .update({
       [`code.${activeTab}`]: code,
+      payloads: ui.payloads,
     })
 }
 
@@ -284,19 +304,29 @@ export async function savePayloads(
   payloads: Record<string, string>,
 ) {
   await checkAuth()
-  db.collection("users").doc(oid).collection("projects").doc(pid).update({
-    payloads,
-  })
+  return db
+    .collection("users")
+    .doc(oid)
+    .collection("projects")
+    .doc(pid)
+    .update({
+      payloads,
+    })
 }
 
 export async function saveProjectName(pid: string, oid: string, name: string) {
   await checkAuth()
-  db.collection("users").doc(oid).collection("projects").doc(pid).update({
-    name,
-  })
+  return db
+    .collection("users")
+    .doc(oid)
+    .collection("projects")
+    .doc(pid)
+    .update({
+      name,
+    })
 }
 
-/* -------------------- Unsorted -------------------- */
+/* -------------------- Not used yet? -------------------- */
 
 export async function getTemplate(pid: string) {
   const doc = await db.collection("templates").doc(pid).get()
@@ -354,21 +384,6 @@ export async function createProject(
   return await addProject(pid, uid, template.data())
 }
 
-export async function updateProjectCode(
-  pid: string,
-  oid: string,
-  uid: string,
-  code: string,
-) {
-  await checkAuth()
-  // must be owner
-  if (uid === oid) {
-    return updateProject(pid, oid, {
-      code,
-    })
-  }
-}
-
 export async function createNewProject(pid: string, oid: string, uid: string) {
   await checkAuth()
   await createProject(pid, uid, "toggle")
@@ -409,23 +424,6 @@ export async function forkProject(pid: string, oid: string, uid?: string) {
   })
 
   router.push(`/u/${uid}/p/${id}`)
-}
-
-export async function getUserProjects(uid: string, oid: string) {
-  const snapshot = await db
-    .collection("users")
-    .doc(uid)
-    .collection("projects")
-    .get()
-
-  const projects = snapshot.docs.map((doc) => doc.id)
-
-  return {
-    uid,
-    oid,
-    projects,
-    isOwner: uid === oid,
-  }
 }
 
 export async function getUserProjectById(uid: string, pid: string) {

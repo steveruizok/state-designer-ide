@@ -1,6 +1,5 @@
-// @jsx jsx
-import * as React from "react"
-
+import { IconButton } from "components/theme"
+import { styled } from "components/theme"
 import {
   MotionProps,
   MotionValue,
@@ -8,12 +7,11 @@ import {
   useAnimation,
   useMotionValue,
 } from "framer-motion"
-
-import { Compass } from "react-feather"
-import { IconButton } from "components/theme"
-import { styled } from "components/theme"
 import usePreventZooming from "hooks/usePreventZooming"
 import useScaleZooming from "hooks/useScaleZooming"
+// @jsx jsx
+import * as React from "react"
+import { Compass } from "react-feather"
 
 interface CanvasProps extends MotionProps {
   mvScale?: MotionValue<number>
@@ -42,7 +40,7 @@ const Canvas = React.forwardRef<HTMLDivElement, CanvasProps>(
           mvX.set(mvX.get() + info.delta.x)
           mvY.set(mvY.get() + info.delta.y)
         }}
-        onDoubleClick={() => resetScrollPosition()}
+        onDoubleClick={resetScrollPosition}
         {...bind()}
       >
         <CanvasInnerContainer

@@ -9,14 +9,13 @@ export const ui = {
     wrap: false,
     fontSize: 13,
   },
-  content: {
-    payloadsOpen: false,
-  },
+  content: {},
   code: {
     fontSize: 13,
     activeTab: "state",
   },
   panelOffsets: {
+    payloads: 0,
     content: 0,
     main: 0,
     code: 0,
@@ -51,6 +50,7 @@ export const themeState = createState({
 
 export const motionValues: Record<LayoutOffset, MotionValue<number>> = {
   content: motionValue(0),
+  payloads: motionValue(0),
   main: motionValue(0),
   code: motionValue(0),
   detail: motionValue(0),
@@ -66,13 +66,8 @@ function loadLocalUI() {
     Object.assign(ui, saved)
 
     // Update panel offsets
-    for (let key in ui.panelOffsets) {
-      const initial = ui.panelOffsets[key]
-      motionValues[key].set(0)
-      motionValues[key].onChange((v: number) =>
-        savePanelOffset(key as LayoutOffset, initial + v),
-      )
-    }
+    updatePanelOffsets()
+    updateCssVariables()
 
     // Update theme
     if (typeof document !== "undefined") {
@@ -82,6 +77,16 @@ function loadLocalUI() {
     if (themeState) {
       themeState.send("SET_INITIAL_THEME", { theme: ui.theme })
     }
+  }
+}
+
+export function updatePanelOffsets() {
+  for (let key in ui.panelOffsets) {
+    const initial = ui.panelOffsets[key]
+    motionValues[key].set(0)
+    motionValues[key].onChange((v: number) =>
+      savePanelOffset(key as LayoutOffset, initial + v),
+    )
   }
 }
 
@@ -186,12 +191,10 @@ export function setupUI() {
   if (typeof document === "undefined") return
   if (typeof window === "undefined") return
   loadLocalUI()
-  updateCssVariables()
 }
 
 // For initial page load
 
 if (typeof document !== "undefined" && typeof window !== "undefined") {
   loadLocalUI()
-  updateCssVariables()
 }

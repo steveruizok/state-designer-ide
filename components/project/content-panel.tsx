@@ -9,6 +9,7 @@ import payloadsState from "states/payloads"
 import projectState from "states/project"
 import { EventDetails } from "types"
 
+import Payloads from "./content/payloads"
 import { DragHandleHorizontal } from "./drag-handles"
 
 export const CONTENT_COL_WIDTH = 200
@@ -33,19 +34,18 @@ export default function Content({}: ContentProps) {
 
   return (
     <ContentContainer>
-      <ContentTitle align="top">States</ContentTitle>
+      <ContentTitle>States</ContentTitle>
       <ContentSection>
         {states.map((node, i) => (
           <StateItem key={i} node={node} highlight={zapStates && node.active} />
         ))}
       </ContentSection>
-      <ContentTitle align="top">Events</ContentTitle>
+      <ContentTitle>Events</ContentTitle>
       <ContentSection>
         {events.map(([eventName, event], i) => (
           <EventItem key={i} eventName={eventName} event={event} />
         ))}
       </ContentSection>
-      <Spacer />
       <Payloads events={events} />
       <DragHandleHorizontal
         motionValue={motionValues.content}
@@ -58,124 +58,6 @@ export default function Content({}: ContentProps) {
     </ContentContainer>
   )
 }
-
-interface PayloadsProps {
-  events: [string, EventDetails][]
-}
-
-function Payloads({ events }: PayloadsProps) {
-  const localPayloads = useStateDesigner(payloadsState)
-  const [selected, setSelected] = React.useState(
-    events[0]?.[0] || "Select an Event",
-  )
-  const [value, setValue] = React.useState("")
-  const [error, setError] = React.useState("")
-
-  React.useEffect(() => {
-    setValue(localPayloads.data.payloads[selected] || "")
-  }, [selected])
-
-  React.useEffect(() => {
-    setValue(payloadsState.data.payloads[selected])
-  }, [payloadsState.data.payloads])
-
-  function handleChange(code: string) {
-    setValue(code)
-    try {
-      Function("Static", `return ${code}`)(projectState.data.static)
-      setError("")
-
-      const { pid, oid } = projectState.data
-
-      payloadsState.send("UPDATED_PAYLOAD", {
-        eventName: selected,
-        code,
-        pid,
-        oid,
-      })
-    } catch (e) {
-      setError(e.message)
-    }
-  }
-
-  return (
-    <PayloadsContainer>
-      <ContentTitle align="bottom">Event Payloads</ContentTitle>
-      <Select
-        value={selected}
-        onChange={(e) => {
-          setSelected(e.currentTarget.value)
-        }}
-      >
-        <option>Select an Event</option>
-        {events.map(([eventName]) => (
-          <option key={eventName}>{eventName}</option>
-        ))}
-      </Select>
-      <TextArea
-        disabled={selected === "Select an Event"}
-        autoCapitalize="false"
-        autoComplete="false"
-        placeholder="Enter a payload of data to send with the event."
-        value={value}
-        onChange={(e) => handleChange(e.currentTarget.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Tab") {
-            e.preventDefault()
-          }
-        }}
-      />
-      <ErrorOverlay>{error}</ErrorOverlay>
-    </PayloadsContainer>
-  )
-}
-
-const PayloadsContainer = styled.div({
-  display: "grid",
-  gridTemplateRows: "40px 40px 200px",
-  gap: "$1",
-  position: "relative",
-})
-
-const TextArea = styled.textarea({
-  bg: "$muted",
-  border: "none",
-  outline: "none",
-  py: "$2",
-  px: "$1",
-  fontFamily: "$monospace",
-  fontSize: "$1",
-  color: "$text",
-  resize: "none",
-  overflow: "scroll",
-  "&:disabled": {
-    opacity: 0.3,
-  },
-})
-
-const Select = styled.select({
-  bg: "transparent",
-  border: "none",
-  color: "$text",
-  px: 0,
-  mx: "$1",
-  outline: "none",
-  fontSize: "$1",
-  fontFamily: "$body",
-  fontWeight: "bold",
-})
-
-const ErrorOverlay = styled.div({
-  position: "absolute",
-  bottom: 40,
-  width: "100%",
-  pointerEvents: "none",
-  fontFamily: "$monospace",
-  fontSize: "$0",
-  px: "$1",
-  py: "$2",
-  color: "$accent",
-})
 
 interface StateItemProps {
   node: S.State<any, any>
@@ -386,10 +268,10 @@ const Spacer = styled.div({
 const ContentContainer = styled.div({
   gridArea: "content",
   position: "relative",
-  display: "flex",
-  flexDirection: "column",
-  gridTemplateRows: 40,
+  display: "grid",
+  gridTemplateRows: "auto auto auto 1fr auto",
   borderRight: "2px solid $border",
+  borderTop: "2px solid $border",
 })
 
 const ContentTitle = styled.div({
@@ -400,24 +282,14 @@ const ContentTitle = styled.div({
   p: "$1",
   height: 40,
   color: "$text",
-  variants: {
-    align: {
-      top: {
-        borderTop: "2px solid $border",
-        borderBottom: "1px solid $shadow",
-      },
-      bottom: {
-        borderTop: "2px solid $border",
-        borderBottom: "1px solid $shadow",
-      },
-    },
-  },
+  borderBottom: "1px solid $shadow",
 })
 
 const ContentSection = styled.ul({
   m: 0,
   pl: 0,
   overflowY: "scroll",
+  borderBottom: "2px solid $border",
 })
 
 /* --------------------- Helpers -------------------- */

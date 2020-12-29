@@ -1,5 +1,5 @@
 import { getCurrentUser } from "lib/auth-server"
-import { getProjectData, getProjectInfo } from "lib/database"
+import { getProjectData, getProjectExists } from "lib/database"
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 import dynamic from "next/dynamic"
 import * as React from "react"
@@ -7,17 +7,26 @@ import * as Types from "types"
 import { single } from "utils"
 const ProjectView = dynamic(() => import("components/project"))
 
-interface ProjectPageProps {
-  authState: Types.AuthState
-  projectResponse: Types.ProjectResponse
+interface ProjectFoundPageProps {
+  oid: string
+  pid: string
+  uid?: string
+  user: Types.User
+  token?: string
+  isOwner?: boolean
+  isProject: true
   projectData: Types.ProjectData
 }
 
-export default function ProjectPage({
-  authState: { token, user, authenticated },
-  projectResponse: { pid, oid, isOwner },
-  projectData,
-}: ProjectPageProps) {
+interface ProjectNotFoundPageProps {
+  isProject: false
+}
+
+type ProjectPageProps = ProjectFoundPageProps | ProjectNotFoundPageProps
+
+export default function ProjectPage(props: ProjectPageProps) {
+  if (!props.isProject) return null
+  const { oid, pid, uid, user, token, isOwner, projectData } = props
   const [isMounted, setIsMounted] = React.useState(false)
 
   React.useEffect(() => {
@@ -26,13 +35,13 @@ export default function ProjectPage({
 
   return isMounted ? (
     <ProjectView
-      token={token}
-      pid={pid}
       oid={oid}
+      pid={pid}
+      uid={uid}
       user={user}
+      token={token}
       isOwner={isOwner}
-      authenticated={authenticated}
-      project={projectData}
+      projectData={projectData}
     />
   ) : (
     <div>Loading...</div>
@@ -45,19 +54,35 @@ export async function getServerSideProps(
   const { oid, pid } = context.query
 
   const authState = await getCurrentUser(context)
-    .then((d) => d)
-    .catch((e) => {
-      throw Error("Oh no " + e.message)
-    })
 
   const uid = authState.authenticated ? authState.user.uid : null
-  const projectResponse = await getProjectInfo(single(pid), single(oid), uid)
+
+  const { isProject } = await getProjectExists(single(pid), single(oid), uid)
+
+  if (!isProject) {
+    context.res.setHeader("Location", `/u/${oid}/p/${pid}/not-found`)
+    context.res.statusCode = 307
+    return {
+      props: { isProject: false },
+    }
+  }
+
   const projectData = await getProjectData(single(pid), single(oid))
+
   if (projectData) {
     ;(projectData as any).timestamp = null
   }
 
   return {
-    props: { authState, projectResponse, projectData },
+    props: {
+      oid: single(oid),
+      pid: single(pid),
+      uid,
+      user: authState.user,
+      token: authState.token,
+      isOwner: oid === pid,
+      isProject: true,
+      projectData,
+    },
   }
 }

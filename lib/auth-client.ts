@@ -46,7 +46,7 @@ export async function login() {
   router.reload()
 }
 
-export async function logout(redirect?: string) {
+export async function logout(redirect = "") {
   await firebase.auth().signOut()
   await clearUserToken()
   if (redirect) {

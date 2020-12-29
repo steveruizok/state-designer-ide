@@ -1,9 +1,9 @@
+import { styled } from "components/theme"
+import { MotionValue, animate, motion } from "framer-motion"
+import { resetOffsets, ui } from "lib/local-data"
+import router from "next/router"
 import * as React from "react"
 import { LayoutOffset } from "types"
-import { motion, animate, MotionValue } from "framer-motion"
-import { ui, resetOffsets } from "lib/local-data"
-import router from "next/router"
-import { styled } from "components/theme"
 
 interface DragHandleProps {
   motionValue: MotionValue<number>
@@ -22,6 +22,7 @@ const DragHandle = styled(motion.div, {
   position: "absolute",
   zIndex: 999,
   bg: "transparent",
+  // bg: "red",
   variants: {
     direction: {
       horizontal: {

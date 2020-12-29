@@ -2,7 +2,13 @@ import { S } from "@state-designer/react"
 
 // App
 
-export type LayoutOffset = "content" | "main" | "code" | "detail" | "console"
+export type LayoutOffset =
+  | "payloads"
+  | "content"
+  | "main"
+  | "code"
+  | "detail"
+  | "console"
 
 export type CodeEditorTab = "state" | "view" | "static"
 
@@ -33,14 +39,19 @@ export type ProjectResponse = {
 }
 
 export type ProjectData = {
-  pid: string
-  oid: string
+  id: string
   name: string
-  code: string
-  jsx: string
-  theme: string
-  statics: string
-  tests: string
+  ownerId: string
+  dateCreated: string
+  lastModified: string
+  payloads: {
+    [key: string]: string
+  }
+  code: {
+    state: string
+    view: string
+    static: string
+  }
 }
 
 export type AdminResponse = {

@@ -3,6 +3,7 @@ import { styled } from "components/theme"
 import sortBy from "lodash/sortBy"
 import * as React from "react"
 import highlightsState from "states/highlights"
+import { getNodeEvents } from "utils"
 
 import NodeEvents from "./node-events"
 import NodeHeading from "./node-heading"
@@ -14,41 +15,36 @@ interface StateNodeProps {
 export default function StateNode({ node }: StateNodeProps) {
   const rContainer = React.useRef<HTMLDivElement>(null)
   const localHighlight = useStateDesigner(highlightsState)
+
   const isRoot = node.parentType === null
-  const childNodes = sortBy(
-    Object.values(node.states || {}),
-    (n: S.State<any, any>) => !n.isInitial,
-  )
 
   const isHighlit =
     localHighlight.values.highlitStates.find(
       ({ name }) => name === node.name,
     ) !== undefined
 
-  const paths = Object.keys(localHighlight.data.states)
+  const childNodes = sortBy(
+    Object.values(node.states || {}),
+    (n: S.State<any, any>) => !n.isInitial,
+  )
 
-  const highlitChildIndexes: number[] = []
+  // For parallel nodes, find out which children are highlighted
+  // so that we can hide the dividers next to those nodes.
+  const hiddenDividerIndices = new Set<number>([])
 
-  childNodes.forEach((child, i) => {
-    if (paths.includes(child.path)) {
-      highlitChildIndexes.push(i)
-    }
-  })
+  if (node.type === "parallel") {
+    const highlitNodePaths = Object.keys(localHighlight.data.states)
+
+    childNodes.forEach((childNode, i) => {
+      if (highlitNodePaths.includes(childNode.path)) {
+        hiddenDividerIndices.add(i)
+        hiddenDividerIndices.add(i + 1)
+      }
+    })
+  }
 
   // Events
-  const events = Object.entries(node.on)
-
-  if (node.onEvent) {
-    events.unshift(["onEvent", node.onEvent])
-  }
-
-  if (node.onExit) {
-    events.unshift(["onExit", node.onExit])
-  }
-
-  if (node.onEnter) {
-    events.unshift(["onEnter", node.onEnter])
-  }
+  const events = getNodeEvents(node)
 
   // Send ref to highlights state and canvas on mount
   React.useEffect(() => {
@@ -98,9 +94,7 @@ export default function StateNode({ node }: StateNodeProps) {
       <ChildNodesContainer type={node.type}>
         {node.type === "parallel"
           ? childNodes.map((child, i) => {
-              const hideDivider =
-                highlitChildIndexes.includes(i) ||
-                highlitChildIndexes.includes(i + 1)
+              const hideDivider = hiddenDividerIndices.has(i)
 
               return (
                 <React.Fragment key={i}>
@@ -163,15 +157,11 @@ export const NodeContainer = styled.div({
         bg: "transparent",
         "&:nth-of-type(1)": {
           borderRadius: "12px 0px 0px 12px",
-          // borderRightStyle: "dashed",
         },
         "&:nth-child(n+2):nth-last-child(n+2) ": {
           borderRadius: 0,
-          // borderLeftStyle: "dashed",
-          // borderRightStyle: "dashed",
         },
         "&:nth-last-of-type(1)": {
-          // borderLeftStyle: "dashed",
           borderRadius: "0px 12px 12px 0px",
         },
         "&[data-active=true]": {
@@ -193,7 +183,6 @@ export const NodeContainer = styled.div({
       root: {
         p: "$1",
         bg: "$root",
-        // border: "1px solid $active",
         borderRadius: 12,
         boxShadow: "0px 0px 12px -2px $shadow",
       },

@@ -37,3 +37,21 @@ export function findFirstTransitionTarget<D = any>(
 ): S.State<D, any> {
   return findTransitionTargets(rootState, path)[0]
 }
+
+export function getNodeEvents(node: S.State<any, any>) {
+  const events = Object.entries(node.on)
+
+  if (node.onEvent) {
+    events.unshift(["onEvent", node.onEvent])
+  }
+
+  if (node.onExit) {
+    events.unshift(["onExit", node.onExit])
+  }
+
+  if (node.onEnter) {
+    events.unshift(["onEnter", node.onEnter])
+  }
+
+  return events
+}
