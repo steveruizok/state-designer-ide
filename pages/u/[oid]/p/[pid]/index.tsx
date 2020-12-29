@@ -80,7 +80,7 @@ export async function getServerSideProps(
       uid,
       user: authState.user,
       token: authState.token,
-      isOwner: oid === pid,
+      isOwner: oid === uid,
       isProject: true,
       projectData,
     },

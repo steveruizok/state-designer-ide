@@ -79,7 +79,7 @@ export default function ProjectView({
   return (
     <Layout>
       <Menu user={user} />
-      <Title readOnly={!isOwner} />
+      <Title readOnly={oid !== uid} />
       <Controls
         oid={oid}
         pid={oid}
