@@ -62,11 +62,6 @@ export async function updateUserToken() {}
 export async function getCurrentUser(
   context?: GetServerSidePropsContext,
 ): Promise<Types.AuthState> {
-  const cookies = parseCookies(context)
-  const [cookie, customToken] = cookies[
-    process.env.NEXT_PUBLIC_COOKIE_NAME
-  ]?.split("+")
-
   const result = {
     token: "",
     user: null,
@@ -74,21 +69,26 @@ export async function getCurrentUser(
     error: "",
   }
 
+  const cookies = parseCookies(context)
+  const cookie = cookies[process.env.NEXT_PUBLIC_COOKIE_NAME]
+
   if (!cookie) {
     result.error = "No cookie."
     return result
   }
 
-  const authentication = await verifyCookie(cookie)
+  const [sessionCookie, customToken] = cookie.split("+")
+
+  const authentication = await verifyCookie(sessionCookie)
 
   if (!authentication) {
-    result.error = "Could not verify cookie."
+    result.error = "Could not verify session cookie."
     return result
   }
 
   const { user = null, authenticated = false } = authentication
 
-  result.token = customToken
+  result.token = customToken || null
   result.user = user
   result.authenticated = authenticated
 

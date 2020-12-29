@@ -22,6 +22,7 @@ function Chart({ state, zoomedPath }: ChartProps) {
   const captive = useStateDesigner(state)
 
   const { ref: rCanvas, width: mvCanvasWidth } = useMotionResizeObserver()
+
   const {
     ref: rRootNode,
     width: mvStateNodeWidth,
@@ -49,8 +50,10 @@ function Chart({ state, zoomedPath }: ChartProps) {
 
       let scale = 1
 
-      if (nodeWidth > canvasWidth) {
-        scale = (canvasWidth - 16) / nodeWidth
+      const chartPadding = canvasWidth < 320 ? 16 : 32
+
+      if (nodeWidth > canvasWidth - chartPadding) {
+        scale = (canvasWidth - chartPadding) / nodeWidth
       }
 
       rAutoScale.current = scale
@@ -67,9 +70,10 @@ function Chart({ state, zoomedPath }: ChartProps) {
       if (mvScale.get() !== rAutoScale.current) return
 
       let scale = 1
+      const chartPadding = canvasWidth < 320 ? 16 : 32
 
-      if (nodeWidth > canvasWidth) {
-        scale = (canvasWidth - 16) / nodeWidth
+      if (nodeWidth > canvasWidth - chartPadding) {
+        scale = (canvasWidth - chartPadding) / nodeWidth
       }
 
       if (scale === mvScale.get()) return
@@ -84,17 +88,7 @@ function Chart({ state, zoomedPath }: ChartProps) {
 
   // Resize statenode on mount
   React.useEffect(() => {
-    const stateNode = rRootNode.current
-    if (!stateNode) return
-
-    const nodeWidth = mvStateNodeWidth.get()
-    const canvasWidth = mvCanvasWidth.get()
-
-    if (nodeWidth > canvasWidth) {
-      let scale = (canvasWidth - 16) / nodeWidth
-      rAutoScale.current = scale
-      mvScale.set(scale)
-    }
+    requestAnimationFrame(resize)
 
     // Resize on canvas pane resize
     return mvCanvasWidth.onChange(resize)

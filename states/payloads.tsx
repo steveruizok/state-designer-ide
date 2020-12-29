@@ -8,7 +8,9 @@ if (typeof window !== "undefined") {
   const savedUI = window.localStorage.getItem(`sd_ui`)
   if (savedUI !== null) {
     const saved = JSON.parse(savedUI)
-    INITIAL_PAYLOADS = saved.payloads
+    if (saved.payloads) {
+      INITIAL_PAYLOADS = saved.payloads
+    }
   }
 }
 

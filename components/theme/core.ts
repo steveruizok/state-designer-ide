@@ -184,6 +184,9 @@ export const darkTheme = css.theme({
 css.global({
   "*": {
     boxSizing: "border-box",
+    "&::-webkit-scrollbar": {
+      width: "0",
+    },
   },
   html: {
     overscrollBehavior: "none",
