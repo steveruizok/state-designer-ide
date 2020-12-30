@@ -1,6 +1,6 @@
-import uniqueId from "lodash/uniqueId"
-import { createState } from "@state-designer/react"
 import { ToastMessage } from "types"
+import { createState } from "@state-designer/react"
+import uniqueId from "lodash/uniqueId"
 
 const toastState = createState({
   data: {

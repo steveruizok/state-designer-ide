@@ -21,7 +21,6 @@ export interface User {
   uid: string
   email: string
   picture: string
-  authenticated: boolean
 }
 
 export interface AuthState {

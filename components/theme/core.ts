@@ -187,6 +187,8 @@ css.global({
     "&::-webkit-scrollbar": {
       width: "0",
     },
+    p: 0,
+    m: 0,
   },
   html: {
     overscrollBehavior: "none",

@@ -1,8 +1,9 @@
-import router from "next/router"
 import * as Types from "types"
 
-import firebase from "./firebase"
 import db from "./firestore"
+import firebase from "./firebase"
+import pick from "lodash/pick"
+import router from "next/router"
 import { ui } from "./local-data"
 
 // New
@@ -36,11 +37,14 @@ users: collection
 let customToken: string
 
 export async function setCustomToken(token: string) {
+  console.log("setting custom token")
   customToken = token
 }
 
 export async function checkAuth() {
-  if (!db.app.auth().currentUser) {
+  const { currentUser } = db.app.auth()
+
+  if (!currentUser) {
     if (!customToken) {
       console.error("No custom token set!")
     }
@@ -48,7 +52,7 @@ export async function checkAuth() {
     await db.app
       .auth()
       .signInWithCustomToken(customToken)
-      .catch(async (e) => {
+      .catch(async () => {
         console.log("Could not use the current token, time to make a new one.")
         var path = "/api/refresh"
         var url = process.env.NEXT_PUBLIC_BASE_API_URL + path
@@ -59,12 +63,136 @@ export async function checkAuth() {
           },
         }).then((d) => d.json())
         customToken = results.customToken
-        return checkAuth()
       })
+    return checkAuth()
+  } else {
+    return currentUser
   }
 }
 
+export function subscribeToUserAuth(callback: (user: Types.User) => void) {
+  checkAuth()
+  return db.app.auth().onAuthStateChanged((res) => {
+    if (!res) return
+
+    callback({
+      name: res.displayName,
+      email: res.email,
+      uid: res.uid,
+      picture: res.photoURL,
+    })
+  })
+}
+
 // New Users
+
+export function getNewProject(
+  uid: string,
+  dateString: string,
+  name = "Toggle",
+) {
+  return {
+    name,
+    dateCreated: dateString,
+    lastModified: dateString,
+    ownerId: uid,
+    payloads: {
+      TOGGLED: "",
+      DECREMENTED: "",
+      INCREMENTED: "",
+    },
+    code: {
+      state: `export default createState({
+data: {
+	count: 0,
+},
+initial: 'turnedOff',
+states: {
+	turnedOff: {
+		on: {
+			TOGGLED: {
+				to: 'turnedOn',
+			},
+		},
+	},
+	turnedOn: {
+		on: {
+			TOGGLED: {
+				to: 'turnedOff',
+			},
+			DECREMENTED: {
+				unless: 'atMin',
+				do: 'decrement',
+			},
+			INCREMENTED: {
+				unless: 'atMax',
+				do: 'increment',
+			},
+		},
+	},
+},
+conditions: {
+	atMin(data) {
+		return data.count <= 0;
+	},
+	atMax(data) {
+		return data.count >= 10;
+	},
+},
+actions: {
+	increment(data) {
+		data.count++;
+	},
+	decrement(data) {
+		data.count--;
+	},
+},
+});
+`,
+      view: `import state from './state';
+
+export default function App() {
+const local = useStateDesigner(state);
+
+return (
+	<Grid css={{ bg: '$border', textAlign: 'center' }}>
+		<Text>Hello {Static.name}</Text>
+		<Flex>
+			<IconButton
+				disabled={!state.can('DECREMENTED')}
+				onClick={() => state.send('DECREMENTED')}
+			>
+				<Icons.Minus />
+			</IconButton>
+			<Heading1 css={{ p: '$3' }}>{local.data.count}</Heading1>
+			<IconButton
+				disabled={!state.can('INCREMENTED')}
+				onClick={() => local.send('INCREMENTED')}
+			>
+				<Icons.Plus />
+			</IconButton>
+		</Flex>
+		<Button onClick={() => state.send('TOGGLED')}>
+			{local.whenIn({
+				turnedOff: 'Turn On',
+				turnedOn: 'Turn Off',
+			})}
+		</Button>
+	</Grid>
+);
+}
+`,
+      static: `export default function getStatic() {
+return {
+	name: "Kitoko",
+	age: 93,
+	height: 184
+};
+}`,
+    },
+  }
+}
+
 export async function addUser(uid: string) {
   const doc = db.collection("users").doc(uid)
   const initial = await doc.get()
@@ -91,115 +219,16 @@ export async function addUser(uid: string) {
         console.log("Error setting user", uid, e.message)
       })
 
-    await doc.collection("projects").add({
-      name: "Toggle",
-      dateCreated: dateString,
-      lastModified: dateString,
-      ownerId: uid,
-      payloads: {
-        TOGGLED: "",
-        DECREMENTED: "",
-        INCREMENTED: "",
-      },
-      code: {
-        state: `export default createState({
-  data: {
-    count: 0,
-  },
-  initial: 'turnedOff',
-  states: {
-    turnedOff: {
-      on: {
-        TOGGLED: {
-          to: 'turnedOn',
-        },
-      },
-    },
-    turnedOn: {
-      on: {
-        TOGGLED: {
-          to: 'turnedOff',
-        },
-        DECREMENTED: {
-          unless: 'atMin',
-          do: 'decrement',
-        },
-        INCREMENTED: {
-          unless: 'atMax',
-          do: 'increment',
-        },
-      },
-    },
-  },
-  conditions: {
-    atMin(data) {
-      return data.count <= 0;
-    },
-    atMax(data) {
-      return data.count >= 10;
-    },
-  },
-  actions: {
-    increment(data) {
-      data.count++;
-    },
-    decrement(data) {
-      data.count--;
-    },
-  },
-});
-`,
-        view: `import state from './state';
-
-export default function App() {
-  const local = useStateDesigner(state);
-
-  return (
-    <Grid css={{ bg: '$border', textAlign: 'center' }}>
-      <Text>Hello {Static.name}</Text>
-      <Flex>
-        <IconButton
-          disabled={!state.can('DECREMENTED')}
-          onClick={() => state.send('DECREMENTED')}
-        >
-          <Icons.Minus />
-        </IconButton>
-        <Heading1 css={{ p: '$3' }}>{local.data.count}</Heading1>
-        <IconButton
-          disabled={!state.can('INCREMENTED')}
-          onClick={() => local.send('INCREMENTED')}
-        >
-          <Icons.Plus />
-        </IconButton>
-      </Flex>
-      <Button onClick={() => state.send('TOGGLED')}>
-        {local.whenIn({
-          turnedOff: 'Turn On',
-          turnedOn: 'Turn Off',
-        })}
-      </Button>
-    </Grid>
-  );
-}
-`,
-        static: `export default function getStatic() {
-  return {
-    name: "Kitoko",
-    age: 93,
-    height: 184
-  };
-}`,
-      },
-    })
+    await doc.collection("projects").add(getNewProject(uid, dateString))
   }
 }
 
 /* ------------------- Users Page ------------------- */
 
-export async function getUserProjects(uid: string, oid: string) {
+export async function getUserProjects(oid: string, uid: string) {
   const snapshot = await db
     .collection("users")
-    .doc(uid)
+    .doc(oid)
     .collection("projects")
     .get()
 
@@ -208,11 +237,26 @@ export async function getUserProjects(uid: string, oid: string) {
   )
 
   return {
-    uid,
     oid,
     projects,
     isOwner: uid === oid,
   }
+}
+
+export async function subscribeToProjects(
+  uid: string,
+  oid: string,
+  callback: (projects: Types.ProjectData[]) => void,
+) {
+  const ref = db.collection("users").doc(oid).collection("projects")
+
+  return ref.onSnapshot((snapshot) => {
+    callback(
+      snapshot.docs.map(
+        (doc) => ({ id: doc.id, ...doc.data() } as Types.ProjectData),
+      ),
+    )
+  })
 }
 
 /* ------ Used by server while loading project ------ */
@@ -238,15 +282,15 @@ export async function getProjectData(
   pid: string,
   oid: string,
 ): Promise<Types.ProjectData> {
-  const initial = await db
+  const doc = await db
     .collection("users")
     .doc(oid)
     .collection("projects")
     .doc(pid)
     .get()
 
-  if (initial.exists) {
-    return initial.data() as Types.ProjectData
+  if (doc.exists) {
+    return { id: doc.id, ...doc.data() } as Types.ProjectData
   } else {
     return undefined
   }
@@ -254,32 +298,20 @@ export async function getProjectData(
 
 /* ----------------- Project Editing ---------------- */
 
-export async function subscribeToDocSnapshot(
+export async function subscribeToProject(
   pid: string,
   oid: string,
-  callback: (
-    doc: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>,
-  ) => void,
+  callback: (doc: Types.ProjectData) => void,
 ) {
-  return getProject(pid, oid)
-    .get()
-    .then((doc) => {
-      if (!doc.exists) {
-        console.log("No project with that owner / id!")
-      }
+  const docRef = db.collection("users").doc(oid).collection("projects").doc(pid)
+  const doc = await docRef.get()
 
-      return db
-        .collection("users")
-        .doc(oid)
-        .collection("projects")
-        .doc(pid)
-        .onSnapshot((doc) => {
-          if (!doc.exists) {
-            return
-          }
-          callback(doc)
-        })
-    })
+  const exists = doc.exists
+  if (!exists) return
+
+  return docRef.onSnapshot((doc) =>
+    callback({ id: doc.id, ...doc.data() } as Types.ProjectData),
+  )
 }
 
 export async function saveProjectCode(
@@ -288,7 +320,13 @@ export async function saveProjectCode(
   activeTab: Types.CodeEditorTab,
   code: string,
 ) {
-  await checkAuth()
+  const user = await checkAuth()
+
+  if (!user) {
+    console.log("User is not logged in!")
+    return
+  }
+
   return db
     .collection("users")
     .doc(oid)
@@ -306,7 +344,13 @@ export async function savePayloads(
   oid: string,
   payloads: Record<string, string>,
 ) {
-  await checkAuth()
+  const user = await checkAuth()
+
+  if (!user) {
+    console.log("User is not logged in!")
+    return
+  }
+
   return db
     .collection("users")
     .doc(oid)
@@ -319,7 +363,7 @@ export async function savePayloads(
 }
 
 export async function saveProjectName(pid: string, oid: string, name: string) {
-  await checkAuth()
+  const user = await checkAuth()
   return db
     .collection("users")
     .doc(oid)
@@ -331,13 +375,45 @@ export async function saveProjectName(pid: string, oid: string, name: string) {
     })
 }
 
-export async function forkProject(pid: string, oid: string, uid?: string) {
-  await checkAuth()
-  const project = await getProject(pid, oid).get()
+export async function deleteProject(pid: string) {
+  const user = await checkAuth()
+
+  if (!user) {
+    console.log("User is not logged in!")
+    return
+  }
+
+  await db
+    .collection("users")
+    .doc(user.uid)
+    .collection("projects")
+    .doc(pid)
+    .delete()
+}
+
+export async function duplicateProject(
+  pid: string,
+  oid: string,
+  newName?: string,
+) {
+  const user = await checkAuth()
+
+  const project = await db
+    .collection("users")
+    .doc(oid)
+    .collection("projects")
+    .doc(pid)
+    .get()
+
   const dateString = new Date().toUTCString()
 
+  if (!user) {
+    console.log("User is not logged in!")
+    return
+  }
+
   if (!project.exists) {
-    console.log("That project doesn't exist!")
+    console.log("That project does not exist!")
     return
   }
 
@@ -345,16 +421,46 @@ export async function forkProject(pid: string, oid: string, uid?: string) {
 
   const docRef = await db
     .collection("users")
-    .doc(uid)
+    .doc(user.uid)
     .collection("projects")
     .add({
       ...data,
       dateCreated: dateString,
       lastModified: dateString,
-      owner: uid,
+      owner: user.uid,
+      name: newName || data.name,
     })
 
-  router.push(`/u/${uid}/p/${docRef.id}`)
+  return getProjectData(docRef.id, user.uid)
+}
+
+export async function duplicateProjectAndPush(pid: string, oid: string) {
+  const project = await duplicateProject(pid, oid)
+  if (!project) {
+    console.log("Could not duplicate project")
+    return
+  }
+
+  router.push(`/u/${project.ownerId}/p/${project.id}`)
+}
+
+export async function createNewProject(name: string) {
+  const user = await checkAuth()
+
+  if (!user) {
+    console.log("User is not logged in!")
+    return
+  }
+
+  const dateString = new Date().toUTCString()
+
+  const docRef = await db
+    .collection("users")
+    .doc(user.uid)
+    .collection("projects")
+    .add(getNewProject(user.uid, dateString, name))
+
+  router.push(`/u/${user.uid}/p/${docRef.id}`)
 }
 
 /* -------------------- Not used yet -------------------- */
@@ -415,11 +521,11 @@ export async function createProject(
   return await addProject(pid, uid, template.data())
 }
 
-export async function createNewProject(pid: string, oid: string, uid: string) {
-  await checkAuth()
-  await createProject(pid, uid, "toggle")
-  router.push(`/${uid}/${pid}`)
-}
+// export async function createNewProject(pid: string, oid: string, uid: string) {
+//   await checkAuth()
+//   await createProject(pid, uid, "toggle")
+//   router.push(`/${uid}/${pid}`)
+// }
 
 export async function getUserProjectById(uid: string, pid: string) {
   const project = await db

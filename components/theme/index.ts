@@ -75,6 +75,8 @@ export const Text = styled.p({
       ui: {
         fontSize: "$1",
         lineHeight: "$ui",
+        m: 0,
+        p: 0,
       },
       detail: {
         fontSize: "$1",
@@ -92,7 +94,7 @@ export const Input = styled.input({
   color: "$text",
   bg: "$muted",
   px: "$2",
-  py: "$2",
+  py: "$1",
   border: "none",
   outline: "none",
   "&:focus": {
@@ -177,7 +179,9 @@ export const Button = styled.button({
   fontWeight: "bold",
   fontFamily: "$body",
   lineHeight: "$ui",
-  px: "$1",
+  px: "$2",
+  py: "$2",
+  borderRadius: "$1",
   bg: "transparent",
   border: "none",
   outline: "none",
@@ -208,7 +212,29 @@ export const Button = styled.button({
       },
     },
     variant: {
+      cta: {
+        color: "$accent",
+        ml: "$2",
+        bg: "$muted",
+        height: 40,
+      },
+      dialogWide: {
+        borderTop: "1px solid $border",
+        mx: "-$2",
+        justifyContent: "center",
+      },
+      delete: {
+        color: "$inactive",
+        textAlign: "center",
+        justifyContent: "center",
+        position: "absolute",
+        width: "100%",
+        bottom: -96,
+        fontWeight: "normal",
+      },
       iconLeft: {
+        px: "$1",
+        py: 0,
         "& > svg": {
           mr: "$0",
         },
@@ -220,7 +246,7 @@ export const Button = styled.button({
         fontWeight: "bold",
         fontFamily: "$body",
         width: "fit-content",
-        borderRadius: 2,
+        borderRadius: "$0",
         color: "$text",
         cursor: "pointer",
         outline: "none",

@@ -1,22 +1,32 @@
 import * as React from "react"
+import * as Types from "types"
+
 import {
-  styled,
+  Button,
   Heading4,
-  Select,
-  Text,
   IconButton,
   Input,
-  Button,
+  Label,
+  Select,
+  Text,
+  styled,
 } from "components/theme"
-import { Home, Sun } from "react-feather"
-import { logout, login } from "lib/auth-client"
-import { getCurrentUser, redirectToAuthPage } from "lib/auth-server"
-import { getUserProjects } from "lib/database"
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
-import Link from "next/link"
+import { Home, MoreHorizontal, Sun, X } from "react-feather"
+import { getCurrentUser, redirectToAuthPage } from "lib/auth-server"
+import {
+  getUserProjects,
+  setCustomToken,
+  subscribeToProjects,
+} from "lib/database"
+import { login, logout } from "lib/auth-client"
+
 import Head from "next/head"
+import Link from "next/link"
+import { Trigger } from "@radix-ui/react-dialog"
+import dialogState from "states/dialog"
+import { single } from "utils"
 import useTheme from "hooks/useTheme"
-import * as Types from "types"
 
 let INITIAL_SORT = "Date"
 let INITIAL_SORT_DIRECTION = "Descending"
@@ -26,6 +36,9 @@ interface UserNotFoundProps {
 }
 
 interface UserFoundProps {
+  uid: string
+  oid: string
+  token: string
   isUser: true
   user: Types.User
   projects: Types.ProjectData[]
@@ -35,14 +48,33 @@ type UserPageProps = UserFoundProps | UserNotFoundProps
 
 export default function UserPage(props: UserPageProps) {
   if (!props.isUser) return null
+
+  const { uid, oid, token } = props
+
+  const { toggle } = useTheme()
+  const [user, setUser] = React.useState(props.user)
+  const [projects, setProjects] = React.useState(props.projects)
+
+  React.useEffect(() => {
+    let unsub: any
+
+    setCustomToken(token)
+
+    subscribeToProjects(uid, oid, (projects) => {
+      setProjects(projects)
+    }).then((cb) => (unsub = cb))
+    return () => {
+      unsub && unsub()
+    }
+  }, [])
+
   const [sortBy, setSortBy] = React.useState(INITIAL_SORT)
   const [sortDirection, setSortDirection] = React.useState(
     INITIAL_SORT_DIRECTION,
   )
   const [filter, setFilter] = React.useState(null)
 
-  const { toggle } = useTheme()
-  const { user, projects } = props
+  console.log(projects)
 
   let sortedProjects = projects.map((p) => ({
     ...p,
@@ -105,7 +137,7 @@ export default function UserPage(props: UserPageProps) {
       <MainContainer>
         <ListControls>
           <ListControlsGroup>
-            <Text variant="ui">Sort by</Text>
+            Sort by
             <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
               <option>Date</option>
               <option>Name</option>
@@ -114,8 +146,8 @@ export default function UserPage(props: UserPageProps) {
               value={sortDirection}
               onChange={(e) => setSortDirection(e.target.value)}
             >
-              <option>Ascending</option>
-              <option>Descending</option>
+              <option value="Ascending">Ascending</option>
+              <option value="Descending">Descending</option>
             </Select>
           </ListControlsGroup>
           <ListControlsGroup>
@@ -124,11 +156,17 @@ export default function UserPage(props: UserPageProps) {
               onChange={(e) => setFilter(e.currentTarget.value)}
               placeholder="Filter"
             />
+            <Button
+              variant="cta"
+              onClick={() => dialogState.send("OPENED_CREATE_PROJECT_DIALOG")}
+            >
+              Create New
+            </Button>
           </ListControlsGroup>
         </ListControls>
         <ul>
           {sortedProjects.length > 0 ? (
-            sortedProjects.map(({ id, name, dateCreated, lastModified }) => (
+            sortedProjects.map(({ id, name, dateCreated, lastModified }, i) => (
               <li key={id}>
                 <ProjectLink>
                   <Link href={`/u/${user.uid}/p/${id}`}>
@@ -141,6 +179,38 @@ export default function UserPage(props: UserPageProps) {
                       </Text>
                     </a>
                   </Link>
+                  <Select
+                    value={"Options"}
+                    onChange={(e) => {
+                      const project = projects.find((p) => p.id === id)
+
+                      switch (e.currentTarget.value) {
+                        case "Rename": {
+                          dialogState.send("OPENED_PROJECT_RENAME_DIALOG", {
+                            project,
+                          })
+                          break
+                        }
+                        case "Duplicate": {
+                          dialogState.send("OPENED_PROJECT_DUPLICATE_DIALOG", {
+                            project,
+                          })
+                          break
+                        }
+                        case "Delete": {
+                          dialogState.send("OPENED_PROJECT_DELETE_DIALOG", {
+                            project,
+                          })
+                          break
+                        }
+                      }
+                    }}
+                  >
+                    <option disabled>Options</option>
+                    <option>Rename</option>
+                    <option>Duplicate</option>
+                    <option>Delete</option>
+                  </Select>
                 </ProjectLink>
               </li>
             ))
@@ -165,11 +235,22 @@ export async function getServerSideProps(
     return { props: { isUser: false } }
   }
 
+  const {
+    query: { oid },
+  } = context
+
   const { uid } = authState.user
-  const data = await getUserProjects(uid, uid)
+  const data = await getUserProjects(single(oid), uid)
 
   return {
-    props: { isUser: true, user: authState.user, projects: data.projects },
+    props: {
+      isUser: true,
+      user: authState.user,
+      projects: data.projects,
+      oid: data.oid,
+      uid: authState.user.uid,
+      token: authState.token,
+    },
   }
 }
 
@@ -181,29 +262,34 @@ const Layout = styled.div({
 		"menu title controls"
 		"sidebar main main"
 	`,
+  minHeight: "100vh",
 })
 
 const MenuContainer = styled.div({
   gridArea: "menu",
   display: "flex",
   alignItems: "center",
+  borderBottom: "2px solid $shadow",
 })
 
 const Title = styled.div({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
+  borderBottom: "2px solid $shadow",
 })
 
 const SidebarContainer = styled.div({
   gridArea: "sidebar",
   display: "flex",
+  borderRight: "2px solid $shadow",
 })
 
 const MainContainer = styled.div({
   gridArea: "main",
   "& ul": {
-    p: 0,
+    pl: "$3",
+    pr: "$1",
     m: 0,
     width: "100%",
     listStyle: "none",
@@ -212,6 +298,10 @@ const MainContainer = styled.div({
     flexGrow: 2,
     p: 0,
     m: 0,
+    borderBottom: "1px solid transparent",
+    "&:nth-last-of-type(n+2):not(:hover)": {
+      borderBottom: "1px solid $shadowLight",
+    },
   },
 })
 
@@ -219,15 +309,24 @@ const ListControls = styled.div({
   display: "flex",
   pt: "$2",
   pb: "$3",
+  pl: "$3",
   justifyContent: "space-between",
 })
 
 const ListControlsGroup = styled.div({
   display: "flex",
   alignItems: "center",
-  px: "$2",
+  pr: "$1",
+  fontSize: "$1",
+  fontWeight: "normal",
   "& select": {
     ml: "$1",
+    height: 40,
+    lineHeight: 1,
+    borderRadius: "$1",
+    "&:hover": {
+      bg: "$shadowLight",
+    },
   },
   "& input": {
     ml: "$1",
@@ -243,16 +342,18 @@ const ControlsContainer = styled.div({
   display: "flex",
   alignItems: "center",
   justifyContent: "flex-end",
+  borderBottom: "1px solid $shadow",
 })
 
 const ProjectLink = styled.div({
   width: "100%",
   display: "flex",
+  alignItems: "center",
   "& > p": {
-    px: "$2",
     py: "$2",
   },
   a: {
+    ml: "-$2",
     px: "$2",
     py: "$2",
     borderRadius: "$2",
@@ -272,5 +373,27 @@ const ProjectLink = styled.div({
         opacity: 0.8,
       },
     },
+  },
+})
+
+const StyledTrigger = styled(Trigger, {
+  cursor: "pointer",
+  bg: "transparent",
+  outline: "none",
+  border: "none",
+  fontFamily: "$body",
+  fontSize: "$1",
+  color: "$text",
+  py: "$2",
+  px: "$1",
+  height: "100%",
+  "&:hover svg": {
+    bg: "$shadowLight",
+  },
+  svg: {
+    borderRadius: "$1",
+    p: "$1",
+    height: 40,
+    width: 40,
   },
 })

@@ -1,9 +1,11 @@
-import { useStateDesigner } from "@state-designer/react"
-import { styled } from "components/theme"
-import { saveProjectName } from "lib/database"
-import Head from "next/head"
 import * as React from "react"
+
+import Head from "next/head"
 import projectState from "states/project"
+import { saveProjectName } from "lib/database"
+import { styled } from "components/theme"
+import toastState from "states/toast"
+import { useStateDesigner } from "@state-designer/react"
 
 interface TitleProps {
   readOnly: boolean
@@ -12,9 +14,19 @@ interface TitleProps {
 export default function Title({ readOnly }: TitleProps) {
   const local = useStateDesigner(projectState)
   const [name, setName] = React.useState(local.data.name)
+
+  const { oid, pid } = local.data
+
   React.useEffect(() => {
     if (local.data.name !== name) setName(local.data.name)
   }, [local.data.name])
+
+  function handleSave() {
+    if (name !== local.data.name) {
+      saveProjectName(pid, oid, name)
+      toastState.send("ADDED_TOAST", { message: "Renamed Project" })
+    }
+  }
 
   return (
     <TitleContainer>
@@ -25,9 +37,13 @@ export default function Title({ readOnly }: TitleProps) {
         value={name}
         readOnly={readOnly}
         onChange={(e) => {
-          const { oid, pid } = local.data
           setName(e.currentTarget.value)
-          saveProjectName(pid, oid, e.currentTarget.value)
+        }}
+        onBlur={handleSave}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleSave()
+          }
         }}
       />
     </TitleContainer>

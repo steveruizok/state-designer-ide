@@ -1,8 +1,9 @@
-import { IconButton, Text, styled } from "components/theme"
-import useTheme from "hooks/useTheme"
-import { forkProject } from "lib/database"
 import { Copy, Minus, Plus, Sun } from "react-feather"
+import { IconButton, Text, styled } from "components/theme"
+
 import codePanelState from "states/code-panel"
+import { duplicateProjectAndPush } from "lib/database"
+import useTheme from "hooks/useTheme"
 
 interface ControlsProps {
   oid: string
@@ -11,18 +12,12 @@ interface ControlsProps {
   isAuthenticated?: boolean
 }
 
-export default function Controls({
-  oid,
-  pid,
-  uid,
-  isAuthenticated,
-}: ControlsProps) {
+export default function Controls({ oid, pid, uid }: ControlsProps) {
   const { toggle } = useTheme()
-  console.log(pid, oid, uid)
   return (
     <ControlsContainer>
-      {isAuthenticated && (
-        <IconButton onClick={() => forkProject(pid, oid, uid)}>
+      {uid && (
+        <IconButton onClick={() => duplicateProjectAndPush(pid, oid)}>
           {!(oid === pid) && <Text variant="ui">Copy Project</Text>}
           <Copy />
         </IconButton>

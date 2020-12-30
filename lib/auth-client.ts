@@ -1,9 +1,8 @@
 // /lib/auth-client.ts
 
-import router from "next/router"
-
 import { addUser } from "./database"
 import firebase from "./firebase"
+import router from "next/router"
 
 async function clearUserToken() {
   var path = "/api/logout"

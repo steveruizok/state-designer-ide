@@ -1,10 +1,10 @@
-import pick from "lodash/pick"
-import { GetServerSidePropsContext } from "next"
-import { parseCookies } from "nookies"
 import * as Types from "types"
 
-import firebase from "./firebase"
+import { GetServerSidePropsContext } from "next"
 import admin from "./firebase-admin"
+import firebase from "./firebase"
+import { parseCookies } from "nookies"
+import pick from "lodash/pick"
 
 export async function verifyCookie(
   cookie: string,
@@ -22,7 +22,6 @@ export async function verifyCookie(
     .verifySessionCookie(cookie, true /** checkRevoked */)
     .then((decodedClaims: { [key: string]: any }) => {
       user = pick(decodedClaims, "name", "email", "picture", "uid")
-      user.authenticated = true
       authenticated = true
     })
     .catch(() => {

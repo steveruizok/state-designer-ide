@@ -1,22 +1,23 @@
-import { styled } from "components/theme"
-import { checkAuth, setCustomToken, subscribeToDocSnapshot } from "lib/database"
-import { motionValues, updatePanelOffsets } from "lib/local-data"
-import Router from "next/router"
 import * as React from "react"
-import codePanelState from "states/code-panel"
-import projectState from "states/project"
 import * as Types from "types"
+
+import ContentPanel, { CONTENT_COL_WIDTH } from "./content-panel"
+import DetailsPanel, { DETAILS_ROW_HEIGHT } from "./details-panel"
+import { checkAuth, setCustomToken, subscribeToProject } from "lib/database"
+import { motionValues, updatePanelOffsets } from "lib/local-data"
 
 import ChartView from "./chart-view"
 import CodePanel from "./code-panel"
 import Console from "./console-panel"
-import ContentPanel, { CONTENT_COL_WIDTH } from "./content-panel"
 import Controls from "./controls"
-import DetailsPanel, { DETAILS_ROW_HEIGHT } from "./details-panel"
 import { DragHandleHorizontalRelative } from "./drag-handles"
 import LiveView from "./live-view"
 import Menu from "./menu"
+import Router from "next/router"
 import Title from "./title"
+import codePanelState from "states/code-panel"
+import projectState from "states/project"
+import { styled } from "components/theme"
 
 export const CODE_COL_WIDTH = 320
 
@@ -52,9 +53,9 @@ export default function ProjectView({
     setCustomToken(token)
 
     // Subscribe to the firebase document on mount.
-    subscribeToDocSnapshot(pid, oid, (doc) => {
+    subscribeToProject(pid, oid, (source) => {
       projectState.send("SOURCE_UPDATED", {
-        source: doc.data(),
+        source,
         oid,
         pid,
       })
@@ -80,12 +81,7 @@ export default function ProjectView({
     <Layout>
       <Menu user={user} />
       <Title readOnly={oid !== uid} />
-      <Controls
-        oid={oid}
-        pid={pid}
-        uid={uid}
-        isAuthenticated={user?.authenticated}
-      />
+      <Controls oid={oid} pid={pid} uid={uid} />
       <ContentPanel />
       <MainContainer>
         <ChartView />
