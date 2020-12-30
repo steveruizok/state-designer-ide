@@ -18,7 +18,7 @@ export default function Title({ oid, pid, readOnly }: TitleProps) {
   return (
     <TitleContainer>
       <Head>
-        <title>{name} - State Designer</title>
+        <title>{project?.name} - State Designer</title>
       </Head>
       <Button
         onClick={() =>
