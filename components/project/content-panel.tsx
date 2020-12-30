@@ -1,16 +1,17 @@
-import { S, useStateDesigner } from "@state-designer/react"
-import { range } from "components/static/utils"
-import { styled } from "components/theme"
-import { motionValues } from "lib/local-data"
 import * as React from "react"
+
 import { Circle, Disc, MinusCircle } from "react-feather"
+import { S, useStateDesigner } from "@state-designer/react"
+
+import { DragHandleHorizontal } from "./drag-handles"
+import { EventDetails } from "types"
+import Payloads from "./content/payloads"
 import highlightsState from "states/highlights"
+import { motionValues } from "lib/local-data"
 import payloadsState from "states/payloads"
 import projectState from "states/project"
-import { EventDetails } from "types"
-
-import Payloads from "./content/payloads"
-import { DragHandleHorizontal } from "./drag-handles"
+import { range } from "components/static/utils"
+import { styled } from "components/theme"
 
 export const CONTENT_COL_WIDTH = 200
 
@@ -64,14 +65,15 @@ interface StateItemProps {
   highlight: boolean
 }
 
-function StateItem({ node, highlight }: StateItemProps) {
+function StateItem({ node }: StateItemProps) {
   useStateDesigner(projectState.data.captive)
-  const localHighlight = useStateDesigner(highlightsState)
 
-  const isHighlit =
-    localHighlight.values.highlitStates.find(
-      ({ name }) => name === node.name,
-    ) !== undefined
+  // const localHighlight = useStateDesigner(highlightsState)
+
+  // const isHighlit =
+  //   localHighlight.values.highlitStates.find(
+  //     ({ name }) => name === node.name,
+  //   ) !== undefined
 
   return (
     <ContentItem

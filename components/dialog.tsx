@@ -38,7 +38,7 @@ export default function DialogManager({}: DialogProps) {
 }
 
 const StyledOverlay = styled(Dialog.Overlay, {
-  backgroundColor: "rgba(0, 0, 0, .40)",
+  backgroundColor: "rgba(0, 0, 0, .5)",
   position: "fixed",
   top: 0,
   right: 0,

@@ -536,6 +536,17 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
+"@radix-ui/react-checkbox@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-checkbox/-/react-checkbox-0.0.1.tgz#57e5363ae32690cb69263623b185884a61b66eb2"
+  integrity sha512-RUyBqE5bOf0kTLxim6sapY0s4ZEgH3TArBgKFZNEmWE93S5HPGIdJyzCzRkMGN06r4n61h0dZVbXJ/lrO03XfA==
+  dependencies:
+    "@radix-ui/react-label" "0.0.1"
+    "@radix-ui/react-polymorphic" "0.0.1"
+    "@radix-ui/react-presence" "0.0.1"
+    "@radix-ui/react-utils" "0.0.1"
+    "@radix-ui/utils" "0.0.1"
+
 "@radix-ui/react-dialog@^0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-dialog/-/react-dialog-0.0.1.tgz#a772a075cd1a4cd232cebe7fb74b41c3c3990f76"
@@ -569,6 +580,15 @@
   resolved "https://registry.yarnpkg.com/@radix-ui/react-focus-scope/-/react-focus-scope-0.0.1.tgz#6c36effb40e1967b89d82adc5ac6c4404f700eac"
   integrity sha512-a5rYPetx+JYfOZpeWIfotaCaxVaQRiHYUsZmCiJjWUpJn3M/LaPlfl+OGz8zibWniZkB1HXarUD6SBofcTS0ug==
   dependencies:
+    "@radix-ui/react-utils" "0.0.1"
+    "@radix-ui/utils" "0.0.1"
+
+"@radix-ui/react-label@0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-label/-/react-label-0.0.1.tgz#e857fa258768d560e6aae42d5437519ec23768f1"
+  integrity sha512-q1JC+ULda9PVabrlJim5yM5EA6L8whCQWuDOLGLJpqkAHMRvcFpmCHJCmKH92JIt7g5hX4mCGTNCtTdFDZNvnA==
+  dependencies:
+    "@radix-ui/react-polymorphic" "0.0.1"
     "@radix-ui/react-utils" "0.0.1"
     "@radix-ui/utils" "0.0.1"
 

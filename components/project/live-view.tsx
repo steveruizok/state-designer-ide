@@ -1,46 +1,45 @@
-import { useStateDesigner } from "@state-designer/react"
-import Loading from "components/project/loading"
-import Colors from "components/static/colors"
+import * as Icons from "react-feather"
+import * as Motion from "framer-motion"
+import * as React from "react"
 import * as Utils from "components/static/utils"
+
 import {
   Box,
+  Checkbox,
+  Container,
+  Divider,
   Flex,
   Grid,
-  Heading1,
-  Heading2,
-  Heading3,
-  Heading4,
-  Heading5,
-  Heading6,
+  Heading,
   Input,
+  Label,
   PlainButton,
   PlainIconButton,
   Text,
   css,
   styled,
 } from "components/theme"
-import * as Motion from "framer-motion"
-import { motion } from "framer-motion"
-import useTheme from "hooks/useTheme"
-import { fakePrint, printFromView } from "lib/eval"
-import * as React from "react"
-import * as Icons from "react-feather"
 import { LiveError, LivePreview, LiveProvider } from "react-live"
-import liveViewState from "states/live-view"
-import projectState from "states/project"
+import { fakePrint, printFromView } from "lib/eval"
 
+import Colors from "components/static/colors"
 import ErrorBoundary from "./error-boundary"
+import Loading from "components/project/loading"
+import liveViewState from "states/live-view"
+import { motion } from "framer-motion"
+import projectState from "states/project"
+import { useStateDesigner } from "@state-designer/react"
+import useTheme from "hooks/useTheme"
 
 const Components = {
   Box,
   Grid,
   Flex,
-  Heading1,
-  Heading2,
-  Heading3,
-  Heading4,
-  Heading5,
-  Heading6,
+  Label,
+  Divider,
+  Container,
+  Checkbox,
+  Heading,
   Input,
   IconButton: PlainIconButton,
   Button: PlainButton,

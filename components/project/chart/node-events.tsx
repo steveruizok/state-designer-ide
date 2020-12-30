@@ -1,10 +1,12 @@
-import { S, useStateDesigner } from "@state-designer/react"
-import { Button, styled } from "components/theme"
 import * as React from "react"
+
+import { Button, styled } from "components/theme"
+import { S, useStateDesigner } from "@state-designer/react"
+
+import { EventDetails } from "types"
 import highlightsState from "states/highlights"
 import payloadsState from "states/payloads"
 import projectState from "states/project"
-import { EventDetails } from "types"
 
 interface NodeEventsProps {
   node: S.State<any, any>
@@ -145,9 +147,7 @@ const NodeEventsContainer = styled.div({
   gap: 1,
   variants: {
     type: {
-      leaf: {
-        pb: "$0",
-      },
+      leaf: {},
       branch: {},
       parallel: {},
     },

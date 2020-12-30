@@ -3,7 +3,7 @@ import * as Types from "types"
 import {
   createNewProject,
   deleteProject,
-  duplicateProject,
+  duplicateProjectAndPush,
   saveProjectName,
 } from "lib/database"
 
@@ -95,7 +95,7 @@ const dialogState = createState({
     },
     duplicateProject(data) {
       const { project, currentName } = data.project
-      duplicateProject(project.id, project.ownerId, currentName)
+      duplicateProjectAndPush(project.id, project.ownerId, currentName)
     },
     deleteProject(data) {
       const { project } = data.project

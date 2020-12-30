@@ -1,18 +1,19 @@
-import { useStateDesigner } from "@state-designer/react"
+import * as React from "react"
+
+import { AlertCircle, RefreshCcw, Save } from "react-feather"
 import { IconButton, TabButton, styled } from "components/theme"
-import useCustomEditor from "hooks/useCustomEditor"
 import { motionValues, ui } from "lib/local-data"
 import {
   useMonacoContext,
   useTextModel,
 } from "node_modules/use-monaco/dist/cjs/use-monaco"
-import * as React from "react"
-import { AlertCircle, RefreshCcw, Save } from "react-feather"
+
+import { CODE_COL_WIDTH } from "./index"
+import { DragHandleHorizontal } from "./drag-handles"
 import codePanelState from "states/code-panel"
 import highlightsState from "states/highlights"
-
-import { DragHandleHorizontal } from "./drag-handles"
-import { CODE_COL_WIDTH } from "./index"
+import useCustomEditor from "hooks/useCustomEditor"
+import { useStateDesigner } from "@state-designer/react"
 
 interface CodePanelProps {
   uid?: string
@@ -184,6 +185,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
         <TabButton
           onClick={() => local.send("SELECTED_STATE_TAB")}
           variant="code"
+          title="State"
           activeState={local.isIn("tab.state") ? "active" : "inactive"}
           codeState={code.state.clean === code.state.dirty ? "clean" : "dirty"}
         >
@@ -192,6 +194,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
         <TabButton
           onClick={() => local.send("SELECTED_VIEW_TAB")}
           variant="code"
+          title="View"
           activeState={local.isIn("tab.view") ? "active" : "inactive"}
           codeState={code.view.clean === code.view.dirty ? "clean" : "dirty"}
         >
@@ -200,6 +203,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
         <TabButton
           onClick={() => local.send("SELECTED_STATIC_TAB")}
           variant="code"
+          title="Static"
           activeState={local.isIn("tab.static") ? "active" : "inactive"}
           codeState={
             code.static.clean === code.static.dirty ? "clean" : "dirty"
@@ -223,12 +227,14 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
         </ErrorMessage>
         <IconButton
           disabled={!isDirty}
+          title="Reset Changes"
           onClick={() => local.send("RESET_CODE")}
         >
           <RefreshCcw />
         </IconButton>
         <IconButton
           disabled={!local.can("SAVED_CODE")}
+          title="Save Changes"
           onClick={async () => {
             if (hasError) return
             if (uid !== oid) return // Unsafe!

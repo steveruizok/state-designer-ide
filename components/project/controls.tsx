@@ -2,7 +2,8 @@ import { Copy, Minus, Plus, Sun } from "react-feather"
 import { IconButton, Text, styled } from "components/theme"
 
 import codePanelState from "states/code-panel"
-import { duplicateProjectAndPush } from "lib/database"
+import dialogState from "states/dialog"
+import useProject from "hooks/useProject"
 import useTheme from "hooks/useTheme"
 
 interface ControlsProps {
@@ -14,11 +15,19 @@ interface ControlsProps {
 
 export default function Controls({ oid, pid, uid }: ControlsProps) {
   const { toggle } = useTheme()
+  const project = useProject(pid, oid)
+
   return (
     <ControlsContainer>
       {uid && (
-        <IconButton onClick={() => duplicateProjectAndPush(pid, oid)}>
-          {!(oid === pid) && <Text variant="ui">Copy Project</Text>}
+        <IconButton
+          onClick={() =>
+            dialogState.send("OPENED_PROJECT_DUPLICATE_DIALOG", {
+              project,
+            })
+          }
+        >
+          {!(oid === uid) && <Text variant="ui">Copy Project</Text>}
           <Copy />
         </IconButton>
       )}

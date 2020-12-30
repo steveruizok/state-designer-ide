@@ -47,7 +47,6 @@ export const DialogButtonsRow = styled.div({
   borderTop: "1px solid $border",
   "& > button:nth-of-type(1)": {
     borderRight: "1px solid $border",
-    color: "$inactive",
   },
 })
 

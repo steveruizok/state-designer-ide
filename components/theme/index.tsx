@@ -1,9 +1,23 @@
+import * as React from "react"
+import * as _Checkbox from "@radix-ui/react-checkbox"
+
 import { css, darkTheme, lightTheme, styled } from "./core"
+
+import { Check } from "react-feather"
+import { m } from "framer-motion"
 
 export { styled, css, lightTheme, darkTheme }
 
 // These components are shared with the live view, though they might also
 // be used in the app. TODO: Make these a clean separation.
+
+export const Container = styled.div({
+  display: "grid",
+  p: "$3",
+  gap: "$2",
+  bg: "$root",
+  borderRadius: "$2",
+})
 
 export const Box = styled.div({})
 
@@ -32,6 +46,9 @@ export const Grid = styled.div({
 
 export const Flex = styled.div({
   display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "$1",
   variants: {
     gaps: {
       none: {
@@ -53,23 +70,20 @@ export const Flex = styled.div({
   },
 })
 
-export const Heading1 = styled.h1({ color: "$text", m: 0, p: 0 })
-export const Heading2 = styled.h2({ color: "$text", m: 0, p: 0 })
-export const Heading3 = styled.h3({ color: "$text", m: 0, p: 0 })
-export const Heading4 = styled.h4({ color: "$text", m: 0, p: 0 })
-export const Heading5 = styled.h5({ color: "$text", m: 0, p: 0 })
-export const Heading6 = styled.h6({ color: "$text", m: 0, p: 0 })
+export const Heading = styled.h2({})
 
 export const Text = styled.p({
   m: 0,
   p: 0,
   fontSize: "$2",
+  fontWeight: "bold",
   lineHeight: "$body",
   color: "$text",
   variants: {
     variant: {
       body: {
         fontSize: "$2",
+        fontWeight: "normal",
         lineHeight: "$body",
       },
       ui: {
@@ -96,34 +110,84 @@ export const Input = styled.input({
   px: "$2",
   py: "$1",
   border: "none",
+  borderRadius: "$1",
   outline: "none",
   "&:focus": {
     bg: "$hover",
   },
+  "&:disabled": {
+    opacity: 0.5,
+  },
 })
+
+const StyledCheckbox = styled(_Checkbox.Root, {
+  appearance: "none",
+  cursor: "pointer",
+  backgroundColor: "transparent",
+  border: "none",
+  padding: 0,
+  boxShadow: "inset 0 0 0 2px $text",
+  width: 15,
+  height: 15,
+  borderRadius: 2,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  outline: "none",
+  color: "$text",
+  "& svg": {
+    mt: "2px",
+    height: 11,
+    width: 11,
+  },
+  "&:disabled": {
+    opacity: 0.5,
+  },
+  "&:hover": {
+    color: "$accent",
+    boxShadow: "inset 0 0 0 2px $accent",
+  },
+})
+
+export const Checkbox = React.forwardRef<
+  HTMLInputElement,
+  _Checkbox.CheckboxOwnProps
+>((props: _Checkbox.CheckboxOwnProps, ref) => (
+  <StyledCheckbox
+    defaultChecked
+    {...props}
+    onCheckedChange={props.onChange}
+    ref={ref}
+  >
+    <_Checkbox.Indicator>
+      <Check strokeWidth={4} />
+    </_Checkbox.Indicator>
+  </StyledCheckbox>
+))
 
 export const Label = styled.label({
   fontSize: "$1",
 })
 
 export const PlainButton = styled.button({
-  color: "$text",
-  fontSize: "$2",
-  fontWeight: "bold",
-  fontFamily: "$body",
-  lineHeight: "$ui",
-  textAlign: "center",
-  px: "$3",
-  py: "$2",
-  borderRadius: "$1",
+  alignItems: "center",
   bg: "$muted",
   border: "none",
-  outline: "none",
+  borderRadius: "$1",
+  color: "$text",
   cursor: "pointer",
   display: "grid",
-  gridAutoFlow: "column",
+  fontFamily: "$body",
+  fontSize: "$2",
+  fontWeight: "bold",
   gap: "$0",
-  alignItems: "center",
+  gridAutoFlow: "column",
+  lineHeight: "$ui",
+  outline: "none",
+  px: "$3",
+  py: "$2",
+  textAlign: "center",
+  width: "100%",
   "&:hover": {
     color: "$accent",
     bg: "$hover",
@@ -133,7 +197,7 @@ export const PlainButton = styled.button({
   },
   variants: {
     display: {
-      wide: {
+      tight: {
         display: "block",
         width: "100%",
         flexGrow: 2,
@@ -169,6 +233,11 @@ export const PlainIconButton = styled.button({
     height: 18,
     width: 18,
   },
+})
+
+export const Divider = styled.hr({
+  borderColor: "$inactive",
+  borderBottom: 0,
 })
 
 // App-specific (these are used in the app and not passed to LiveView)

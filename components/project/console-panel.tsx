@@ -1,4 +1,6 @@
-import { createState, useStateDesigner } from "@state-designer/react"
+import * as React from "react"
+
+import { ChevronDown, ChevronUp, Copy } from "react-feather"
 import {
   IconButton,
   TabButton,
@@ -6,14 +8,13 @@ import {
   TitleRow,
   styled,
 } from "components/theme"
-import { animate } from "framer-motion"
+import { createState, useStateDesigner } from "@state-designer/react"
 import { motionValues, ui } from "lib/local-data"
-import * as React from "react"
-import { ChevronDown, ChevronUp, Copy } from "react-feather"
-import consoleState from "states/console"
-import toastState from "states/toast"
 
 import { DragHandleVertical } from "./drag-handles"
+import { animate } from "framer-motion"
+import consoleState from "states/console"
+import toastState from "states/toast"
 
 const initialOffset = ui.panelOffsets.console
 
@@ -82,14 +83,21 @@ export default function Console({}: ConsoleProps) {
     <ConsoleContainer>
       <TitleRow onDoubleClick={toggleExpanded}>
         <TabsContainer>
-          <TabButton variant="details" activeState={"active"}>
+          <TabButton variant="details" title="Console" activeState={"active"}>
             Console
           </TabButton>
         </TabsContainer>
-        <IconButton data-hidey="true" onClick={copyCurrent}>
+        <IconButton
+          data-hidey="true"
+          title="Copy to clipboard"
+          onClick={copyCurrent}
+        >
           <Copy />
         </IconButton>
-        <IconButton onClick={toggleExpanded}>
+        <IconButton
+          title={expanded ? "Collapse panel" : "Expand panel"}
+          onClick={toggleExpanded}
+        >
           {expanded ? <ChevronDown /> : <ChevronUp />}
         </IconButton>
       </TitleRow>

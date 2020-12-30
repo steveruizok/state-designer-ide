@@ -80,7 +80,7 @@ export default function ProjectView({
   return (
     <Layout>
       <Menu user={user} />
-      <Title readOnly={oid !== uid} />
+      <Title pid={pid} oid={oid} readOnly={oid !== uid} />
       <Controls oid={oid} pid={pid} uid={uid} />
       <ContentPanel />
       <MainContainer>
@@ -104,7 +104,7 @@ export default function ProjectView({
 
 const Layout = styled.div({
   display: "grid",
-  position: "absolute",
+  position: "fixed",
   bg: "$background",
   top: 0,
   left: 0,

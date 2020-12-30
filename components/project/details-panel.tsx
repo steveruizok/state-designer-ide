@@ -1,4 +1,6 @@
-import { useStateDesigner } from "@state-designer/react"
+import * as React from "react"
+
+import { AlignLeft, ChevronDown, ChevronUp, Copy } from "react-feather"
 import {
   IconButton,
   TabButton,
@@ -6,19 +8,18 @@ import {
   TitleRow,
   styled,
 } from "components/theme"
-import { animate } from "framer-motion"
-import useCustomEditor from "hooks/useCustomEditor"
 import { motionValues, saveWrapDetails, ui } from "lib/local-data"
 import {
   useMonacoContext,
   useTextModel,
 } from "node_modules/use-monaco/dist/cjs/use-monaco"
-import * as React from "react"
-import { AlignLeft, ChevronDown, ChevronUp, Copy } from "react-feather"
-import projectState from "states/project"
-import toastState from "states/toast"
 
 import { DragHandleVertical } from "./drag-handles"
+import { animate } from "framer-motion"
+import projectState from "states/project"
+import toastState from "states/toast"
+import useCustomEditor from "hooks/useCustomEditor"
+import { useStateDesigner } from "@state-designer/react"
 
 interface DetailsProps {}
 
@@ -147,6 +148,7 @@ export default function Details({}: DetailsProps) {
         <TabsContainer>
           <TabButton
             variant="details"
+            title="Details"
             activeState={activeTab === "data" ? "active" : "inactive"}
             onClick={() => handleTabChange("data")}
           >
@@ -154,22 +156,31 @@ export default function Details({}: DetailsProps) {
           </TabButton>
           <TabButton
             variant="details"
+            title="Values"
             activeState={activeTab === "values" ? "active" : "inactive"}
             onClick={() => handleTabChange("values")}
           >
             Values
           </TabButton>
         </TabsContainer>
-        <IconButton data-hidey="true" onClick={copyCurrent}>
+        <IconButton
+          data-hidey="true"
+          title="Copy to clipboard"
+          onClick={copyCurrent}
+        >
           <Copy />
         </IconButton>
         <IconButton
-          data-hidey={isWrapped ? "false" : "true"}
+          data-hidey="true"
+          title="Toggle word wrap"
           onClick={toggleWrap}
         >
           <AlignLeft />
         </IconButton>
-        <IconButton onClick={toggleExpanded}>
+        <IconButton
+          title={expanded ? "Collapse panel" : "Expand panel"}
+          onClick={toggleExpanded}
+        >
           {expanded ? <ChevronDown /> : <ChevronUp />}
         </IconButton>
       </TitleRow>

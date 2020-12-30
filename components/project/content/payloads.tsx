@@ -1,13 +1,15 @@
-import { useStateDesigner } from "@state-designer/react"
-import { DragHandleVertical } from "components/project/drag-handles"
-import { IconButton, Select, Text, styled } from "components/theme"
-import { animate } from "framer-motion"
-import { motionValues, ui } from "lib/local-data"
 import * as React from "react"
+
 import { ChevronDown, ChevronUp } from "react-feather"
+import { IconButton, Select, Text, styled } from "components/theme"
+import { motionValues, ui } from "lib/local-data"
+
+import { DragHandleVertical } from "components/project/drag-handles"
+import { EventDetails } from "types"
+import { animate } from "framer-motion"
 import payloadsState from "states/payloads"
 import projectState from "states/project"
-import { EventDetails } from "types"
+import { useStateDesigner } from "@state-designer/react"
 
 const initialOffset = ui.panelOffsets.payloads
 
@@ -91,7 +93,10 @@ export default function Payloads({ events }: PayloadsProps) {
     <PayloadsContainer>
       <ContentTitle>
         <Text variant="ui">Event Payloads</Text>
-        <IconButton onClick={toggleExpanded}>
+        <IconButton
+          title={expanded ? "Collapse panel" : "Expand panel"}
+          onClick={toggleExpanded}
+        >
           {expanded ? <ChevronDown /> : <ChevronUp />}
         </IconButton>
       </ContentTitle>

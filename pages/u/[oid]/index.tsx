@@ -3,7 +3,6 @@ import * as Types from "types"
 
 import {
   Button,
-  Heading4,
   IconButton,
   Input,
   Label,
@@ -126,14 +125,12 @@ export default function UserPage(props: UserPageProps) {
           <Button onClick={login}>Log in</Button>
         )}
       </MenuContainer>
+      <Title>{user.name}</Title>
       <ControlsContainer>
         <IconButton onClick={toggle}>
           <Sun />
         </IconButton>
       </ControlsContainer>
-      <Title>{user.name}</Title>
-      <ControlsContainer></ControlsContainer>
-      <SidebarContainer></SidebarContainer>
       <MainContainer>
         <ListControls>
           <ListControlsGroup>
@@ -171,7 +168,7 @@ export default function UserPage(props: UserPageProps) {
                 <ProjectLink>
                   <Link href={`/u/${user.uid}/p/${id}`}>
                     <a>
-                      <Heading4>{name}</Heading4>
+                      <h4>{name}</h4>
                       <Text variant="ui">
                         Last modified{" "}
                         {new Date(lastModified).toLocaleDateString()} - Created{" "}
@@ -256,11 +253,11 @@ export async function getServerSideProps(
 
 const Layout = styled.div({
   display: "grid",
-  gridTemplateRows: "40px 1fr",
-  gridTemplateColumns: "320px 1fr",
+  gridTemplateRows: "42px 1fr",
+  gridTemplateColumns: "1fr 1fr 1fr",
   gridTemplateAreas: `
 		"menu title controls"
-		"sidebar main main"
+		"main main main"
 	`,
   minHeight: "100vh",
 })
@@ -273,23 +270,22 @@ const MenuContainer = styled.div({
 })
 
 const Title = styled.div({
+  gridArea: "title",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   borderBottom: "2px solid $shadow",
 })
 
-const SidebarContainer = styled.div({
-  gridArea: "sidebar",
-  display: "flex",
-  borderRight: "2px solid $shadow",
-})
-
 const MainContainer = styled.div({
   gridArea: "main",
+  px: "$2",
+  mx: "auto",
+  width: "100%",
+  maxWidth: 920,
   "& ul": {
-    pl: "$3",
-    pr: "$1",
+    p: 0,
+    pl: 0,
     m: 0,
     width: "100%",
     listStyle: "none",
@@ -309,14 +305,12 @@ const ListControls = styled.div({
   display: "flex",
   pt: "$2",
   pb: "$3",
-  pl: "$3",
   justifyContent: "space-between",
 })
 
 const ListControlsGroup = styled.div({
   display: "flex",
   alignItems: "center",
-  pr: "$1",
   fontSize: "$1",
   fontWeight: "normal",
   "& select": {
@@ -342,21 +336,20 @@ const ControlsContainer = styled.div({
   display: "flex",
   alignItems: "center",
   justifyContent: "flex-end",
-  borderBottom: "1px solid $shadow",
+  borderBottom: "2px solid $shadow",
 })
 
 const ProjectLink = styled.div({
-  width: "100%",
   display: "flex",
   alignItems: "center",
+  borderRadius: "$2",
+  px: "$3",
+  mx: "-$3",
   "& > p": {
     py: "$2",
   },
-  a: {
-    ml: "-$2",
-    px: "$2",
+  "& > a": {
     py: "$2",
-    borderRadius: "$2",
     color: "$text",
     textDecoration: "none",
     flexGrow: 2,
@@ -367,33 +360,20 @@ const ProjectLink = styled.div({
     },
     "&:hover": {
       color: "$accent",
-      bg: "$shadowLight",
       h4: { color: "$accent" },
       [`${Text}:nth-of-type(1)`]: {
         opacity: 0.8,
       },
     },
   },
-})
-
-const StyledTrigger = styled(Trigger, {
-  cursor: "pointer",
-  bg: "transparent",
-  outline: "none",
-  border: "none",
-  fontFamily: "$body",
-  fontSize: "$1",
-  color: "$text",
-  py: "$2",
-  px: "$1",
-  height: "100%",
-  "&:hover svg": {
+  "&:hover": {
     bg: "$shadowLight",
   },
-  svg: {
-    borderRadius: "$1",
-    p: "$1",
-    height: 40,
-    width: 40,
+  "& select": {
+    py: "$1",
+    opacity: 0.3,
+  },
+  "&:hover select": {
+    opacity: 1,
   },
 })

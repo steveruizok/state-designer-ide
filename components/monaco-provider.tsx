@@ -1,9 +1,11 @@
-import useTheme from "hooks/useTheme"
+import * as React from "react"
+
 import {
   MonacoProvider,
   plugins,
 } from "node_modules/use-monaco/dist/cjs/use-monaco"
-import * as React from "react"
+
+import useTheme from "hooks/useTheme"
 
 const themes = {
   light: {
@@ -230,12 +232,9 @@ export default function CustomMonacoProvider({ children }) {
             export const Box: TC<HTMLDivElement>;
             export const Grid: TC<HTMLDivElement>;
             export const Flex: TC<HTMLDivElement>;
-            export const Heading1: TC<HTMLHeadingElement>;
-            export const Heading2: TC<HTMLHeadingElement>;
-            export const Heading3: TC<HTMLHeadingElement>;
-            export const Heading4: TC<HTMLHeadingElement>;
-            export const Heading5: TC<HTMLHeadingElement>;
-            export const Heading6: TC<HTMLHeadingElement>;
+            export const Heading: TC<HTMLHeadingElement>;
+            export const Checkbox: TC<HTMLInputElement>;
+            export const Label: TC<HTMLLabelElement>;
             export const Input: TC<HTMLInputElement>;
             export const IconButton: TC<HTMLButtonElement>;
             export const Button: TC<HTMLButtonElement>;

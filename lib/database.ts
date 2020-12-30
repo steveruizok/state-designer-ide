@@ -103,50 +103,50 @@ export function getNewProject(
     },
     code: {
       state: `export default createState({
-data: {
-	count: 0,
-},
-initial: 'turnedOff',
-states: {
-	turnedOff: {
-		on: {
-			TOGGLED: {
-				to: 'turnedOn',
+	data: {
+		count: 0,
+	},
+	initial: 'turnedOff',
+	states: {
+		turnedOff: {
+			on: {
+				TOGGLED: {
+					to: 'turnedOn',
+				},
+			},
+		},
+		turnedOn: {
+			on: {
+				TOGGLED: {
+					to: 'turnedOff',
+				},
+				DECREMENTED: {
+					unless: 'atMin',
+					do: 'decrement',
+				},
+				INCREMENTED: {
+					unless: 'atMax',
+					do: 'increment',
+				},
 			},
 		},
 	},
-	turnedOn: {
-		on: {
-			TOGGLED: {
-				to: 'turnedOff',
-			},
-			DECREMENTED: {
-				unless: 'atMin',
-				do: 'decrement',
-			},
-			INCREMENTED: {
-				unless: 'atMax',
-				do: 'increment',
-			},
+	conditions: {
+		atMin(data) {
+			return data.count <= 0;
+		},
+		atMax(data) {
+			return data.count >= 10;
 		},
 	},
-},
-conditions: {
-	atMin(data) {
-		return data.count <= 0;
+	actions: {
+		increment(data) {
+			data.count++;
+		},
+		decrement(data) {
+			data.count--;
+		},
 	},
-	atMax(data) {
-		return data.count >= 10;
-	},
-},
-actions: {
-	increment(data) {
-		data.count++;
-	},
-	decrement(data) {
-		data.count--;
-	},
-},
 });
 `,
       view: `import state from './state';
@@ -164,7 +164,7 @@ return (
 			>
 				<Icons.Minus />
 			</IconButton>
-			<Heading1 css={{ p: '$3' }}>{local.data.count}</Heading1>
+			<Heading css={{ p: '$3' }}>{local.data.count}</Heading>
 			<IconButton
 				disabled={!state.can('INCREMENTED')}
 				onClick={() => local.send('INCREMENTED')}
@@ -183,11 +183,11 @@ return (
 }
 `,
       static: `export default function getStatic() {
-return {
-	name: "Kitoko",
-	age: 93,
-	height: 184
-};
+	return {
+		name: "Kitoko",
+		age: 93,
+		height: 184
+	};
 }`,
     },
   }
@@ -434,8 +434,13 @@ export async function duplicateProject(
   return getProjectData(docRef.id, user.uid)
 }
 
-export async function duplicateProjectAndPush(pid: string, oid: string) {
-  const project = await duplicateProject(pid, oid)
+export async function duplicateProjectAndPush(
+  pid: string,
+  oid: string,
+  name?: string,
+) {
+  const project = await duplicateProject(pid, oid, name)
+
   if (!project) {
     console.log("Could not duplicate project")
     return
