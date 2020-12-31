@@ -145,7 +145,7 @@ export default function UserPage(props: UserPageProps) {
           </ListControlsGroup>
           <ListControlsGroup>
             <Input
-              value={filter}
+              value={filter || ""}
               onChange={(e) => setFilter(e.currentTarget.value)}
               placeholder="Filter"
             />

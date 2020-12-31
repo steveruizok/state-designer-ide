@@ -58,7 +58,7 @@ export async function checkAuth() {
 
   if (!currentUser) {
     if (!customToken) {
-      console.error("No custom token set! Getting a new one.")
+      console.log("No custom token set! Getting a new one.")
       const newToken = await getCustomToken()
       customToken = newToken
     }
