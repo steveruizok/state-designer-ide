@@ -1,11 +1,9 @@
-import * as React from "react"
-import * as Types from "types"
-
 import { Button, IconButton, styled } from "components/theme"
 import { login, logout } from "lib/auth-client"
-
-import { Home } from "react-feather"
 import Link from "next/link"
+import * as React from "react"
+import { Home } from "react-feather"
+import * as Types from "types"
 
 interface MenuProps {
   user: Types.User

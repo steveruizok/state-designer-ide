@@ -1,6 +1,4 @@
-import * as React from "react"
-import * as Types from "types"
-
+import { Trigger } from "@radix-ui/react-dialog"
 import {
   Button,
   IconButton,
@@ -10,22 +8,22 @@ import {
   Text,
   styled,
 } from "components/theme"
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
-import { Home, MoreHorizontal, Sun, X } from "react-feather"
+import useTheme from "hooks/useTheme"
+import { login, logout } from "lib/auth-client"
 import { getCurrentUser, redirectToAuthPage } from "lib/auth-server"
 import {
   getUserProjects,
   setCustomToken,
   subscribeToProjects,
 } from "lib/database"
-import { login, logout } from "lib/auth-client"
-
+import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 import Head from "next/head"
 import Link from "next/link"
-import { Trigger } from "@radix-ui/react-dialog"
+import * as React from "react"
+import { Home, MoreHorizontal, Sun, X } from "react-feather"
 import dialogState from "states/dialog"
+import * as Types from "types"
 import { single } from "utils"
-import useTheme from "hooks/useTheme"
 
 let INITIAL_SORT = "Date"
 let INITIAL_SORT_DIRECTION = "Descending"
@@ -72,8 +70,6 @@ export default function UserPage(props: UserPageProps) {
     INITIAL_SORT_DIRECTION,
   )
   const [filter, setFilter] = React.useState(null)
-
-  console.log(projects)
 
   let sortedProjects = projects.map((p) => ({
     ...p,

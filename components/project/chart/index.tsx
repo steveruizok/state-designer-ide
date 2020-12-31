@@ -1,17 +1,16 @@
-import * as React from "react"
-
-import { Button, IconButton, styled } from "components/theme"
-import { Compass, RotateCcw } from "react-feather"
 import { S, useStateDesigner } from "@state-designer/react"
+import { Button, IconButton, styled } from "components/theme"
 import { useAnimation, useMotionValue } from "framer-motion"
+import { motion } from "framer-motion"
+import usePreventZooming from "hooks/usePreventZooming"
+import useScaleZooming from "hooks/useScaleZooming"
+import throttle from "lodash/throttle"
+import * as React from "react"
+import { Compass, RotateCcw } from "react-feather"
+import useMotionResizeObserver from "use-motion-resize-observer"
 
 import CanvasOverlay from "./canvas-overlay"
 import StateNode from "./state-node"
-import { motion } from "framer-motion"
-import throttle from "lodash/throttle"
-import useMotionResizeObserver from "use-motion-resize-observer"
-import usePreventZooming from "hooks/usePreventZooming"
-import useScaleZooming from "hooks/useScaleZooming"
 
 interface ChartProps {
   state: S.DesignedState<any, any>

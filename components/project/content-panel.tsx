@@ -1,18 +1,18 @@
-import * as React from "react"
-
-import { Circle, Disc, MinusCircle } from "react-feather"
 import { S, useStateDesigner } from "@state-designer/react"
-
-import { DragHandleHorizontal } from "./drag-handles"
-import { EventDetails } from "types"
-import Payloads from "./content/payloads"
-import highlightsState from "states/highlights"
-import { motionValues } from "lib/local-data"
-import payloadsState from "states/payloads"
-import projectState from "states/project"
 import { range } from "components/static/utils"
 import { styled } from "components/theme"
+import { motionValues } from "lib/local-data"
+import * as React from "react"
+import { Circle, Disc, MinusCircle } from "react-feather"
+import highlightsState from "states/highlights"
+import payloadsState from "states/payloads"
+import projectState from "states/project"
+import { EventDetails } from "types"
 
+import Payloads from "./content/payloads"
+import { DragHandleHorizontal } from "./drag-handles"
+
+const AUTOEVENT_NAMES = ["onEnter", "onExit", "onEvent"]
 export const CONTENT_COL_WIDTH = 200
 
 interface ContentProps {}
@@ -23,7 +23,9 @@ export default function Content({}: ContentProps) {
   const { captive, eventMap } = local.data
 
   const states = getFlatStates(captive.stateTree)
-  const events = Object.entries(eventMap)
+  const events = Object.entries(eventMap).filter(
+    ([name]) => !AUTOEVENT_NAMES.includes(name),
+  )
   // Includes duplicates (same event on different states)
   // const allEvents = getAllEvents(captive.stateTree)
 

@@ -1,12 +1,10 @@
-import * as React from "react"
-
-import { Button, styled } from "components/theme"
 import { S, useStateDesigner } from "@state-designer/react"
-
-import { EventDetails } from "types"
+import { Button, styled } from "components/theme"
+import * as React from "react"
 import highlightsState from "states/highlights"
 import payloadsState from "states/payloads"
 import projectState from "states/project"
+import { EventDetails } from "types"
 
 interface NodeEventsProps {
   node: S.State<any, any>

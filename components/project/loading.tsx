@@ -1,5 +1,5 @@
-import { motion } from "framer-motion"
 import { styled } from "components/theme"
+import { motion } from "framer-motion"
 import { Loader } from "react-feather"
 
 export default function Loading() {

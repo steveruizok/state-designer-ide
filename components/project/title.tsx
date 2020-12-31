@@ -1,10 +1,8 @@
-import * as React from "react"
-
 import { Button, styled } from "components/theme"
-
-import Head from "next/head"
-import dialogState from "states/dialog"
 import useProject from "hooks/useProject"
+import Head from "next/head"
+import * as React from "react"
+import dialogState from "states/dialog"
 
 interface TitleProps {
   readOnly: boolean
@@ -21,6 +19,7 @@ export default function Title({ oid, pid, readOnly }: TitleProps) {
         <title>{project?.name} - State Designer</title>
       </Head>
       <Button
+        title="Rename Project"
         onClick={() =>
           dialogState.send("OPENED_PROJECT_RENAME_DIALOG", {
             project,

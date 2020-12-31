@@ -1,10 +1,10 @@
+import pick from "lodash/pick"
+import { GetServerSidePropsContext } from "next"
+import { parseCookies } from "nookies"
 import * as Types from "types"
 
-import { GetServerSidePropsContext } from "next"
-import admin from "./firebase-admin"
 import firebase from "./firebase"
-import { parseCookies } from "nookies"
-import pick from "lodash/pick"
+import admin from "./firebase-admin"
 
 export async function verifyCookie(
   cookie: string,

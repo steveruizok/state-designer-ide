@@ -1,9 +1,9 @@
-import * as Types from "types"
-
-import db from "./firestore"
-import firebase from "./firebase"
 import pick from "lodash/pick"
 import router from "next/router"
+import * as Types from "types"
+
+import firebase from "./firebase"
+import db from "./firestore"
 import { ui } from "./local-data"
 
 // New
@@ -152,43 +152,44 @@ export function getNewProject(
       view: `import state from './state';
 
 export default function App() {
-const local = useStateDesigner(state);
+  const local = useStateDesigner(state);
 
-return (
-	<Grid css={{ bg: '$border', textAlign: 'center' }}>
-		<Text>Hello {Static.name}</Text>
-		<Flex>
-			<IconButton
-				disabled={!state.can('DECREMENTED')}
-				onClick={() => state.send('DECREMENTED')}
-			>
-				<Icons.Minus />
-			</IconButton>
-			<Heading css={{ p: '$3' }}>{local.data.count}</Heading>
-			<IconButton
-				disabled={!state.can('INCREMENTED')}
-				onClick={() => local.send('INCREMENTED')}
-			>
-				<Icons.Plus />
-			</IconButton>
-		</Flex>
-		<Button onClick={() => state.send('TOGGLED')}>
-			{local.whenIn({
-				turnedOff: 'Turn On',
-				turnedOn: 'Turn Off',
-			})}
-		</Button>
-	</Grid>
-);
+  return (
+    <Grid css={{ bg: '$border', textAlign: 'center' }}>
+      <Text>Hello {Static.name}</Text>
+      <Flex>
+        <IconButton
+          disabled={!state.can('DECREMENTED')}
+          onClick={() => state.send('DECREMENTED')}
+        >
+          <Icons.Minus />
+        </IconButton>
+        <Heading css={{ p: '$3' }}>{local.data.count}</Heading>
+        <IconButton
+          disabled={!state.can('INCREMENTED')}
+          onClick={() => local.send('INCREMENTED')}
+        >
+          <Icons.Plus />
+        </IconButton>
+      </Flex>
+      <Button onClick={() => state.send('TOGGLED')}>
+        {local.whenIn({
+          turnedOff: 'Turn On',
+          turnedOn: 'Turn Off',
+        })}
+      </Button>
+    </Grid>
+  );
 }
 `,
       static: `export default function getStatic() {
-	return {
-		name: "Kitoko",
-		age: 93,
-		height: 184
-	};
-}`,
+  return {
+    name: 'Kitoko',
+    age: 93,
+    height: 184,
+  };
+}
+`,
     },
   }
 }

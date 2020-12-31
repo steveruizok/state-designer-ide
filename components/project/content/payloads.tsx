@@ -1,15 +1,13 @@
-import * as React from "react"
-
-import { ChevronDown, ChevronUp } from "react-feather"
-import { IconButton, Select, Text, styled } from "components/theme"
-import { motionValues, ui } from "lib/local-data"
-
+import { useStateDesigner } from "@state-designer/react"
 import { DragHandleVertical } from "components/project/drag-handles"
-import { EventDetails } from "types"
+import { IconButton, Select, Text, styled } from "components/theme"
 import { animate } from "framer-motion"
+import { motionValues, ui } from "lib/local-data"
+import * as React from "react"
+import { ChevronDown, ChevronUp } from "react-feather"
 import payloadsState from "states/payloads"
 import projectState from "states/project"
-import { useStateDesigner } from "@state-designer/react"
+import { EventDetails } from "types"
 
 const initialOffset = ui.panelOffsets.payloads
 

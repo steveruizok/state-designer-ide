@@ -1,12 +1,12 @@
-import React from "react"
+import { setupUI } from "lib/local-data"
 import NextDocument, {
+  DocumentContext,
+  Head,
   Html,
   Main,
-  Head,
   NextScript,
-  DocumentContext,
 } from "next/document"
-import { setupUI } from "lib/local-data"
+import React from "react"
 
 import { css, darkTheme } from "../components/theme"
 

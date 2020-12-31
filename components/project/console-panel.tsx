@@ -1,6 +1,4 @@
-import * as React from "react"
-
-import { ChevronDown, ChevronUp, Copy } from "react-feather"
+import { createState, useStateDesigner } from "@state-designer/react"
 import {
   IconButton,
   TabButton,
@@ -8,13 +6,14 @@ import {
   TitleRow,
   styled,
 } from "components/theme"
-import { createState, useStateDesigner } from "@state-designer/react"
-import { motionValues, ui } from "lib/local-data"
-
-import { DragHandleVertical } from "./drag-handles"
 import { animate } from "framer-motion"
+import { motionValues, ui } from "lib/local-data"
+import * as React from "react"
+import { ChevronDown, ChevronUp, Copy } from "react-feather"
 import consoleState from "states/console"
 import toastState from "states/toast"
+
+import { DragHandleVertical } from "./drag-handles"
 
 const initialOffset = ui.panelOffsets.console
 

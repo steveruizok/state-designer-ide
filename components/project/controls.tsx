@@ -1,10 +1,9 @@
-import { Copy, Minus, Plus, Sun } from "react-feather"
 import { IconButton, Text, styled } from "components/theme"
-
-import codePanelState from "states/code-panel"
-import dialogState from "states/dialog"
 import useProject from "hooks/useProject"
 import useTheme from "hooks/useTheme"
+import { Copy, Minus, Plus, Sun } from "react-feather"
+import codePanelState from "states/code-panel"
+import dialogState from "states/dialog"
 
 interface ControlsProps {
   oid: string
@@ -21,6 +20,7 @@ export default function Controls({ oid, pid, uid }: ControlsProps) {
     <ControlsContainer>
       {uid && (
         <IconButton
+          title="Duplicate Project"
           onClick={() =>
             dialogState.send("OPENED_PROJECT_DUPLICATE_DIALOG", {
               project,
@@ -31,13 +31,19 @@ export default function Controls({ oid, pid, uid }: ControlsProps) {
           <Copy />
         </IconButton>
       )}
-      <IconButton onClick={() => codePanelState.send("DECREASED_FONT_SIZE")}>
+      <IconButton
+        title="Decrease Editor Font Size"
+        onClick={() => codePanelState.send("DECREASED_FONT_SIZE")}
+      >
         <Minus />
       </IconButton>
-      <IconButton onClick={() => codePanelState.send("INCREASED_FONT_SIZE")}>
+      <IconButton
+        title="Increase Editor Font Size"
+        onClick={() => codePanelState.send("INCREASED_FONT_SIZE")}
+      >
         <Plus />
       </IconButton>
-      <IconButton onClick={toggle}>
+      <IconButton title="Toggle Dark Mode" onClick={toggle}>
         <Sun />
       </IconButton>
     </ControlsContainer>

@@ -1,13 +1,12 @@
-import * as React from "react"
-
 import { S, useStateDesigner } from "@state-designer/react"
+import { styled } from "components/theme"
+import sortBy from "lodash/sortBy"
+import * as React from "react"
+import highlightsState from "states/highlights"
+import { getNodeEvents } from "utils"
 
 import NodeEvents from "./node-events"
 import NodeHeading from "./node-heading"
-import { getNodeEvents } from "utils"
-import highlightsState from "states/highlights"
-import sortBy from "lodash/sortBy"
-import { styled } from "components/theme"
 
 interface StateNodeProps {
   node: S.State<any, any>

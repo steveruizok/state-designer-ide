@@ -1,6 +1,4 @@
-import * as React from "react"
-
-import { AlignLeft, ChevronDown, ChevronUp, Copy } from "react-feather"
+import { useStateDesigner } from "@state-designer/react"
 import {
   IconButton,
   TabButton,
@@ -8,18 +6,19 @@ import {
   TitleRow,
   styled,
 } from "components/theme"
+import { animate } from "framer-motion"
+import useCustomEditor from "hooks/useCustomEditor"
 import { motionValues, saveWrapDetails, ui } from "lib/local-data"
 import {
   useMonacoContext,
   useTextModel,
 } from "node_modules/use-monaco/dist/cjs/use-monaco"
-
-import { DragHandleVertical } from "./drag-handles"
-import { animate } from "framer-motion"
+import * as React from "react"
+import { AlignLeft, ChevronDown, ChevronUp, Copy } from "react-feather"
 import projectState from "states/project"
 import toastState from "states/toast"
-import useCustomEditor from "hooks/useCustomEditor"
-import { useStateDesigner } from "@state-designer/react"
+
+import { DragHandleVertical } from "./drag-handles"
 
 interface DetailsProps {}
 
@@ -205,6 +204,7 @@ const DetailsContainer = styled.div({
   minWidth: 0,
   position: "relative",
   borderRight: "2px solid $border",
+  bg: "$codeBg",
 })
 
 const CodeContainer = styled.div({

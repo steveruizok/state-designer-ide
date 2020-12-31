@@ -91,10 +91,13 @@ const codePanelState = createState({
           },
         },
         waitingToSave: {
-          onEnter: {
-            wait: 0.5,
-            to: "saving",
-          },
+          onEnter: [
+            "formatCode",
+            {
+              wait: 0.25,
+              to: "saving",
+            },
+          ],
           on: {
             CHANGED_CODE: {
               to: "saving",
@@ -284,6 +287,9 @@ const codePanelState = createState({
       const { code, activeTab, models } = data
       const model = models[activeTab]
       model.setValue(code[activeTab].clean)
+    },
+    formatCode(data) {
+      data.editor.getAction("editor.action.formatDocument").run()
     },
     saveCodeToFirebase(
       data,
