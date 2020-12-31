@@ -1,6 +1,6 @@
 import { useStateDesigner } from "@state-designer/react"
+import Loading from "components/loading"
 import ChartView from "components/project/chart"
-import Loading from "components/project/loading"
 import { styled } from "components/theme"
 import { AnimatePresence, AnimateSharedLayout } from "framer-motion"
 import projectState from "states/project"

@@ -1,5 +1,5 @@
 import { useStateDesigner } from "@state-designer/react"
-import Loading from "components/project/loading"
+import Loading from "components/loading"
 import Colors from "components/static/colors"
 import * as Utils from "components/static/utils"
 import {

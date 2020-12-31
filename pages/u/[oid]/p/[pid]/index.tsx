@@ -1,3 +1,4 @@
+import Loading from "components/loading"
 import { getCurrentUser } from "lib/auth-server"
 import { getProjectData, getProjectExists } from "lib/database"
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
@@ -44,7 +45,7 @@ export default function ProjectPage(props: ProjectPageProps) {
       projectData={projectData}
     />
   ) : (
-    <div>Loading...</div>
+    <Loading />
   )
 }
 
