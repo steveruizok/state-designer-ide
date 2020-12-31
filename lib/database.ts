@@ -36,8 +36,20 @@ users: collection
 
 let customToken: string
 
+export async function getCustomToken() {
+  var path = "/api/refresh"
+  var url = process.env.NEXT_PUBLIC_BASE_API_URL + path
+  const results = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).then((d) => d.json())
+  return results.customToken
+}
+
 export async function setCustomToken(token: string) {
-  console.log("setting custom token")
+  console.log("Setting custom token received from server.")
   customToken = token
 }
 
@@ -46,23 +58,18 @@ export async function checkAuth() {
 
   if (!currentUser) {
     if (!customToken) {
-      console.error("No custom token set!")
+      console.error("No custom token set! Getting a new one.")
+      const newToken = await getCustomToken()
+      customToken = newToken
     }
 
     await db.app
       .auth()
       .signInWithCustomToken(customToken)
       .catch(async () => {
-        console.log("Could not use the current token, time to make a new one.")
-        var path = "/api/refresh"
-        var url = process.env.NEXT_PUBLIC_BASE_API_URL + path
-        const results = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }).then((d) => d.json())
-        customToken = results.customToken
+        console.log("Could not use the current token! Getting a new one")
+        const newToken = await getCustomToken()
+        customToken = newToken
       })
     return checkAuth()
   } else {
