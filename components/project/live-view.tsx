@@ -4,12 +4,14 @@ import Colors from "components/static/colors"
 import * as Utils from "components/static/utils"
 import {
   Box,
+  Button,
   Checkbox,
   Container,
   Divider,
   Flex,
   Grid,
   Heading,
+  IconButton,
   Input,
   Label,
   PlainButton,
@@ -23,6 +25,7 @@ import { motion } from "framer-motion"
 import useTheme from "hooks/useTheme"
 import { fakePrint, printFromView } from "lib/eval"
 import * as React from "react"
+import { RotateCcw } from "react-feather"
 import * as Icons from "react-feather"
 import { LiveError, LivePreview, LiveProvider } from "react-live"
 import liveViewState from "states/live-view"
@@ -70,48 +73,9 @@ function Preview() {
 
   return (
     <LiveViewWrapper>
-      {local.isIn("ready") ? (
-        <LiveProvider
-          code={`${code}\n\nrender(<App/>)`}
-          noInline={true}
-          scope={{
-            ...Motion,
-            ...WithMotionComponents,
-            Icons,
-            Utils,
-            Colors,
-            ColorMode: theme.theme,
-            useStateDesigner,
-            Static: staticResults,
-            state,
-            styled,
-            print: printFn,
-            log: printFn,
-            css,
-          }}
-        >
-          <PreviewScrollContainer>
-            <PreviewInnerContainer>
-              <LivePreview />
-            </PreviewInnerContainer>
-
-            <StyledLiveErrorWrapper>
-              <StyledLiveError />
-            </StyledLiveErrorWrapper>
-          </PreviewScrollContainer>
-        </LiveProvider>
-      ) : (
-        <Loading />
-      )}
-    </LiveViewWrapper>
-  )
-}
-
-const LiveViewWrapper = styled.div({
-  width: "100%",
-  height: "100%",
-  pb: "40px",
-})
+      <LiveProvider
+        code={`
+const rLiveView = React.createRef()
 
 const PreviewScrollContainer = styled.div({
   width: "100%",
@@ -120,19 +84,128 @@ const PreviewScrollContainer = styled.div({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
+  "& *": {
+    boxSizing: "border-box"
+  }
 })
 
-const PreviewInnerContainer = styled.div({
-  p: 2,
-  fontSize: 16,
+const View = styled.div({
   position: "relative",
-  maxHeight: "100%",
+  height: "100%",
   width: "100%",
-  maxWidth: "100%",
-  overflow: "scroll",
   display: "flex",
-  alignItems: "flex-start",
+  overflow: "hidden",
+  alignItems: "center",
   justifyContent: "center",
+})
+
+
+function usePointer(ref = rLiveView, onMove = () => {}) {
+  const mvX = useMotionValue(0)
+  const mvY = useMotionValue(0)
+  const mvDX = useMotionValue(0)
+  const mvDY = useMotionValue(0)
+
+  const rOffset = React.useRef({
+    left: 0,
+    top: 0,
+  })
+  
+  React.useEffect(() => {
+    function updateBoundingBox() {
+      const { left, top } = ref.current.getBoundingClientRect()
+      rOffset.current = { left, top }
+    }
+
+    let timeout = setInterval(updateBoundingBox, 1000)
+    return () => clearInterval(timeout)
+  }, [])
+
+  React.useEffect(() => {
+    function updateMotionValues(e) {
+      const { left, top } = rOffset.current
+      const x = e.pageX - left, y = e.pageY - top
+
+      mvDX.set(x - mvX.get())
+      mvDY.set(y - mvY.get())
+      mvX.set(x)
+      mvY.set(y)
+
+      if (onMove) {
+        onMove({
+          dx: mvDX.get(),
+          dy: mvDY.get(),
+          x: mvX.get(),
+          y: mvY.get(),
+        })
+      }
+    }
+
+    window.addEventListener("pointermove", updateMotionValues)
+    return () => window.removeEventListener("pointermove", updateMotionValues)
+  }, [])
+
+  return { x: mvX, y: mvY, dx: mvDX, dy: mvDY }
+}
+
+${code}
+
+render(
+  <PreviewScrollContainer ref={rLiveView} id="live-view">
+    <App />
+  </PreviewScrollContainer>
+  )`}
+        noInline={true}
+        scope={{
+          ...Motion,
+          ...WithMotionComponents,
+          Icons,
+          Utils,
+          Colors,
+          ColorMode: theme.theme,
+          useStateDesigner,
+          Static: staticResults,
+          state,
+          styled,
+          print: printFn,
+          log: printFn,
+          css,
+        }}
+      >
+        <LiveViewOuterWrapper>
+          {local.isIn("ready") ? <LivePreview /> : <Loading />}
+          <LiveViewControls>
+            <Button
+              data-hidey="true"
+              title="Reset Canvas"
+              variant="iconLeft"
+              onClick={() => projectState.send("RESET_VIEW")}
+            >
+              <RotateCcw size={14} strokeWidth={3} /> Reset View
+            </Button>
+          </LiveViewControls>
+        </LiveViewOuterWrapper>
+        {local.isIn("ready") && (
+          <StyledLiveErrorWrapper>
+            <StyledLiveError />
+          </StyledLiveErrorWrapper>
+        )}
+      </LiveProvider>
+    </LiveViewWrapper>
+  )
+}
+
+const LiveViewWrapper = styled.div({
+  pb: "40px",
+  height: "100%",
+})
+
+const LiveViewOuterWrapper = styled.div({
+  height: "100%",
+  "& > div:nth-of-type(1)": {
+    height: "100%",
+  },
+  position: "relative",
 })
 
 const StyledLiveErrorWrapper = styled.div({
@@ -155,6 +228,16 @@ const StyledLiveError = styled(LiveError, {
   bg: "scrim",
   zIndex: 800,
   pointerEvents: "all",
+})
+
+const LiveViewControls = styled.div({
+  height: 40,
+  position: "absolute",
+  bottom: 0,
+  width: "100%",
+  display: "flex",
+  justifyContent: "space-between",
+  bg: "$scrim",
 })
 
 const MemoizedPreview = React.memo(Preview)

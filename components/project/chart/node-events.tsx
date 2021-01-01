@@ -118,11 +118,10 @@ const EventButton: React.FC<{
         )
         requestAnimationFrame(() => sendHighlightEvent())
       }}
-      onMouseOver={(e) => {
-        e.stopPropagation()
+      onPointerEnter={(e) => {
         sendHighlightEvent(e.shiftKey)
       }}
-      onMouseLeave={() =>
+      onPointerLeave={() =>
         requestAnimationFrame(() =>
           highlightsState.send("CLEARED_EVENT_HIGHLIGHT", {
             eventName,
@@ -142,12 +141,17 @@ const NodeEventsContainer = styled.div({
   flexDirection: "row",
   flexWrap: "wrap",
   maxWidth: 400,
-  gap: 1,
+  flexGrow: 2,
+  gap: "$0",
   variants: {
     type: {
       leaf: {},
-      branch: {},
-      parallel: {},
+      branch: {
+        pb: "$2",
+      },
+      parallel: {
+        pb: "$2",
+      },
     },
   },
 })

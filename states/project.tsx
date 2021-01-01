@@ -39,8 +39,20 @@ const projectState = createState({
         ],
       },
     },
+    resettingView: {
+      onEnter: {
+        wait: 0.01,
+        to: "ready",
+      },
+    },
     ready: {
       on: {
+        RESET_STATE: {
+          do: "resetCaptiveState",
+        },
+        RESET_VIEW: {
+          to: "resettingView",
+        },
         SOURCE_UPDATED: [
           "updateFromDatabase",
           "updateCodePanelState",
@@ -102,6 +114,9 @@ const projectState = createState({
     },
     setEventMap(data) {
       data.eventMap = collectEventsFromState(data.captive.stateTree, data)
+    },
+    resetCaptiveState(data) {
+      data.captive.reset()
     },
   },
 })

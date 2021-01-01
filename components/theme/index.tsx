@@ -169,24 +169,24 @@ export const Label = styled.label({
 })
 
 export const PlainButton = styled.button({
+  cursor: "pointer",
+  fontWeight: "bold",
+  fontFamily: "$body",
+  fontSize: "$2",
+  lineHeight: "$ui",
+  width: "100%",
+  px: "$3",
+  py: "$2",
   alignItems: "center",
+  textAlign: "center",
+  display: "grid",
+  gridAutoFlow: "column",
+  gap: "$0",
+  outline: "none",
   bg: "$muted",
   border: "none",
   borderRadius: "$1",
   color: "$text",
-  cursor: "pointer",
-  display: "grid",
-  fontFamily: "$body",
-  fontSize: "$2",
-  fontWeight: "bold",
-  gap: "$0",
-  gridAutoFlow: "column",
-  lineHeight: "$ui",
-  outline: "none",
-  px: "$3",
-  py: "$2",
-  textAlign: "center",
-  width: "100%",
   "&:hover": {
     color: "$accent",
     bg: "$hover",
@@ -195,6 +195,12 @@ export const PlainButton = styled.button({
     opacity: 0.5,
   },
   variants: {
+    variant: {
+      ghost: {
+        bg: "$transparent",
+        color: "$text",
+      },
+    },
     display: {
       tight: {
         display: "block",
@@ -207,7 +213,7 @@ export const PlainButton = styled.button({
 
 export const PlainIconButton = styled.button({
   color: "$text",
-  bg: "transparent",
+  bg: "$muted",
   borderRadius: "$1",
   fontFamily: "$body",
   fontSize: "$2",
@@ -216,6 +222,7 @@ export const PlainIconButton = styled.button({
   outline: "none",
   display: "flex",
   alignItems: "center",
+  justifyContent: "center",
   "&:disabled": {
     opacity: 0.5,
   },

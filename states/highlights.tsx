@@ -33,6 +33,7 @@ const highlightsState = createState({
       do: ["clearEventHighlight", "setEventHighlight"],
     },
     HIGHLIT_STATE: {
+      wait: 0.01,
       unless: "stateIsHighlit",
       do: ["clearStateHighlight", "setStateHighlight"],
     },

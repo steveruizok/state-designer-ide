@@ -38,6 +38,7 @@ export default function StateNode({ node }: StateNodeProps) {
     childNodes.forEach((childNode, i) => {
       if (highlitNodePaths.includes(childNode.path)) {
         hiddenDividerIndices.add(i)
+        hiddenDividerIndices.add(i - 1)
         hiddenDividerIndices.add(i + 1)
       }
     })
@@ -56,16 +57,14 @@ export default function StateNode({ node }: StateNodeProps) {
     <NodeContainer
       ref={rContainer}
       data-type="node-container"
-      onMouseOver={(e) => {
-        e.stopPropagation()
+      onPointerEnter={(e) => {
         highlightsState.send("HIGHLIT_STATE", {
           stateName: node.name,
           shiftKey: e.shiftKey,
           path: node.path,
         })
       }}
-      onMouseLeave={(e) => {
-        e.stopPropagation()
+      onPointerLeave={(e) => {
         highlightsState.send("CLEARED_STATE_HIGHLIGHT", {
           stateName: node.name,
           path: node.path,
@@ -79,18 +78,18 @@ export default function StateNode({ node }: StateNodeProps) {
     >
       {isRoot ? (
         events.length > 0 ? (
-          <RootNodeHeading />
-        ) : null
+          <NodeHeading node={node} />
+        ) : // <RootNodeHeading />
+        null
       ) : (
         <NodeHeading node={node} />
       )}
       {events.length > 0 && <NodeEvents node={node} events={events} />}
-      {(isRoot && events.length === 0) ||
-        (childNodes.length > 0 && (
-          <Divider
-            state={isRoot ? "inactive" : node.active ? "active" : "inactive"}
-          />
-        ))}
+      {events.length > 0 && childNodes.length > 0 && (
+        <Divider
+          state={isRoot ? "inactive" : node.active ? "active" : "inactive"}
+        />
+      )}
       <ChildNodesContainer type={node.type}>
         {node.type === "parallel"
           ? childNodes.map((child, i) => {
@@ -156,13 +155,13 @@ export const NodeContainer = styled.div({
         width: "fit-content",
         bg: "transparent",
         "&:nth-of-type(1)": {
-          borderRadius: "12px 0px 0px 12px",
+          borderRadius: "0px 0px 0px 12px",
         },
         "&:nth-child(n+2):nth-last-child(n+2) ": {
           borderRadius: 0,
         },
         "&:nth-last-of-type(1)": {
-          borderRadius: "0px 12px 12px 0px",
+          borderRadius: "0px 0px 12px 0px",
         },
         "&[data-active=true]": {
           borderColor: "transparent",
@@ -204,6 +203,7 @@ export const ChildNodesContainer = styled.div({
         width: "fit-content",
         gridAutoColumns: "fit-content",
         gap: 0,
+        m: "-$1",
         gridAutoFlow: "column",
         overflow: "hidden",
         position: "relative",
@@ -214,12 +214,11 @@ export const ChildNodesContainer = styled.div({
 
 export const ParallelDivider = styled.div({
   alignSelf: "stretch",
-  height: "100%",
   borderLeft: "1px solid dashed",
   variants: {
     state: {
       active: {
-        borderColor: "$active",
+        borderColor: "$inactive",
       },
       inactive: {
         borderColor: "$inactive",
@@ -239,8 +238,9 @@ export const ParallelDivider = styled.div({
 export const Divider = styled.hr({
   border: 0,
   borderBottom: "1px solid currentColor",
-  mt: "$0",
-  mb: 0,
+  mt: 0,
+  mb: "$0",
+  mx: "-$1",
   variants: {
     state: {
       active: {

@@ -7,6 +7,7 @@ import useScaleZooming from "hooks/useScaleZooming"
 import throttle from "lodash/throttle"
 import * as React from "react"
 import { Compass, RotateCcw } from "react-feather"
+import projectState from "states/project"
 import useMotionResizeObserver from "use-motion-resize-observer"
 
 import CanvasOverlay from "./canvas-overlay"
@@ -143,7 +144,7 @@ function Chart({ state, zoomedPath }: ChartProps) {
           title="Reset Canvas"
           variant="iconLeft"
           disabled={captive.log.length === 0}
-          onClick={() => captive.reset()}
+          onClick={() => projectState.send("RESET_STATE")}
         >
           <RotateCcw size={14} strokeWidth={3} /> Reset State
         </Button>
