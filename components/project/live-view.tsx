@@ -78,6 +78,7 @@ function Preview() {
 const rLiveView = React.createRef()
 
 const PreviewScrollContainer = styled.div({
+  outline: "none",
   width: "100%",
   height: "100%",
   overflow: "scroll",
@@ -86,6 +87,17 @@ const PreviewScrollContainer = styled.div({
   justifyContent: "center",
   "& *": {
     boxSizing: "border-box"
+  },
+  "&:focus-within:after": {
+    content: "''",
+    position: "absolute",
+    top: 8,
+    right: 8,
+    height: 8,
+    width: 8,
+    borderRadius: 8,
+    bg: "$text",
+    zIndex: 99999
   }
 })
 
@@ -148,10 +160,46 @@ function usePointer(ref = rLiveView, onMove = () => {}) {
   return { x: mvX, y: mvY, dx: mvDX, dy: mvDY }
 }
 
+function useKeyboardInputs(
+  handlers = {},
+) {
+  const element = rLiveView.current
+
+  React.useEffect(() => {
+    if (!element) return
+    const { onKeyDown = {}, onKeyUp = {} } = handlers
+
+
+    function handleKeydown(event) {
+      if (!onKeyDown) return
+      if (onKeyDown[event.key] !== undefined) {
+        event.preventDefault()
+        onKeyDown[event.key](event)
+      }
+    }
+
+    function handleKeyup(event) {
+      if (!onKeyUp) return
+      if (onKeyUp[event.key] !== undefined) {
+        event.preventDefault()
+        onKeyUp[event.key](event)
+      }
+    }
+
+    element.addEventListener("keydown", handleKeydown)
+    element.addEventListener("keyup", handleKeyup)
+
+    return () => {
+      element.removeEventListener("keydown", handleKeydown)
+      element.removeEventListener("keyup", handleKeyup)
+    }
+  }, [element])
+}
+
 ${code}
 
 render(
-  <PreviewScrollContainer ref={rLiveView} id="live-view">
+  <PreviewScrollContainer ref={rLiveView} tabIndex={0} id="live-view">
     <App />
   </PreviewScrollContainer>
   )`}

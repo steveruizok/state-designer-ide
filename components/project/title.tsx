@@ -26,7 +26,7 @@ export default function Title({ oid, pid, readOnly }: TitleProps) {
           })
         }
       >
-        {project?.name}
+        {project?.name || "Loading"}
       </Button>
     </TitleContainer>
   )
