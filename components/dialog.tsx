@@ -4,6 +4,7 @@ import CreateProjectDialog from "components/dialogs/create-project"
 import DeleteProjectDialog from "components/dialogs/delete-project"
 import DuplicateProjectDialog from "components/dialogs/duplicate-project"
 import RenameProjectDialog from "components/dialogs/rename-project"
+import LoadingDialog from "components/dialogs/rename-project"
 import { Button, Input, Label, Text, styled } from "components/theme"
 import useUser from "hooks/useUser"
 import { deleteProject, saveProjectName } from "lib/database"
@@ -30,6 +31,7 @@ export default function DialogManager({}: DialogProps) {
         deletingProject: <DeleteProjectDialog />,
         duplicatingProject: <DuplicateProjectDialog />,
         creatingProject: <CreateProjectDialog />,
+        loadingProject: <LoadingDialog />,
       })}
     </Dialog.Root>
   )
