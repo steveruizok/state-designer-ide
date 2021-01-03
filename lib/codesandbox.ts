@@ -79,6 +79,7 @@ import { Colors, Utils } from "./resources"
 import { useStateDesigner } from "@state-designer/react"
 import { styled, css } from "./stitches.config.js"
 import { Static } from "./static.js"
+import * as Icons from "react-feather"
 import {
 	Box,
 	Button,
