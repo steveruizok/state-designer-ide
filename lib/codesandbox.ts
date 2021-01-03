@@ -74,6 +74,7 @@ ReactDOM.render(
 
   const appCode = `
 import React from "react"
+import state from "./state"
 import { motion, useMotionValue, motionValue, useTransform, transform, AnimatePresence, AnimateSharedLayout } from "framer-motion"
 import { Colors, Utils } from "./resources"
 import { useStateDesigner } from "@state-designer/react"
@@ -180,7 +181,7 @@ function useKeyboardInputs(
   }, [])
 }
 
-${project.code.view}
+${project.code.view.replace(`import state from './state';`, "")}
 `
 
   const staticCode = `
