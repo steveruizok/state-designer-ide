@@ -1,9 +1,9 @@
-import pick from "lodash/pick"
-import router from "next/router"
 import * as Types from "types"
 
-import firebase from "./firebase"
 import db from "./firestore"
+import firebase from "./firebase"
+import pick from "lodash/pick"
+import router from "next/router"
 import { ui } from "./local-data"
 
 // New
@@ -60,6 +60,14 @@ export async function checkAuth() {
     if (!customToken) {
       console.log("No custom token set! Getting a new one.")
       const newToken = await getCustomToken()
+
+      if (!newToken) {
+        console.log(
+          "User will need to log in again. Session token is likely expired. ",
+        )
+        return null
+      }
+
       customToken = newToken
     }
 
@@ -67,12 +75,15 @@ export async function checkAuth() {
       .auth()
       .signInWithCustomToken(customToken)
       .catch(async () => {
-        console.log("Could not use the current token! Getting a new one")
+        console.log("Could not use the current token! Getting a new one...")
         const newToken = await getCustomToken()
         customToken = newToken
       })
+
+    console.log("Ok, let's check that custom token again.")
     return checkAuth()
   } else {
+    console.log("All good, we have the current user.")
     return currentUser
   }
 }

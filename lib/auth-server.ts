@@ -1,10 +1,10 @@
-import pick from "lodash/pick"
-import { GetServerSidePropsContext } from "next"
-import { parseCookies } from "nookies"
 import * as Types from "types"
 
-import firebase from "./firebase"
+import { GetServerSidePropsContext } from "next"
 import admin from "./firebase-admin"
+import firebase from "./firebase"
+import { parseCookies } from "nookies"
+import pick from "lodash/pick"
 
 export async function verifyCookie(
   cookie: string,
@@ -25,7 +25,12 @@ export async function verifyCookie(
       authenticated = true
     })
     .catch(() => {
+      console.log("Could not authenticate")
       authenticated = false
+      return {
+        authenticated,
+        user,
+      }
     })
 
   return {
@@ -78,7 +83,9 @@ export async function getCurrentUser(
 
   const [sessionCookie, customToken] = cookie.split("+")
 
-  const authentication = await verifyCookie(sessionCookie)
+  const authentication = await verifyCookie(sessionCookie).catch((e) => {
+    console.log("Problem here!")
+  })
 
   if (!authentication) {
     result.error = "Could not verify session cookie."

@@ -23,7 +23,18 @@ export default async function login(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-  const decodedClaims = await admin.auth().verifySessionCookie(cookie)
+  const decodedClaims = await admin
+    .auth()
+    .verifySessionCookie(cookie)
+    .catch((e) => {
+      console.log("Could not verify session cookie!")
+    })
+
+  if (!decodedClaims) {
+    res.send({ response: "Could not refresh token.", customToken: null })
+    return
+  }
+
   const customToken = await admin.auth().createCustomToken(decodedClaims.uid)
 
   const options = {
