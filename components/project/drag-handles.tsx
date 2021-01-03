@@ -59,7 +59,6 @@ export function DragHandleHorizontal({
   function togglePosition(e: React.MouseEvent) {
     if (e.shiftKey) {
       resetOffsets()
-      router.reload()
       return
     }
 

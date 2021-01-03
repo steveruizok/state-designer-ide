@@ -69,7 +69,16 @@ export const Flex = styled.div({
   },
 })
 
-export const Heading = styled.h2({})
+export const Heading = styled.h2({
+  variants: {
+    center: {
+      true: { textAlign: "center" },
+    },
+    monospace: {
+      true: { fontFamily: "$monospace" },
+    },
+  },
+})
 
 export const Text = styled.p({
   m: 0,
@@ -79,6 +88,12 @@ export const Text = styled.p({
   lineHeight: "$body",
   color: "$text",
   variants: {
+    center: {
+      true: { textAlign: "center" },
+    },
+    monospace: {
+      true: { fontFamily: "$monospace" },
+    },
     variant: {
       body: {
         fontSize: "$2",
@@ -99,6 +114,16 @@ export const Text = styled.p({
       },
     },
   },
+})
+
+export const View = styled.div({
+  position: "relative",
+  height: "100%",
+  width: "100%",
+  display: "flex",
+  overflow: "hidden",
+  alignItems: "center",
+  justifyContent: "center",
 })
 
 export const Input = styled.input({

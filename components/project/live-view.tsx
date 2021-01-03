@@ -11,12 +11,12 @@ import {
   Flex,
   Grid,
   Heading,
-  IconButton,
   Input,
   Label,
   PlainButton,
   PlainIconButton,
   Text,
+  View,
   css,
   styled,
 } from "components/theme"
@@ -43,6 +43,7 @@ const Components = {
   Checkbox,
   Heading,
   Input,
+  View,
   IconButton: PlainIconButton,
   Button: PlainButton,
   Text,
@@ -76,41 +77,6 @@ function Preview() {
       <LiveProvider
         code={`
 const rLiveView = React.createRef()
-
-const PreviewScrollContainer = styled.div({
-  outline: "none",
-  width: "100%",
-  height: "100%",
-  overflow: "scroll",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  "& *": {
-    boxSizing: "border-box"
-  },
-  "&:focus-within:after": {
-    content: "''",
-    position: "absolute",
-    top: 8,
-    right: 8,
-    height: 8,
-    width: 8,
-    borderRadius: 8,
-    bg: "$text",
-    zIndex: 99999
-  }
-})
-
-const View = styled.div({
-  position: "relative",
-  height: "100%",
-  width: "100%",
-  display: "flex",
-  overflow: "hidden",
-  alignItems: "center",
-  justifyContent: "center",
-})
-
 
 function usePointer(ref = rLiveView, onMove = () => {}) {
   const mvX = useMotionValue(0)
@@ -207,6 +173,7 @@ render(
         scope={{
           ...Motion,
           ...WithMotionComponents,
+          PreviewScrollContainer,
           Icons,
           Utils,
           Colors,
@@ -286,6 +253,30 @@ const LiveViewControls = styled.div({
   display: "flex",
   justifyContent: "space-between",
   bg: "$scrim",
+})
+
+const PreviewScrollContainer = styled.div({
+  outline: "none",
+  width: "100%",
+  height: "100%",
+  overflow: "scroll",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  "& *": {
+    boxSizing: "border-box",
+  },
+  "&:focus-within:after": {
+    content: "''",
+    position: "absolute",
+    top: 8,
+    right: 8,
+    height: 8,
+    width: 8,
+    borderRadius: 8,
+    bg: "$text",
+    zIndex: 99999,
+  },
 })
 
 const MemoizedPreview = React.memo(Preview)

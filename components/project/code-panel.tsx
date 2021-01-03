@@ -255,20 +255,6 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   )
 }
 
-const CodeContainer = styled.div({
-  position: "relative",
-  gridArea: "code",
-  display: "grid",
-  width: "100%",
-  minWidth: 0,
-  maxWidth: "100%",
-  gridTemplateColumns: "minmax(0, 1fr)",
-  gridTemplateRows: `40px 1fr 40px`,
-  borderTop: "2px solid $border",
-  borderLeft: "2px solid $border",
-  // overflow: "hidden",
-})
-
 const EditorContainer = styled.div({
   bg: "$codeBg",
   borderBottom: "2px solid $border",
@@ -303,6 +289,25 @@ const EditorContainer = styled.div({
     bg: "$codeHl",
     position: "relative",
   },
+  ".lineStateBlockCodeHl": {},
+  ".inlineStateBlockCodeHl": {
+    textDecoration: "underline",
+  },
+  ".marginStateBlockCodeHl": {},
+})
+
+const CodeContainer = styled.div({
+  position: "relative",
+  gridArea: "code",
+  display: "grid",
+  width: "100%",
+  minWidth: 0,
+  maxWidth: "100%",
+  gridTemplateColumns: "minmax(0, 1fr)",
+  gridTemplateRows: `40px 1fr 40px`,
+  borderTop: "2px solid $border",
+  borderLeft: "2px solid $border",
+  // overflow: "hidden",
 })
 
 const CodeEditorControls = styled.div({

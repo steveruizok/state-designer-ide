@@ -151,6 +151,9 @@ export const { styled, css } = createStyled({
     bg: () => (value: string) => ({
       backgroundColor: value,
     }),
+    br: () => (value: string) => ({
+      borderRadius: value,
+    }),
     fadeBg: () => (value: number) => ({
       transition: `background-color ${value}s`,
     }),

@@ -27,6 +27,7 @@ if (typeof window !== "undefined") {
 
 const codePanelState = createState({
   data: {
+    prevDecorations: [] as any[],
     fontSize: INITIAL_FONT_SIZE,
     activeTab: INITIAL_TAB as CodeEditorTab,
     monaco: null as any,
@@ -72,8 +73,12 @@ const codePanelState = createState({
     LOADED: ["loadData", "notifyLiveViewClean"],
     UNLOADED: { to: ["loading"] },
     SOURCE_UPDATED: ["updateFromDatabase", "notifyLiveViewClean"],
-    CHANGED_CODE: "updateDirtyCode",
-    RESET_CODE: ["resetCode", "restoreActiveTabCleanViewState"],
+    CHANGED_CODE: ["updateDirtyCode", "highlightBlockTitles"],
+    RESET_CODE: [
+      "resetCode",
+      "restoreActiveTabCleanViewState",
+      "highlightBlockTitles",
+    ],
     INCREASED_FONT_SIZE: "increaseFontSize",
     DECREASED_FONT_SIZE: "decreaseFontSize",
     RESET_FONT_SIZE: "resetFontSize",
@@ -140,7 +145,11 @@ const codePanelState = createState({
           },
         },
         state: {
-          onEnter: ["setStateActiveTab", "restoreActiveTabDirtyViewState"],
+          onEnter: [
+            "setStateActiveTab",
+            "restoreActiveTabDirtyViewState",
+            "highlightBlockTitles",
+          ],
           onExit: "saveCurrentViewState",
           on: {
             SELECTED_VIEW_TAB: { to: "tab.view" },
@@ -148,7 +157,11 @@ const codePanelState = createState({
           },
         },
         view: {
-          onEnter: ["setViewActiveTab", "restoreActiveTabDirtyViewState"],
+          onEnter: [
+            "setViewActiveTab",
+            "restoreActiveTabDirtyViewState",
+            "highlightBlockTitles",
+          ],
           onExit: "saveCurrentViewState",
           on: {
             CHANGED_CODE: { secretlyDo: "notifyLiveViewDirty" },
@@ -157,7 +170,11 @@ const codePanelState = createState({
           },
         },
         static: {
-          onEnter: ["setStaticActiveTab", "restoreActiveTabDirtyViewState"],
+          onEnter: [
+            "setStaticActiveTab",
+            "restoreActiveTabDirtyViewState",
+            "highlightBlockTitles",
+          ],
           onExit: "saveCurrentViewState",
           on: {
             SELECTED_STATE_TAB: { to: "tab.state" },
@@ -339,6 +356,101 @@ const codePanelState = createState({
       editor.updateOptions({
         fontSize: next,
       })
+    },
+    highlightBlockTitles(data) {
+      const { monaco, editor, prevDecorations } = data
+      const hlRanges: any[] = []
+      const elines = editor.getModel().getLinesContent()
+      const blockTests = {
+        actions: /^(\s*)actions\: {/,
+        conditions: /^(\s*)conditions\: {/,
+        data: /^(\s*)data\: {/,
+        values: /^(\s*)values\: {/,
+        results: /^(\s*)results\: {/,
+      }
+
+      for (let i = 0; i < elines.length; i++) {
+        const line = elines[i]
+        for (let key in blockTests) {
+          if (blockTests[key].exec(line)) {
+            hlRanges.push({
+              range: new monaco.Range(i + 1, 3, i + 1, key.length + 3),
+              options: {
+                isWholeLine: false,
+                linesDecorationsClassName: "lineStateBlockCodeHl",
+                inlineClassName: "inlineStateBlockCodeHl",
+                marginClassName: "marginStateBlockCodeHl",
+              },
+            })
+          }
+        }
+      }
+
+      data.prevDecorations = editor.deltaDecorations(prevDecorations, hlRanges)
+    },
+    highlightHoveredBlocks(
+      data,
+      { search, scrollToLine }: { search: string; scrollToLine: boolean },
+    ) {
+      const { monaco, editor, prevDecorations } = data
+      const code = editor.getValue()
+
+      if (search === null || search === "root") {
+        data.prevDecorations = editor.deltaDecorations(prevDecorations, [])
+      } else {
+        const searchString = search + ":"
+        const lines = code.split("\n")
+        const ranges: number[][] = []
+
+        if (searchString === "root:") {
+          ranges[0] = [0, 1, lines.length - 1, 1]
+        } else {
+          let rangeIndex = 0,
+            startSpaces = 0,
+            state = "searchingForStart"
+
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i]
+            if (state === "searchingForStart") {
+              if (line.includes(" " + searchString)) {
+                startSpaces = line.search(/\S/)
+                state = "searchingForEnd"
+                ranges[rangeIndex] = [i + 1, 1]
+              }
+            } else if (state === "searchingForEnd") {
+              if (i === 0) continue
+              const spaces = line.search(/\S/)
+              const range = ranges[rangeIndex]
+
+              if (spaces <= startSpaces) {
+                range.push(spaces < startSpaces || i === range[0] ? i : i + 1)
+                range.push(1)
+                rangeIndex++
+                state = "searchingForStart"
+              }
+            }
+          }
+        }
+
+        const hlRanges = ranges.map(([a, b, c, d]) => ({
+          range: new monaco.Range(a, b, c, d),
+          options: {
+            isWholeLine: true,
+            linesDecorationsClassName: "lineCodeHighlight",
+            inlineClassName: "inlineCodeHighlight",
+            marginClassName: "marginCodeHighlight",
+          },
+        }))
+
+        if (scrollToLine && hlRanges.length > 0) {
+          editor.revealLineInCenter(hlRanges[0].range.startLineNumber - 1, 0)
+        }
+
+        data.prevDecorations = editor.deltaDecorations(
+          prevDecorations,
+          hlRanges,
+        )
+      }
     },
   },
   values: {
