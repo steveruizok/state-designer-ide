@@ -6,8 +6,8 @@ import Head from "next/head"
 
 const TITLE = "State Designer"
 const DESCRIPTION = "Prototype with an interactive state chart."
-const OG_IMAGE = "/sd-social-og.jpg"
-const TW_IMAGE = "/sd-social-og.jpg"
+const OG_IMAGE = "https://app.state-designer.com/sd-social-og.jpg"
+const TW_IMAGE = "https://app.state-designer.com/sd-social-og.jpg"
 const URL = "https://app.state-designer.com"
 
 function MyApp({ Component, pageProps }) {
