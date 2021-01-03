@@ -999,11 +999,7 @@ ${project.code.state}
         // },
       }),
     },
-  )
-    .then((x) => x.json())
-    .catch((e) => console.log(e))
-
-  console.log(data)
+  ).then((x) => x.json())
 
   return `https://codesandbox.io/s/${data.sandbox_id}`
 }

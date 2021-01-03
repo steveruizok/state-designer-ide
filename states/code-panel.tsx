@@ -234,10 +234,7 @@ const codePanelState = createState({
     loadData(data, payload = {}) {
       const { monaco, editor, models } = payload
       if (!editor) {
-        console.log("No editor.")
         return
-      } else {
-        console.log("We have an editor!")
       }
 
       data.models = models
@@ -382,7 +379,6 @@ const codePanelState = createState({
     highlightBlockTitles(data) {
       const { monaco, editor, prevDecorations } = data
       if (!editor) {
-        console.log("Can't highlight, no editor.")
         return
       }
 
@@ -421,7 +417,6 @@ const codePanelState = createState({
     ) {
       const { monaco, editor, prevDecorations } = data
       if (!editor) {
-        console.log("Can't highlight, no editor.")
         return
       }
       const code = editor.getValue()

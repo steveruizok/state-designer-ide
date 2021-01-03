@@ -20,9 +20,7 @@ export default function Controls({ oid, pid, uid }: ControlsProps) {
   const project = useProject(pid, oid)
 
   async function openCodeSandbox() {
-    const link = await getCodeSandboxUrl(oid, pid).catch((e) => {
-      console.log("Could not get a codesandbox link.")
-    })
+    const link = await getCodeSandboxUrl(oid, pid).catch((e) => {})
 
     if (!link) {
       toastState.send("ADDED_TOAST", {

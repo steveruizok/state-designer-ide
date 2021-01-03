@@ -25,7 +25,7 @@ export async function verifyCookie(
       authenticated = true
     })
     .catch(() => {
-      console.log("Could not authenticate")
+      console.log("Could not authenticate!")
       authenticated = false
       return {
         authenticated,
@@ -84,7 +84,7 @@ export async function getCurrentUser(
   const [sessionCookie, customToken] = cookie.split("+")
 
   const authentication = await verifyCookie(sessionCookie).catch((e) => {
-    console.log("Problem here!")
+    console.log("Could not verify session cookie!")
   })
 
   if (!authentication) {
