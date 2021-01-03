@@ -71,6 +71,9 @@ export const Flex = styled.div({
 
 export const Heading = styled.h2({
   variants: {
+    highlight: {
+      true: { color: "$accent" },
+    },
     center: {
       true: { textAlign: "center" },
     },
@@ -88,6 +91,9 @@ export const Text = styled.p({
   lineHeight: "$body",
   color: "$text",
   variants: {
+    highlight: {
+      true: { color: "$accent" },
+    },
     center: {
       true: { textAlign: "center" },
     },

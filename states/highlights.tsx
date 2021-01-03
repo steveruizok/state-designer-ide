@@ -1,7 +1,6 @@
 import { S, createState } from "@state-designer/react"
-import last from "lodash/last"
-import projectState from "states/project"
-import { EventDetails, HighlightData } from "types"
+import codePanelState from "states/code-panel"
+import { HighlightData } from "types"
 
 const initialData: HighlightData = {
   event: null,
@@ -18,24 +17,31 @@ const highlightsState = createState({
       do: ["clearEventHighlight"],
     },
     CLEARED_HIGHLIGHTS: {
-      do: ["clearEventHighlight", "clearStateHighlight"],
+      do: [
+        "clearEventHighlight",
+        "clearStateHighlights",
+        "clearCodePanelHighlights",
+      ],
     },
     CLEARED_EVENT_HIGHLIGHT: {
       if: "eventIsHighlit",
-      do: "clearEventHighlight",
+      do: ["clearEventHighlight", "clearCodePanelHighlights"],
     },
     CLEARED_STATE_HIGHLIGHT: {
       if: "stateIsHighlit",
-      do: "clearStateHighlight",
+      do: ["clearStateHighlight", "clearCodePanelHighlights"],
+    },
+    CLEARED_STATE_HIGHLIGHTS: {
+      do: ["clearStateHighlights", "clearCodePanelHighlights"],
     },
     HIGHLIT_EVENT: {
       unless: "eventIsHighlit",
-      do: ["clearEventHighlight", "setEventHighlight"],
+      do: ["clearEventHighlight", "setEventHighlight", "notifyCodePanelEvent"],
     },
     HIGHLIT_STATE: {
       wait: 0.01,
       unless: "stateIsHighlit",
-      do: ["clearStateHighlight", "setStateHighlight"],
+      do: ["clearStateHighlight", "setStateHighlight", "notifyCodePanelState"],
     },
     MOUNTED_NODE: "addStateNodeRef",
     UNMOUNTED_NODE: "deleteNodeRef",
@@ -58,11 +64,13 @@ const highlightsState = createState({
       data,
       {
         eventName,
+        canBeHandled,
         statePaths,
         targets,
         shiftKey,
       }: {
         eventName: string
+        canBeHandled: boolean
         statePaths: string[]
         targets: {
           from: string
@@ -76,6 +84,7 @@ const highlightsState = createState({
 
       data.event = {
         eventName,
+        canBeHandled,
         statePaths,
         targets: targets.map((target) => ({
           from: eventButtonRefs.get(target.from + "_" + eventName),
@@ -86,11 +95,15 @@ const highlightsState = createState({
       data.scrollToLine = shiftKey
     },
     setStateHighlight(data, { path, stateName, shiftKey }) {
+      // data.states = { [path]: { path, name: stateName } }
       data.states[path] = { path, name: stateName }
       data.scrollToLine = shiftKey
     },
     clearStateHighlight(data, { path }) {
       delete data.states[path]
+    },
+    clearStateHighlights(data) {
+      data.states = {}
     },
     clearEventHighlight(data) {
       data.event = null
@@ -110,6 +123,21 @@ const highlightsState = createState({
     },
     deleteEventButtonRef(data, { id }) {
       data.eventButtonRefs.delete(id)
+    },
+    notifyCodePanelState(data, { stateName, shiftKey }) {
+      codePanelState.send("CHANGED_HIGHLIGHTS", {
+        search: stateName,
+        scrollToLine: shiftKey,
+      })
+    },
+    notifyCodePanelEvent(data, { eventName, shiftKey }) {
+      codePanelState.send("CHANGED_HIGHLIGHTS", {
+        search: eventName,
+        scrollToLine: shiftKey,
+      })
+    },
+    clearCodePanelHighlights(data) {
+      codePanelState.send("CLEARED_HIGHLIGHTS")
     },
   },
   values: {

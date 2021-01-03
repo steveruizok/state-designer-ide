@@ -20,6 +20,7 @@
     "lodash-es": "^4.17.20",
     "monaco-editor": "^0.21.2",
     "next": "10.0.3",
+    "next-seo": "^4.17.0",
     "nookies": "^2.5.0",
     "perfect-arrows": "^0.3.3",
     "prettier": "^2.2.1",

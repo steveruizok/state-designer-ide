@@ -2,11 +2,13 @@ import { S, useStateDesigner } from "@state-designer/react"
 import { Button, IconButton, styled } from "components/theme"
 import { useAnimation, useMotionValue } from "framer-motion"
 import { motion } from "framer-motion"
+import { AnimatePresence, AnimateSharedLayout } from "framer-motion"
 import usePreventZooming from "hooks/usePreventZooming"
 import useScaleZooming from "hooks/useScaleZooming"
 import throttle from "lodash/throttle"
 import * as React from "react"
 import { Compass, RotateCcw } from "react-feather"
+import highlightsState from "states/highlights"
 import projectState from "states/project"
 import useMotionResizeObserver from "use-motion-resize-observer"
 
@@ -124,10 +126,20 @@ function Chart({ state, zoomedPath }: ChartProps) {
         animate={animation}
         onDoubleClick={(e) => e.stopPropagation()}
       >
-        <StateNodeContainer>
-          <RootNodeWrapper id="chart-container" ref={rRootNode as any}>
-            <StateNode node={zoomed || captive.stateTree} />
-          </RootNodeWrapper>
+        <StateNodeContainer
+          onMouseLeave={(e) => {
+            highlightsState.send("CLEARED_HIGHLIGHTS")
+          }}
+        >
+          <AnimateSharedLayout>
+            <RootNodeWrapper id="chart-container" ref={rRootNode as any}>
+              <StateNode
+                key="root"
+                layoutId="root"
+                node={zoomed || captive.stateTree}
+              />
+            </RootNodeWrapper>
+          </AnimateSharedLayout>
           <CanvasOverlay
             scale={mvScale}
             offsetX={mvX}
@@ -162,7 +174,7 @@ function Chart({ state, zoomedPath }: ChartProps) {
 
 export default React.memo(Chart)
 
-const RootNodeWrapper = styled.div({})
+const RootNodeWrapper = styled(motion.div, {})
 
 const ChartContainer = styled(motion.div, {
   position: "relative",

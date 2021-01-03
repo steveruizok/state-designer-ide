@@ -1,5 +1,6 @@
 import { S, useStateDesigner } from "@state-designer/react"
 import { styled } from "components/theme"
+import { motion } from "framer-motion"
 import sortBy from "lodash/sortBy"
 import * as React from "react"
 import highlightsState from "states/highlights"
@@ -9,10 +10,11 @@ import NodeEvents from "./node-events"
 import NodeHeading from "./node-heading"
 
 interface StateNodeProps {
+  layoutId?: string
   node: S.State<any, any>
 }
 
-export default function StateNode({ node }: StateNodeProps) {
+export default function StateNode({ layoutId, node }: StateNodeProps) {
   const rContainer = React.useRef<HTMLDivElement>(null)
   const localHighlight = useStateDesigner(highlightsState)
 
@@ -20,7 +22,7 @@ export default function StateNode({ node }: StateNodeProps) {
 
   const isHighlit =
     localHighlight.values.highlitStates.find(
-      ({ name }) => name === node.name,
+      ({ path }) => path === node.path,
     ) !== undefined
 
   const childNodes = sortBy(
@@ -56,15 +58,16 @@ export default function StateNode({ node }: StateNodeProps) {
   return (
     <NodeContainer
       ref={rContainer}
+      layoutId={layoutId}
       data-type="node-container"
-      onPointerEnter={(e) => {
+      onMouseEnter={(e) => {
         highlightsState.send("HIGHLIT_STATE", {
           stateName: node.name,
           shiftKey: e.shiftKey,
           path: node.path,
         })
       }}
-      onPointerLeave={(e) => {
+      onMouseLeave={(e) => {
         highlightsState.send("CLEARED_STATE_HIGHLIGHT", {
           stateName: node.name,
           path: node.path,
@@ -75,6 +78,14 @@ export default function StateNode({ node }: StateNodeProps) {
       childOf={node.parentType || "root"}
       nodeLevel={isRoot ? "root" : "child"}
       data-highlight={isHighlit}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{
+        type: "spring",
+        stiffness: 500,
+        damping: 40,
+      }}
     >
       {isRoot ? (
         events.length > 0 ? (
@@ -85,10 +96,9 @@ export default function StateNode({ node }: StateNodeProps) {
         <NodeHeading node={node} />
       )}
       {events.length > 0 && <NodeEvents node={node} events={events} />}
-      {events.length > 0 && childNodes.length > 0 && (
-        <Divider
-          state={isRoot ? "inactive" : node.active ? "active" : "inactive"}
-        />
+      {((events.length > 0 && childNodes.length > 0) ||
+        (node.type === "parallel" && childNodes.length > 0)) && (
+        <Divider state={"inactive"} />
       )}
       <ChildNodesContainer type={node.type}>
         {node.type === "parallel"
@@ -96,8 +106,11 @@ export default function StateNode({ node }: StateNodeProps) {
               const hideDivider = hiddenDividerIndices.has(i)
 
               return (
-                <React.Fragment key={i}>
-                  <StateNode node={child} />
+                <React.Fragment key={child.path}>
+                  <StateNode
+                    node={child}
+                    layoutId={node.name + "_" + child.name}
+                  />
                   {i < childNodes.length - 1 && (
                     <ParallelDivider
                       visibility={hideDivider ? "hidden" : "visible"}
@@ -108,20 +121,21 @@ export default function StateNode({ node }: StateNodeProps) {
               )
             })
           : childNodes.map((child, i) => (
-              <StateNode key={child.path} node={child} />
+              <StateNode
+                key={child.path}
+                node={child}
+                layoutId={node.name + "_" + child.name}
+              />
             ))}
       </ChildNodesContainer>
     </NodeContainer>
   )
 }
 
-const RootNodeHeading = styled.div({
-  pt: "$1",
-})
-
-export const NodeContainer = styled.div({
+export const NodeContainer = styled(motion.div, {
   color: "$text",
   fontFamily: "$monospace",
+  display: "block",
   fontSize: "$1",
   borderRadius: 12,
   bg: "$node",

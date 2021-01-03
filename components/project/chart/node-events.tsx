@@ -29,15 +29,13 @@ function NodeEvents({ node, events }: NodeEventsProps) {
 
         const isActive = node.active
 
-        let canHandleEvent = true
+        let canBeHandled = true
 
         try {
-          canHandleEvent = local.data.captive.can(name, payload)
+          canBeHandled = local.data.captive.can(name, payload)
         } catch (e) {
           throw new Error("error while testing event")
         }
-
-        const isDisabled = !isActive || !canHandleEvent
 
         return (
           <EventButton
@@ -45,7 +43,7 @@ function NodeEvents({ node, events }: NodeEventsProps) {
             eventName={name}
             node={node}
             payload={payload}
-            isDisabled={isDisabled}
+            canBeHandled={canBeHandled}
             isActive={isActive}
             isHighlit={highlitEventName === name}
             event={eventMap[name]}
@@ -62,10 +60,18 @@ const EventButton: React.FC<{
   node: S.State<any, any>
   payload: any
   isHighlit: boolean
-  isDisabled: boolean
+  canBeHandled: boolean
   isActive: boolean
   event: EventDetails
-}> = ({ eventName, event, node, payload, isHighlit, isDisabled, isActive }) => {
+}> = ({
+  eventName,
+  event,
+  node,
+  payload,
+  isHighlit,
+  canBeHandled,
+  isActive,
+}) => {
   const rButton = React.useRef<HTMLButtonElement>(null)
   const { captive } = projectState.data
 
@@ -84,6 +90,7 @@ const EventButton: React.FC<{
   function sendHighlightEvent(shiftKey = false) {
     highlightsState.send("HIGHLIT_EVENT", {
       eventName,
+      canBeHandled,
       statePaths: Array.from(event.states.values()).map((state) => ({
         statePath: state.path,
         active: state.active,
@@ -98,6 +105,8 @@ const EventButton: React.FC<{
     })
   }
 
+  const isDisabled = !(isActive && canBeHandled)
+
   return (
     <Button
       ref={rButton}
@@ -108,8 +117,8 @@ const EventButton: React.FC<{
         !isDisabled
           ? `Click to send the ${eventName} event`
           : !isActive
-          ? "The state cannot handle this event while it is inactive."
-          : "The state cannot handle this event due to its current payload."
+          ? `Click to send the ${eventName} event. The ${node.name} will not handle this event while it is inactive, but it may be handled elsewhere.`
+          : `Click to send the ${eventName} event. The ${node.name} will not handle this event due to its current payload, but it may be handled elsewhere.`
       }
       onClick={() => {
         captive.send(eventName, payload)
@@ -118,10 +127,10 @@ const EventButton: React.FC<{
         )
         requestAnimationFrame(() => sendHighlightEvent())
       }}
-      onPointerEnter={(e) => {
+      onMouseEnter={(e) => {
         sendHighlightEvent(e.shiftKey)
       }}
-      onPointerLeave={() =>
+      onMouseLeave={() =>
         requestAnimationFrame(() =>
           highlightsState.send("CLEARED_EVENT_HIGHLIGHT", {
             eventName,
@@ -145,12 +154,14 @@ const NodeEventsContainer = styled.div({
   gap: "$0",
   variants: {
     type: {
-      leaf: {},
+      leaf: {
+        pb: "$0",
+      },
       branch: {
-        pb: "$2",
+        pb: "$1",
       },
       parallel: {
-        pb: "$2",
+        pb: "$1",
       },
     },
   },

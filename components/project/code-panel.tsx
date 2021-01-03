@@ -66,73 +66,73 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
 
   const rPreviousDecorations = React.useRef<any[]>([])
 
-  React.useEffect(() => {
-    return highlightsState.onUpdate(
-      ({ data: { states, event, scrollToLine } }) => {
-        if (local.data.activeTab !== "state") return
-        if (!editor) return
-        const previous = rPreviousDecorations.current
-        const search = Object.values(states)[0]?.name || event?.eventName
-        const code = editor.getValue()
+  // React.useEffect(() => {
+  //   return highlightsState.onUpdate(
+  //     ({ data: { states, event, scrollToLine } }) => {
+  //       if (local.data.activeTab !== "state") return
+  //       if (!editor) return
+  //       const previous = rPreviousDecorations.current
+  //       const search = Object.values(states)[0]?.name || event?.eventName
+  //       const code = editor.getValue()
 
-        if (search === null || search === "root") {
-          rPreviousDecorations.current = editor.deltaDecorations(previous, [])
-        } else {
-          const searchString = search + ":"
-          const lines = code.split("\n")
-          const ranges: number[][] = []
+  //       if (search === null || search === "root") {
+  //         rPreviousDecorations.current = editor.deltaDecorations(previous, [])
+  //       } else {
+  //         const searchString = search + ":"
+  //         const lines = code.split("\n")
+  //         const ranges: number[][] = []
 
-          if (searchString === "root:") {
-            ranges[0] = [0, 1, lines.length - 1, 1]
-          } else {
-            let rangeIndex = 0,
-              startSpaces = 0,
-              state = "searchingForStart"
+  //         if (searchString === "root:") {
+  //           ranges[0] = [0, 1, lines.length - 1, 1]
+  //         } else {
+  //           let rangeIndex = 0,
+  //             startSpaces = 0,
+  //             state = "searchingForStart"
 
-            for (let i = 0; i < lines.length; i++) {
-              const line = lines[i]
-              if (state === "searchingForStart") {
-                if (line.includes(" " + searchString)) {
-                  startSpaces = line.search(/\S/)
-                  state = "searchingForEnd"
-                  ranges[rangeIndex] = [i + 1, 1]
-                }
-              } else if (state === "searchingForEnd") {
-                if (i === 0) continue
-                const spaces = line.search(/\S/)
-                const range = ranges[rangeIndex]
+  //           for (let i = 0; i < lines.length; i++) {
+  //             const line = lines[i]
+  //             if (state === "searchingForStart") {
+  //               if (line.includes(" " + searchString)) {
+  //                 startSpaces = line.search(/\S/)
+  //                 state = "searchingForEnd"
+  //                 ranges[rangeIndex] = [i + 1, 1]
+  //               }
+  //             } else if (state === "searchingForEnd") {
+  //               if (i === 0) continue
+  //               const spaces = line.search(/\S/)
+  //               const range = ranges[rangeIndex]
 
-                if (spaces <= startSpaces) {
-                  range.push(spaces < startSpaces || i === range[0] ? i : i + 1)
-                  range.push(1)
-                  rangeIndex++
-                  state = "searchingForStart"
-                }
-              }
-            }
-          }
+  //               if (spaces <= startSpaces) {
+  //                 range.push(spaces < startSpaces || i === range[0] ? i : i + 1)
+  //                 range.push(1)
+  //                 rangeIndex++
+  //                 state = "searchingForStart"
+  //               }
+  //             }
+  //           }
+  //         }
 
-          const hlRanges = ranges.map(([a, b, c, d]) => ({
-            range: new monaco.Range(a, b, c, d),
-            options: {
-              isWholeLine: true,
-              linesDecorationsClassName: "lineCodeHighlight",
-              inlineClassName: "inlineCodeHighlight",
-              marginClassName: "marginCodeHighlight",
-            },
-          }))
+  //         const hlRanges = ranges.map(([a, b, c, d]) => ({
+  //           range: new monaco.Range(a, b, c, d),
+  //           options: {
+  //             isWholeLine: true,
+  //             linesDecorationsClassName: "lineCodeHighlight",
+  //             inlineClassName: "inlineCodeHighlight",
+  //             marginClassName: "marginCodeHighlight",
+  //           },
+  //         }))
 
-          if (scrollToLine && hlRanges.length > 0) {
-            editor.revealLineInCenter(hlRanges[0].range.startLineNumber - 1, 0)
-          }
+  //         if (scrollToLine && hlRanges.length > 0) {
+  //           editor.revealLineInCenter(hlRanges[0].range.startLineNumber - 1, 0)
+  //         }
 
-          const decorations = editor.deltaDecorations(previous, hlRanges)
+  //         const decorations = editor.deltaDecorations(previous, hlRanges)
 
-          rPreviousDecorations.current = decorations
-        }
-      },
-    )
-  }, [editor, monaco])
+  //         rPreviousDecorations.current = decorations
+  //       }
+  //     },
+  //   )
+  // }, [editor, monaco])
 
   // Setup save action and load up the state machine
 

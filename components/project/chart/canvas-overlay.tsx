@@ -75,6 +75,7 @@ const CanvasOverlay: React.FC<{
           ctx,
           getFrame(fElm, sc, cFrame.x, cFrame.y),
           getFrame(tElm, sc, cFrame.x, cFrame.y),
+          event.canBeHandled ? "red" : "rgba(122, 122, 122, 1)",
         )
       }
       isDirty.current = true
@@ -167,6 +168,7 @@ function drawLineFromEventButtonToStateNode(
   ctx: CanvasRenderingContext2D,
   a: Frame,
   b: Frame,
+  color: string,
 ) {
   const arrow = getBoxToBoxArrow(
     a.x,
@@ -205,14 +207,14 @@ function drawLineFromEventButtonToStateNode(
   ctx.lineWidth = 3
   ctx.stroke()
 
-  ctx.fillStyle = "red"
+  ctx.fillStyle = color
   ctx.fill()
 
   ctx.beginPath()
   ctx.moveTo(sx, sy)
   ctx.quadraticCurveTo(cx, cy, ex, ey)
 
-  ctx.strokeStyle = "red"
+  ctx.strokeStyle = color
   ctx.lineWidth = 3
   ctx.stroke()
 

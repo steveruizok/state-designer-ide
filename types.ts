@@ -76,6 +76,7 @@ export interface ToastMessage {
 export interface HighlightData {
   event: {
     eventName: string
+    canBeHandled: boolean
     statePaths: string[]
     targets: {
       from: React.RefObject<HTMLDivElement>

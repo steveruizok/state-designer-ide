@@ -10,7 +10,9 @@ export default function usePreventZooming(
     if (!container) return
 
     function preventTouchZooming(e: WheelEvent) {
-      if (e.ctrlKey) e.preventDefault()
+      if (e.ctrlKey) {
+        e.preventDefault()
+      }
     }
 
     container.addEventListener("wheel", preventTouchZooming, {

@@ -11,13 +11,18 @@ import { EventDetails } from "types"
 
 const initialOffset = ui.panelOffsets.payloads
 
+const AUTOEVENT_NAMES = ["onEnter", "onExit", "onEvent"]
+
 export const PAYLOADS_ROW_HEIGHT = 40
 
-interface PayloadsProps {
-  events: [string, EventDetails][]
-}
+interface PayloadsProps {}
 
-export default function Payloads({ events }: PayloadsProps) {
+export default function Payloads({}: PayloadsProps) {
+  const local = useStateDesigner(projectState)
+  const events = Object.entries(local.data.eventMap).filter(
+    ([name]) => !AUTOEVENT_NAMES.includes(name),
+  )
+
   const localPayloads = useStateDesigner(payloadsState)
   const [selected, setSelected] = React.useState(
     events[0]?.[0] || "Select an Event",

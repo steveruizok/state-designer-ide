@@ -133,7 +133,7 @@ export default function UserPage(props: UserPageProps) {
             Sort by
             <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
               <option>Date</option>
-              <option>N e</option>
+              <option>Name</option>
             </Select>
             <Select
               value={sortDirection}

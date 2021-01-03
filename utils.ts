@@ -55,3 +55,7 @@ export function getNodeEvents(node: S.State<any, any>) {
 
   return events
 }
+
+export function getFlatStates(state: S.State<any, any>): S.State<any, any>[] {
+  return [state, ...Object.values(state.states).flatMap(getFlatStates)]
+}

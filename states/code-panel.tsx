@@ -82,6 +82,8 @@ const codePanelState = createState({
     INCREASED_FONT_SIZE: "increaseFontSize",
     DECREASED_FONT_SIZE: "decreaseFontSize",
     RESET_FONT_SIZE: "resetFontSize",
+    CHANGED_HIGHLIGHTS: "highlightHoveredBlocks",
+    CLEARED_HIGHLIGHTS: "clearHighlights",
   },
   states: {
     editor: {
@@ -451,6 +453,10 @@ const codePanelState = createState({
           hlRanges,
         )
       }
+    },
+    clearHighlights(data) {
+      const { editor, prevDecorations } = data
+      data.prevDecorations = editor.deltaDecorations(prevDecorations, [])
     },
   },
   values: {
