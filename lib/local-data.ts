@@ -64,19 +64,18 @@ function loadLocalUI() {
     // Set saved data to ui
     const saved = JSON.parse(savedUI)
     Object.assign(ui, saved)
-  } else {
-    // Update panel offsets
-    updatePanelOffsets()
-    updateCssVariables()
+  }
+  // Update panel offsets
+  updatePanelOffsets()
+  updateCssVariables()
 
-    // Update theme
-    if (typeof document !== "undefined") {
-      document.body.className = ui.theme === "dark" ? darkTheme : lightTheme
-    }
+  // Update theme
+  if (typeof document !== "undefined") {
+    document.body.className = ui.theme === "dark" ? darkTheme : lightTheme
+  }
 
-    if (themeState) {
-      themeState.send("SET_INITIAL_THEME", { theme: ui.theme })
-    }
+  if (themeState) {
+    themeState.send("SET_INITIAL_THEME", { theme: ui.theme })
   }
 }
 
