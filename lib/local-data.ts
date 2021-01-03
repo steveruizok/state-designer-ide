@@ -23,7 +23,7 @@ export const ui = {
     console: 0,
   },
   payloads: {},
-  theme: "light" as "dark" | "light",
+  theme: "dark" as "dark" | "light",
 }
 
 export const themeState = createState({
@@ -64,7 +64,7 @@ function loadLocalUI() {
     // Set saved data to ui
     const saved = JSON.parse(savedUI)
     Object.assign(ui, saved)
-
+  } else {
     // Update panel offsets
     updatePanelOffsets()
     updateCssVariables()
