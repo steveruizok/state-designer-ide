@@ -578,3 +578,15 @@ export async function updateProjectName(
   await checkAuth()
   updateProject(pid, uid, { name })
 }
+
+export async function getCodeSandboxUrl(oid: string, pid: string) {
+  var path = `/api/sandbox`
+  var url = process.env.NEXT_PUBLIC_BASE_API_URL + path
+  return await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ oid, pid }),
+  }).then((d) => d.json())
+}

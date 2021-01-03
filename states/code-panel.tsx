@@ -1,5 +1,3 @@
-import { createState } from "@state-designer/react"
-import { saveProjectCode } from "lib/database"
 import { codeFormatValidators, codeValidators } from "lib/eval"
 import {
   decreaseFontSize,
@@ -8,9 +6,11 @@ import {
   saveCodeTab,
   ui,
 } from "lib/local-data"
-import { CodeEditorTab } from "types"
 
+import { CodeEditorTab } from "types"
+import { createState } from "@state-designer/react"
 import liveViewState from "./live-view"
+import { saveProjectCode } from "lib/database"
 
 const EDITOR_TABS = ["state", "view", "static"]
 let INITIAL_FONT_SIZE = 13
@@ -70,7 +70,6 @@ const codePanelState = createState({
     },
   },
   on: {
-    LOADED: ["loadData", "notifyLiveViewClean"],
     UNLOADED: { to: ["loading"] },
     SOURCE_UPDATED: ["updateFromDatabase", "notifyLiveViewClean"],
     CHANGED_CODE: ["updateDirtyCode", "highlightBlockTitles"],
@@ -124,27 +123,38 @@ const codePanelState = createState({
       states: {
         loading: {
           on: {
+            LOADED: [
+              "loadData",
+              {
+                if: "hasSource",
+                to: "starting",
+              },
+            ],
             SOURCE_LOADED: [
-              {
-                unless: "hasEditor",
-                break: true,
-              },
               "initialLoadFromDatabase",
-              "updateModels",
               {
-                if: "initialTabIsState",
-                to: "state",
-              },
-              {
-                if: "initialTabIsView",
-                to: "view",
-              },
-              {
-                if: "initialTabIsStatic",
-                to: "static",
+                if: "hasEditor",
+                to: "starting",
               },
             ],
           },
+        },
+        starting: {
+          onEnter: [
+            "updateModels",
+            {
+              if: "initialTabIsState",
+              to: "state",
+            },
+            {
+              if: "initialTabIsView",
+              to: "view",
+            },
+            {
+              if: "initialTabIsStatic",
+              to: "static",
+            },
+          ],
         },
         state: {
           onEnter: [
@@ -199,6 +209,9 @@ const codePanelState = createState({
     errorInCurrentTab(data) {
       return data.code[data.activeTab].error !== ""
     },
+    hasSource(data) {
+      return data.code[EDITOR_TABS[0]].clean !== ""
+    },
     hasEditor(data) {
       return !!data.editor
     },
@@ -220,6 +233,13 @@ const codePanelState = createState({
     // Data
     loadData(data, payload = {}) {
       const { monaco, editor, models } = payload
+      if (!editor) {
+        console.log("No editor.")
+        return
+      } else {
+        console.log("We have an editor!")
+      }
+
       data.models = models
       data.monaco = monaco
       data.editor = editor
@@ -361,6 +381,11 @@ const codePanelState = createState({
     },
     highlightBlockTitles(data) {
       const { monaco, editor, prevDecorations } = data
+      if (!editor) {
+        console.log("Can't highlight, no editor.")
+        return
+      }
+
       const hlRanges: any[] = []
       const elines = editor.getModel().getLinesContent()
       const blockTests = {
@@ -395,6 +420,10 @@ const codePanelState = createState({
       { search, scrollToLine }: { search: string; scrollToLine: boolean },
     ) {
       const { monaco, editor, prevDecorations } = data
+      if (!editor) {
+        console.log("Can't highlight, no editor.")
+        return
+      }
       const code = editor.getValue()
 
       if (search === null || search === "root") {

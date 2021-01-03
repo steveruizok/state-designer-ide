@@ -1,9 +1,9 @@
-import * as _Checkbox from "@radix-ui/react-checkbox"
-import { m } from "framer-motion"
 import * as React from "react"
-import { Check } from "react-feather"
+import * as _Checkbox from "@radix-ui/react-checkbox"
 
 import { css, darkTheme, lightTheme, styled } from "./core"
+
+import { Check } from "react-feather"
 
 export { styled, css, lightTheme, darkTheme }
 

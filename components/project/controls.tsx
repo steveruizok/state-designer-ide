@@ -1,9 +1,12 @@
+import { Codesandbox, Copy, Minus, Plus, Sun } from "react-feather"
 import { IconButton, Text, styled } from "components/theme"
-import useProject from "hooks/useProject"
-import useTheme from "hooks/useTheme"
-import { Copy, Minus, Plus, Sun } from "react-feather"
+
 import codePanelState from "states/code-panel"
 import dialogState from "states/dialog"
+import { getCodeSandboxUrl } from "lib/database"
+import toastState from "states/toast"
+import useProject from "hooks/useProject"
+import useTheme from "hooks/useTheme"
 
 interface ControlsProps {
   oid: string
@@ -16,8 +19,34 @@ export default function Controls({ oid, pid, uid }: ControlsProps) {
   const { toggle } = useTheme()
   const project = useProject(pid, oid)
 
+  async function openCodeSandbox() {
+    const link = await getCodeSandboxUrl(oid, pid).catch((e) => {
+      console.log("Could not get a codesandbox link.")
+    })
+
+    if (!link) {
+      toastState.send("ADDED_TOAST", {
+        message: "Sorry, we couldn't reach CodeSandbox.",
+      })
+      return
+    }
+
+    const elm = document.createElement("textarea")
+    document.body.appendChild(elm)
+    elm.value = link.url
+    elm.select()
+    document.execCommand("copy")
+    document.body.removeChild(elm)
+    toastState.send("ADDED_TOAST", {
+      message: "Copied CodeSandbox URL to Clipboard",
+    })
+  }
+
   return (
     <ControlsContainer>
+      <IconButton title="Open in Codesandbox" onClick={openCodeSandbox}>
+        <Codesandbox />
+      </IconButton>
       {uid && (
         <IconButton
           title="Duplicate Project"

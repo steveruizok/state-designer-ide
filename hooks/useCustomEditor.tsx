@@ -1,9 +1,9 @@
-import debounce from "lodash/debounce"
 import * as React from "react"
+
+import debounce from "lodash/debounce"
 import mergeRefs from "react-merge-refs"
 import { useEditor } from "use-monaco"
 import useMotionResizeObserver from "use-motion-resize-observer"
-
 import useTheme from "./useTheme"
 
 export default function useCustomEditor(
@@ -83,6 +83,7 @@ export default function useCustomEditor(
 
   React.useEffect(() => {
     if (editor) {
+      resizeEditor()
       editor.updateOptions({
         readOnly,
       })
