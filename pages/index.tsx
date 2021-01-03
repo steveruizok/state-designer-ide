@@ -18,11 +18,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   if (authState.user) {
     context.res.setHeader("Location", `/u/${authState.user.uid}`)
     context.res.statusCode = 307
-  } else {
-    if (!authState.authenticated) {
-      context.res.setHeader("Location", `/u/auth`)
-      context.res.statusCode = 307
-    }
   }
 
   return {
