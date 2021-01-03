@@ -1,7 +1,6 @@
 import "../styles/globals.css"
 
 import Dialog from "components/dialog"
-import MonacoProvider from "components/monaco-provider"
 import Toast from "components/toast"
 import Head from "next/head"
 
@@ -13,7 +12,7 @@ const URL = "https://app.state-designer.com"
 
 function MyApp({ Component, pageProps }) {
   return (
-    <MonacoProvider>
+    <>
       <Head>
         <title>State Designer</title>
         <meta property="og:title" content={TITLE} />
@@ -29,7 +28,7 @@ function MyApp({ Component, pageProps }) {
       <Component {...pageProps} />
       <Toast />
       <Dialog />
-    </MonacoProvider>
+    </>
   )
 }
 
