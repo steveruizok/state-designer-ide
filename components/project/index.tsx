@@ -1,3 +1,4 @@
+import MonacoProvider from "components/monaco-provider"
 import { styled } from "components/theme"
 import { checkAuth, setCustomToken, subscribeToProject } from "lib/database"
 import { motionValues, updatePanelOffsets } from "lib/local-data"
@@ -77,27 +78,29 @@ export default function ProjectView({
   }, [oid, pid])
 
   return (
-    <Layout>
-      <Menu user={user} />
-      <Title pid={pid} oid={oid} readOnly={oid !== uid} />
-      <Controls oid={oid} pid={pid} uid={uid} />
-      <ContentPanel />
-      <MainContainer>
-        <ChartView />
-        <MainDragArea ref={rMainContainer} />
-        <LiveViewContainer>
-          <LiveView />
-          <Console />
-        </LiveViewContainer>
-        <DetailsPanel />
-        <DragHandleHorizontalRelative
-          motionValue={motionValues.main}
-          containerRef={rMainContainer}
-          offset="main"
-        />
-      </MainContainer>
-      <CodePanel oid={oid} pid={pid} uid={uid} />
-    </Layout>
+    <MonacoProvider>
+      <Layout>
+        <Menu user={user} />
+        <Title pid={pid} oid={oid} readOnly={oid !== uid} />
+        <Controls oid={oid} pid={pid} uid={uid} />
+        <ContentPanel />
+        <MainContainer>
+          <ChartView />
+          <MainDragArea ref={rMainContainer} />
+          <LiveViewContainer>
+            <LiveView />
+            <Console />
+          </LiveViewContainer>
+          <DetailsPanel />
+          <DragHandleHorizontalRelative
+            motionValue={motionValues.main}
+            containerRef={rMainContainer}
+            offset="main"
+          />
+        </MainContainer>
+        <CodePanel oid={oid} pid={pid} uid={uid} />
+      </Layout>
+    </MonacoProvider>
   )
 }
 
