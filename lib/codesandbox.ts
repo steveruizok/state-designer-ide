@@ -2,36 +2,6 @@ import { ProjectData } from "types"
 import { getParameters } from "codesandbox/lib/api/define"
 
 export default async function getCodeSandboxUrl(project: ProjectData) {
-  const packageCode = `
-{
-	"name": ${project.name},
-	"version": "1.0.0",
-	"private": true,
-	"description": "React example starter project",
-	"keywords": ["react", "starter"],
-	"main": "src/index.js",
-	"dependencies": {
-		"react": "17.0.0",
-		"react-dom": "17.0.0",
-		"react-scripts": "3.4.3",
-		"@state-designer/react": "latest",
-		"@stitches/react": "latest",
-		"@radix-ui/react-checkbox": "latest",
-		"react-feather": "latest",
-		"lodash": "latest"
-	},
-	"devDependencies": {
-		"typescript": "3.8.3"
-	},
-	"scripts": {
-		"start": "react-scripts start",
-		"build": "react-scripts build",
-		"test": "react-scripts test --env=jsdom",
-		"eject": "react-scripts eject"
-	},
-	"browserslist": [">0.2%", "not dead", "not ie <= 11", "not op_mini all"]
-}`
-
   const indexCode = `
 import React from "react"
 import ReactDOM from "react-dom"
@@ -910,6 +880,7 @@ export {
 `
 
   const stateCode = `
+import { Colors, Utils } from "./resources"
 import { createState } from "@state-designer/react"
 
 ${project.code.state}
