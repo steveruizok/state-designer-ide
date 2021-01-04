@@ -1,19 +1,20 @@
-import { S, useStateDesigner } from "@state-designer/react"
-import { Button, IconButton, styled } from "components/theme"
-import { useAnimation, useMotionValue } from "framer-motion"
-import { motion } from "framer-motion"
-import { AnimatePresence, AnimateSharedLayout } from "framer-motion"
-import usePreventZooming from "hooks/usePreventZooming"
-import useScaleZooming from "hooks/useScaleZooming"
-import throttle from "lodash/throttle"
 import * as React from "react"
+
+import { AnimatePresence, AnimateSharedLayout } from "framer-motion"
+import { Button, IconButton, styled } from "components/theme"
 import { Compass, RotateCcw } from "react-feather"
-import highlightsState from "states/highlights"
-import projectState from "states/project"
-import useMotionResizeObserver from "use-motion-resize-observer"
+import { S, useStateDesigner } from "@state-designer/react"
+import { useAnimation, useMotionValue } from "framer-motion"
 
 import CanvasOverlay from "./canvas-overlay"
 import StateNode from "./state-node"
+import highlightsState from "states/highlights"
+import { motion } from "framer-motion"
+import projectState from "states/project"
+import throttle from "lodash/throttle"
+import useMotionResizeObserver from "use-motion-resize-observer"
+import usePreventZooming from "hooks/usePreventZooming"
+import useScaleZooming from "hooks/useScaleZooming"
 
 interface ChartProps {
   state: S.DesignedState<any, any>
@@ -199,7 +200,7 @@ const StateNodeContainer = styled(motion.div, {
   position: "relative",
 })
 
-const CanvasControls = styled.div({
+export const CanvasControls = styled.div({
   height: 40,
   position: "absolute",
   bottom: 0,

@@ -1,18 +1,16 @@
 import * as React from "react"
 
-import { Button, IconButton, styled } from "components/theme"
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 
+import { CanvasControls } from "components/project/chart"
 import ChartView from "components/project/chart-view"
 import Head from "next/head"
-import Link from "next/link"
 import Router from "next/router"
-import { Sun } from "react-feather"
 import { getProjectData } from "lib/database"
 import projectState from "states/project"
 import { single } from "utils"
+import { styled } from "components/theme"
 import { subscribeToProject } from "lib/database"
-import useTheme from "hooks/useTheme"
 
 interface ChartPageProps {
   oid: string
@@ -27,7 +25,7 @@ interface ProjectNotFoundPageProps {
 
 type PageProps = ChartPageProps | ProjectNotFoundPageProps
 
-export default function ProjectPage(props: PageProps) {
+export default function ChartPage(props: PageProps) {
   if (!props.isProject) return null
   const { oid, pid, name } = props
 
@@ -58,25 +56,11 @@ export default function ProjectPage(props: PageProps) {
     }
   }, [oid, pid])
 
-  const { toggle } = useTheme()
-
   return (
     <Layout>
       <Head>
         <title>{name} - State Designer</title>
       </Head>
-      <NavContainer>
-        <Link href={`/u/${oid}/p/${pid}`}>
-          <Button>Back to Project</Button>
-        </Link>
-        <Link href={`/u/${oid}/p/${pid}/view`}>
-          <Button>View</Button>
-        </Link>
-        <Spacer />
-        <IconButton title="Toggle Dark Mode" onClick={toggle}>
-          <Sun />
-        </IconButton>
-      </NavContainer>
       <ChartView />
     </Layout>
   )
@@ -126,6 +110,9 @@ const Layout = styled.div({
   gridTemplateRows: "minmax(0, 1fr)",
   gridTemplateAreas: `
 	"chart"`,
+  [`& ${CanvasControls}`]: {
+    visibility: "hidden",
+  },
 })
 
 const NavContainer = styled.nav({
