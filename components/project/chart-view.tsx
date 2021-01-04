@@ -1,8 +1,8 @@
-import { useStateDesigner } from "@state-designer/react"
-import Loading from "components/loading"
 import ChartView from "components/project/chart"
-import { styled } from "components/theme"
+import Loading from "components/loading"
 import projectState from "states/project"
+import { styled } from "components/theme"
+import { useStateDesigner } from "@state-designer/react"
 
 export default function Chart() {
   const local = useStateDesigner(projectState)

@@ -1,20 +1,19 @@
 import * as React from "react"
 
-import { Button, IconButton, styled } from "components/theme"
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
+import LiveView, { LiveViewControls } from "components/project/live-view"
 
-import ChartView from "components/project/chart-view"
 import Head from "next/head"
-import Link from "next/link"
 import Router from "next/router"
-import { Sun } from "react-feather"
 import { getProjectData } from "lib/database"
 import projectState from "states/project"
 import { single } from "utils"
+import { styled } from "components/theme"
 import { subscribeToProject } from "lib/database"
+import { updatePanelOffsets } from "lib/local-data"
 import useTheme from "hooks/useTheme"
 
-interface CharPageProps {
+interface ViewPageProps {
   oid: string
   pid: string
   name: string
@@ -26,11 +25,12 @@ interface ProjectNotFoundPageProps {
   isProject: false
 }
 
-type ProjectPageProps = CharPageProps | ProjectNotFoundPageProps
+type PageProps = ViewPageProps | ProjectNotFoundPageProps
 
-export default function ProjectPage(props: ProjectPageProps) {
+export default function ProjectPage(props: PageProps) {
   if (!props.isProject) return null
-  const { oid, pid, name } = props
+
+  const { oid, pid, name, showConsole } = props
 
   const rUnsub = React.useRef<any>()
 
@@ -40,7 +40,6 @@ export default function ProjectPage(props: ProjectPageProps) {
       rUnsub.current?.()
     }
 
-    // Subscribe to the firebase document on mount.
     subscribeToProject(pid, oid, (source) => {
       projectState.send("SOURCE_UPDATED", {
         source,
@@ -49,8 +48,8 @@ export default function ProjectPage(props: ProjectPageProps) {
       })
     }).then((unsub) => (rUnsub.current = unsub))
 
-    // Cleanup the project when when we leave this route, even if we
-    // change to a different project.
+    updatePanelOffsets()
+
     Router.events.on("routeChangeStart", handleRouteChange)
 
     return () => {
@@ -59,33 +58,19 @@ export default function ProjectPage(props: ProjectPageProps) {
     }
   }, [oid, pid])
 
-  const { toggle } = useTheme()
-
   return (
     <Layout>
       <Head>
         <title>{name} - State Designer</title>
       </Head>
-      <NavContainer>
-        <Link href={`/u/${oid}/p/${pid}`}>
-          <Button>Back to Project</Button>
-        </Link>
-        <Link href={`/u/${oid}/p/${pid}/view`}>
-          <Button>View</Button>
-        </Link>
-        <Spacer />
-        <IconButton title="Toggle Dark Mode" onClick={toggle}>
-          <Sun />
-        </IconButton>
-      </NavContainer>
-      <ChartView />
+      <LiveView showConsole={showConsole} />
     </Layout>
   )
 }
 
 export async function getServerSideProps(
   context: GetServerSidePropsContext,
-): Promise<GetServerSidePropsResult<ProjectPageProps>> {
+): Promise<GetServerSidePropsResult<PageProps>> {
   const { oid, pid, console } = context.query
 
   const projectData = await getProjectData(single(pid), single(oid))
@@ -126,8 +111,9 @@ const Layout = styled.div({
   overflow: "hidden",
   gridTemplateColumns: `1fr`,
   gridTemplateRows: "minmax(0, 1fr)",
-  gridTemplateAreas: `
-	"chart"`,
+  [`& ${LiveViewControls}`]: {
+    visibility: "hidden",
+  },
 })
 
 const NavContainer = styled.nav({

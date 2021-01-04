@@ -1,5 +1,4 @@
 import { ProjectData } from "types"
-import { getParameters } from "codesandbox/lib/api/define"
 
 export default async function getCodeSandboxUrl(project: ProjectData) {
   const indexCode = `
@@ -936,40 +935,6 @@ ${project.code.state}
             content: indexHtmlCode,
           },
         },
-        // files: {
-        //   "package.json": {
-        //     isBinary: false,
-        //     content: packageCode,
-        //   },
-        //   "index.js": {
-        //     isBinary: false,
-        //     content: indexCode,
-        //   },
-        //   "stitches.config.js": {
-        //     isBinary: false,
-        //     content: stitchesConfigCode,
-        //   },
-        //   "app.js": {
-        //     isBinary: false,
-        //     content: staticCode,
-        //   },
-        //   "static.js": {
-        //     isBinary: false,
-        //     content: staticCode,
-        //   },
-        //   "styled.js": {
-        //     isBinary: false,
-        //     content: styledCode,
-        //   },
-        //   "state.js": {
-        //     isBinary: false,
-        //     content: stateCode,
-        //   },
-        //   "public/index.html": {
-        //     isBinary: false,
-        //     content: indexHtmlCode,
-        //   },
-        // },
       }),
     },
   ).then((x) => x.json())

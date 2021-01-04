@@ -58,7 +58,11 @@ const WithMotionComponents: any = Object.fromEntries(
   }),
 )
 
-function Preview() {
+interface LiveViewProps {
+  showConsole?: boolean
+}
+
+function Preview({ showConsole = true }: LiveViewProps) {
   const local = useStateDesigner(projectState)
   const localEditor = useStateDesigner(liveViewState)
   const theme = useTheme()
@@ -74,7 +78,7 @@ function Preview() {
     .replace(`export default `, "")
 
   return (
-    <LiveViewWrapper>
+    <LiveViewWrapper showConsole={showConsole}>
       <LiveProvider
         code={`
 const rLiveView = React.createRef()
@@ -89,7 +93,7 @@ function usePointer(ref = rLiveView, onMove = () => {}) {
     left: 0,
     top: 0,
   })
-  
+
   React.useEffect(() => {
     function updateBoundingBox() {
       const { left, top } = ref.current.getBoundingClientRect()
@@ -103,7 +107,8 @@ function usePointer(ref = rLiveView, onMove = () => {}) {
   React.useEffect(() => {
     function updateMotionValues(e) {
       const { left, top } = rOffset.current
-      const x = e.pageX - left, y = e.pageY - top
+      const x = e.pageX - left,
+        y = e.pageY - top
 
       mvDX.set(x - mvX.get())
       mvDY.set(y - mvY.get())
@@ -127,15 +132,12 @@ function usePointer(ref = rLiveView, onMove = () => {}) {
   return { x: mvX, y: mvY, dx: mvDX, dy: mvDY }
 }
 
-function useKeyboardInputs(
-  handlers = {},
-) {
+function useKeyboardInputs(handlers = {}) {
   const element = rLiveView.current
 
   React.useEffect(() => {
     if (!element) return
     const { onKeyDown = {}, onKeyUp = {} } = handlers
-
 
     function handleKeydown(event) {
       if (!onKeyDown) return
@@ -212,8 +214,15 @@ render(
 }
 
 const LiveViewWrapper = styled.div({
-  pb: "40px",
   height: "100%",
+  bg: "$border",
+  variants: {
+    showConsole: {
+      true: {
+        pb: "40px",
+      },
+    },
+  },
 })
 
 const LiveViewOuterWrapper = styled.div({
@@ -246,16 +255,6 @@ const StyledLiveError = styled(LiveError, {
   pointerEvents: "all",
 })
 
-const LiveViewControls = styled.div({
-  height: 40,
-  position: "absolute",
-  bottom: 0,
-  width: "100%",
-  display: "flex",
-  justifyContent: "space-between",
-  bg: "$scrim",
-})
-
 const PreviewScrollContainer = styled.div({
   outline: "none",
   width: "100%",
@@ -267,20 +266,19 @@ const PreviewScrollContainer = styled.div({
   "& *": {
     boxSizing: "border-box",
   },
-  "&:focus-within:after": {
-    content: "''",
-    position: "absolute",
-    top: 8,
-    right: 8,
-    height: 8,
-    width: 8,
-    borderRadius: 8,
-    bg: "$text",
-    zIndex: 99999,
-  },
 })
 
 const MemoizedPreview = React.memo(Preview)
+
+export const LiveViewControls = styled.div({
+  height: 40,
+  position: "absolute",
+  bottom: 0,
+  width: "100%",
+  display: "flex",
+  justifyContent: "space-between",
+  bg: "$scrim",
+})
 
 const SafePreview = (props) => (
   <ErrorBoundary>
