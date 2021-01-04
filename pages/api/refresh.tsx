@@ -1,5 +1,3 @@
-// /pages/api/login.tsx
-
 import { serialize } from "cookie"
 import admin from "lib/firebase-admin"
 import { NextApiRequest, NextApiResponse } from "next"

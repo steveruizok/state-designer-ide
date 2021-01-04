@@ -1,7 +1,6 @@
-import { NextApiRequest, NextApiResponse } from "next"
-
-import admin from "lib/firebase-admin"
 import { serialize } from "cookie"
+import admin from "lib/firebase-admin"
+import { NextApiRequest, NextApiResponse } from "next"
 
 const SESSION_DURATION_IN_DAYS = 5
 

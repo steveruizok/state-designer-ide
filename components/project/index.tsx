@@ -77,7 +77,9 @@ export default function ProjectView({
     Router.events.on("routeChangeStart", handleRouteChange)
 
     // Save a screenshot every five minutes
-    saveProjectSocialScreenshot(oid, pid)
+    saveProjectSocialScreenshot(oid, pid).then((url) => {
+      console.log("saved social screenshot to", url)
+    })
 
     let interval = setInterval(() => {
       saveProjectSocialScreenshot(oid, pid)
