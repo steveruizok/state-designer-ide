@@ -17,7 +17,7 @@ export default function Title({ oid, pid, readOnly }: TitleProps) {
 
   return (
     <TitleContainer>
-      <ProjectMeta name={project?.name} oid={oid} pid={pid} />
+      <ProjectMeta name={project?.name || ""} oid={oid} pid={pid} />
       <Button
         title="Rename Project"
         onClick={() =>
