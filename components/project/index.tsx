@@ -80,6 +80,7 @@ export default function ProjectView({
 
   return (
     <MonacoProvider>
+      v
       <Layout>
         <Menu user={user} />
         <Title pid={pid} oid={oid} readOnly={oid !== uid} />

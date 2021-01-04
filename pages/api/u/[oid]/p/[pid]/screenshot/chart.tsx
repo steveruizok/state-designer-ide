@@ -1,9 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next"
 
-import admin from "lib/firebase-admin"
 import captureWebsite from "capture-website"
-import getCodeSandboxUrl from "lib/codesandbox"
-import { getProjectData } from "lib/database"
 import { single } from "utils"
 
 export default async function sandbox(
@@ -20,6 +17,7 @@ export default async function sandbox(
 
   const screenshot = await captureWebsite.base64(url, {
     delay: 1,
+    scaleFactor: 1,
   })
 
   res.send({ response: "Got screenshot.", src: screenshot })

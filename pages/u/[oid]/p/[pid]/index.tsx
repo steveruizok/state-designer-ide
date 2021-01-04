@@ -1,10 +1,12 @@
-import Loading from "components/loading"
-import { getCurrentUser } from "lib/auth-server"
-import { getProjectData, getProjectExists } from "lib/database"
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
-import dynamic from "next/dynamic"
 import * as React from "react"
 import * as Types from "types"
+
+import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
+import { getProjectData, getProjectExists } from "lib/database"
+
+import Loading from "components/loading"
+import dynamic from "next/dynamic"
+import { getCurrentUser } from "lib/auth-server"
 import { single } from "utils"
 const ProjectView = dynamic(() => import("components/project"))
 

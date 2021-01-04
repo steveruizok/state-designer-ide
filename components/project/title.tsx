@@ -2,9 +2,8 @@ import * as React from "react"
 
 import { Button, styled } from "components/theme"
 
-import Head from "next/head"
+import ProjectMeta from "components/project-meta"
 import dialogState from "states/dialog"
-import toastState from "states/toast"
 import useProject from "hooks/useProject"
 
 interface TitleProps {
@@ -18,12 +17,11 @@ export default function Title({ oid, pid, readOnly }: TitleProps) {
 
   return (
     <TitleContainer>
-      <Head>
-        <title>{project?.name} - State Designer</title>
-      </Head>
+      <ProjectMeta name={project.name} oid={oid} pid={pid} />
       <Button
         title="Rename Project"
         onClick={() =>
+          !readOnly &&
           dialogState.send("OPENED_PROJECT_RENAME_DIALOG", {
             project,
           })
