@@ -1,8 +1,7 @@
-import * as Icons from "react-feather"
-import * as Motion from "framer-motion"
-import * as React from "react"
+import { useStateDesigner } from "@state-designer/react"
+import Loading from "components/loading"
+import Colors from "components/static/colors"
 import * as Utils from "components/static/utils"
-
 import {
   Box,
   Button,
@@ -21,18 +20,18 @@ import {
   css,
   styled,
 } from "components/theme"
-import { LiveError, LivePreview, LiveProvider } from "react-live"
-import { fakePrint, printFromView } from "lib/eval"
-
-import Colors from "components/static/colors"
-import ErrorBoundary from "./error-boundary"
-import Loading from "components/loading"
-import { RotateCcw } from "react-feather"
-import liveViewState from "states/live-view"
+import * as Motion from "framer-motion"
 import { motion } from "framer-motion"
-import projectState from "states/project"
-import { useStateDesigner } from "@state-designer/react"
 import useTheme from "hooks/useTheme"
+import { fakePrint, printFromView } from "lib/eval"
+import * as React from "react"
+import * as Icons from "react-feather"
+import { RotateCcw } from "react-feather"
+import { LiveError, LivePreview, LiveProvider } from "react-live"
+import liveViewState from "states/live-view"
+import projectState from "states/project"
+
+import ErrorBoundary from "./error-boundary"
 
 const Components = {
   Box,

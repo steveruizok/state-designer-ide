@@ -1,12 +1,12 @@
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
-
+import GeneralMeta from "components/general-meta"
 import { Button } from "components/theme"
-import { getCurrentUser } from "lib/auth-server"
 import { login } from "lib/auth-client"
-
+import { getCurrentUser } from "lib/auth-server"
+import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 export default function Home() {
   return (
     <div>
+      <GeneralMeta />
       <Button onClick={login}>Log in</Button>
     </div>
   )

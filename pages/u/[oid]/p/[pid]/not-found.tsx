@@ -1,3 +1,4 @@
+import GeneralMeta from "components/general-meta"
 import { getCurrentUser } from "lib/auth-server"
 import { getProjectData, getProjectExists } from "lib/database"
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
@@ -26,7 +27,14 @@ export default function ProjectNotFoundPage({
     setIsMounted(true)
   }, [])
 
-  return isMounted ? <div>Not found. Make one?</div> : <div>Loading...</div>
+  return isMounted ? (
+    <div>
+      <GeneralMeta />
+      Not found. Make one?
+    </div>
+  ) : (
+    <div>Loading...</div>
+  )
 }
 
 export async function getServerSideProps(

@@ -1,18 +1,16 @@
-import * as React from "react"
-
-import { Button, IconButton, styled } from "components/theme"
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
-
+import ProjectMeta from "components/project-meta"
 import ChartView from "components/project/chart-view"
-import Head from "next/head"
+import { Button, IconButton, styled } from "components/theme"
+import useTheme from "hooks/useTheme"
+import { getProjectData } from "lib/database"
+import { subscribeToProject } from "lib/database"
+import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 import Link from "next/link"
 import Router from "next/router"
+import * as React from "react"
 import { Sun } from "react-feather"
-import { getProjectData } from "lib/database"
 import projectState from "states/project"
 import { single } from "utils"
-import { subscribeToProject } from "lib/database"
-import useTheme from "hooks/useTheme"
 
 interface ChartPageProps {
   oid: string
@@ -62,9 +60,7 @@ export default function ProjectPage(props: PageProps) {
 
   return (
     <Layout>
-      <Head>
-        <title>{name} - State Designer</title>
-      </Head>
+      <ProjectMeta name={name || ""} oid={oid} pid={pid} />
       <NavContainer>
         <Link href={`/u/${oid}/p/${pid}`}>
           <Button>Back to Project</Button>
