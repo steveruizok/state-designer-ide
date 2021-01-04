@@ -15,15 +15,27 @@ function MyApp({ Component, pageProps }) {
     <>
       <Head>
         <title>State Designer</title>
-        <meta property="og:title" content={TITLE} />
-        <meta property="og:description" content={DESCRIPTION} />
-        <meta property="og:image" content={OG_IMAGE} />
-        <meta property="og:url" content={URL} />
-        <meta name="twitter:title" content={TITLE} />
-        <meta name="twitter:description" content={DESCRIPTION} />
-        <meta name="twitter:image" content={TW_IMAGE} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@statedesigner" />
+        <meta key="og:title" property="og:title" content={TITLE} />
+        <meta
+          key="og:description"
+          property="og:description"
+          content={DESCRIPTION}
+        />
+        <meta key="og:image" property="og:image" content={OG_IMAGE} />
+        <meta key="og:url" property="og:url" content={URL} />
+        <meta key="twitter:title" name="twitter:title" content={TITLE} />
+        <meta
+          key="twitter:description"
+          name="twitter:description"
+          content={DESCRIPTION}
+        />
+        <meta key="twitter:image" name="twitter:image" content={TW_IMAGE} />
+        <meta
+          key="twitter:card"
+          name="twitter:card"
+          content="summary_large_image"
+        />
+        <meta key="twitter:site" name="twitter:site" content="@statedesigner" />
       </Head>
       <Component {...pageProps} />
       <Toast />
