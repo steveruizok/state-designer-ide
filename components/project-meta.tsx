@@ -14,6 +14,7 @@ export default function ProjectMeta({ name, oid, pid }: Props) {
 
   return (
     <Head>
+      <title>{title}</title>
       <meta property="og:title" content={title} />
       <meta property="og:description" content={DESCRIPTION} />
       <meta property="og:image" content={IMAGE} />
