@@ -2,7 +2,6 @@ import * as React from "react"
 
 import { Button, styled } from "components/theme"
 
-import ProjectMeta from "components/project-meta"
 import dialogState from "states/dialog"
 import useProject from "hooks/useProject"
 
@@ -17,7 +16,6 @@ export default function Title({ oid, pid, readOnly }: TitleProps) {
 
   return (
     <TitleContainer>
-      <ProjectMeta name={project?.name || ""} oid={oid} pid={pid} />
       <Button
         title="Rename Project"
         onClick={() =>

@@ -5,9 +5,11 @@ import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 import { getProjectData, getProjectExists } from "lib/database"
 
 import Loading from "components/loading"
+import ProjectMeta from "components/project-meta"
 import dynamic from "next/dynamic"
 import { getCurrentUser } from "lib/auth-server"
 import { single } from "utils"
+
 const ProjectView = dynamic(() => import("components/project"))
 
 interface ProjectFoundPageProps {
@@ -37,15 +39,18 @@ export default function ProjectPage(props: ProjectPageProps) {
   }, [])
 
   return isMounted ? (
-    <ProjectView
-      oid={oid}
-      pid={pid}
-      uid={uid}
-      user={user}
-      token={token}
-      isOwner={isOwner}
-      projectData={projectData}
-    />
+    <>
+      <ProjectMeta name={projectData.name || ""} oid={oid} pid={pid} />
+      <ProjectView
+        oid={oid}
+        pid={pid}
+        uid={uid}
+        user={user}
+        token={token}
+        isOwner={isOwner}
+        projectData={projectData}
+      />
+    </>
   ) : (
     <Loading />
   )
