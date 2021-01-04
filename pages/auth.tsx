@@ -1,4 +1,3 @@
-import GeneralMeta from "components/general-meta"
 import { Button } from "components/theme"
 import { login } from "lib/auth-client"
 import { getCurrentUser } from "lib/auth-server"
@@ -8,7 +7,6 @@ import * as Types from "types"
 export default function Auth({ error }: Types.AuthState) {
   return (
     <div>
-      <GeneralMeta />
       <Button onClick={login}>Log in</Button>
     </div>
   )

@@ -4,9 +4,12 @@ import ProjectMeta from "components/project-meta"
 import { getCurrentUser } from "lib/auth-server"
 import { getProjectData, getProjectExists } from "lib/database"
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
+import dynamic from "next/dynamic"
 import * as React from "react"
 import * as Types from "types"
 import { single } from "utils"
+
+// const ProjectView = dynamic(() => import("components/project"))
 
 interface ProjectFoundPageProps {
   oid: string
