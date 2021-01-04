@@ -1,10 +1,12 @@
+import fs from "fs"
+
+import captureWebsite from "capture-website"
+import pick from "lodash/pick"
+import { GetServerSidePropsContext } from "next"
+import { parseCookies } from "nookies"
 import * as Types from "types"
 
-import { GetServerSidePropsContext } from "next"
 import admin from "./firebase-admin"
-import firebase from "./firebase"
-import { parseCookies } from "nookies"
-import pick from "lodash/pick"
 
 export async function verifyCookie(
   cookie: string,
@@ -99,4 +101,20 @@ export async function getCurrentUser(
   result.authenticated = authenticated
 
   return result
+}
+
+export async function saveProjectSocialScreenshot(
+  oid: string,
+  pid: string,
+  page: "view" | "chart",
+) {
+  const url = `https://app.state-designer.com/u/${oid}/p/${pid}/${page}-clean`
+  // const location = process.cwd() + `/public/screenshots/${oid}-${pid}.jpg`
+  const buffer = await captureWebsite.buffer(url, { delay: 1 })
+  const binaryData = buffer.toString("binary")
+
+  const file = admin.storage().bucket().file(`screenshots/${oid}-${pid}.jpg`)
+  await file.save(binaryData, { contentType: "image/jpeg" })
+  await file.makePublic()
+  return file.publicUrl()
 }

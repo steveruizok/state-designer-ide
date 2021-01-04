@@ -1,9 +1,8 @@
 // /pages/api/login.tsx
 
-import { NextApiRequest, NextApiResponse } from "next"
-
-import admin from "lib/firebase-admin"
 import { serialize } from "cookie"
+import admin from "lib/firebase-admin"
+import { NextApiRequest, NextApiResponse } from "next"
 
 const SESSION_DURATION_IN_DAYS = 5
 
@@ -16,16 +15,24 @@ export default async function login(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-  const [cookie] = req.cookies[process.env.NEXT_PUBLIC_COOKIE_NAME].split("+")
-
+  const cookie = req.cookies[process.env.NEXT_PUBLIC_COOKIE_NAME]
   if (!cookie) {
+    res.status(401).send({ response: "No session cookie!" })
+    return
+  }
+
+  const [sessionCookie] = req.cookies[
+    process.env.NEXT_PUBLIC_COOKIE_NAME
+  ].split("+")
+
+  if (!sessionCookie) {
     res.status(401).send({ response: "Invalid authentication" })
     return
   }
 
   const decodedClaims = await admin
     .auth()
-    .verifySessionCookie(cookie)
+    .verifySessionCookie(sessionCookie)
     .catch((e) => {
       console.log("Could not verify session cookie!")
     })

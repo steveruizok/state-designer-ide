@@ -65,6 +65,7 @@ function loadLocalUI() {
     const saved = JSON.parse(savedUI)
     Object.assign(ui, saved)
   }
+
   // Update panel offsets
   updatePanelOffsets()
   updateCssVariables()

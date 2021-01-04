@@ -1,9 +1,9 @@
-import * as Types from "types"
-
-import db from "./firestore"
-import firebase from "./firebase"
 import pick from "lodash/pick"
 import router from "next/router"
+import * as Types from "types"
+
+import firebase from "./firebase"
+import db from "./firestore"
 import { ui } from "./local-data"
 
 // New
@@ -581,6 +581,18 @@ export async function updateProjectName(
 
 export async function getCodeSandboxUrl(oid: string, pid: string) {
   var path = `/api/sandbox`
+  var url = process.env.NEXT_PUBLIC_BASE_API_URL + path
+  return await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ oid, pid }),
+  }).then((d) => d.json())
+}
+
+export async function saveProjectSocialScreenshot(oid: string, pid: string) {
+  var path = `/api/screenshot`
   var url = process.env.NEXT_PUBLIC_BASE_API_URL + path
   return await fetch(url, {
     method: "POST",

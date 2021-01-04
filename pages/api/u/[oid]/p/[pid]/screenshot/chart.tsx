@@ -1,6 +1,5 @@
+import { saveProjectSocialScreenshot } from "lib/auth-server"
 import { NextApiRequest, NextApiResponse } from "next"
-
-import captureWebsite from "capture-website"
 import { single } from "utils"
 
 export default async function sandbox(
@@ -11,16 +10,12 @@ export default async function sandbox(
     query: { oid, pid },
   } = req
 
-  const url = `https://app.state-designer.com/u/${single(oid)}/p/${single(
-    pid,
-  )}/chart-clean`
-
-  const screenshot = await captureWebsite.base64(url, {
-    delay: 1,
-    scaleFactor: 1,
-  })
-
-  res.send({ response: "Got screenshot.", src: screenshot })
+  const url = await saveProjectSocialScreenshot(
+    single(oid),
+    single(pid),
+    "chart",
+  )
+  res.send({ response: "Saved screenshot.", url })
 }
 
 export const config = {

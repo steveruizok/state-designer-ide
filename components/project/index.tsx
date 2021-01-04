@@ -1,24 +1,28 @@
-import * as React from "react"
-import * as Types from "types"
-
-import ContentPanel, { CONTENT_COL_WIDTH } from "./content-panel"
-import DetailsPanel, { DETAILS_ROW_HEIGHT } from "./details-panel"
-import { checkAuth, setCustomToken, subscribeToProject } from "lib/database"
+import MonacoProvider from "components/monaco-provider"
+import { styled } from "components/theme"
+import {
+  checkAuth,
+  saveProjectSocialScreenshot,
+  setCustomToken,
+  subscribeToProject,
+} from "lib/database"
 import { motionValues, updatePanelOffsets } from "lib/local-data"
+import Router from "next/router"
+import * as React from "react"
+import codePanelState from "states/code-panel"
+import projectState from "states/project"
+import * as Types from "types"
 
 import ChartView from "./chart-view"
 import CodePanel from "./code-panel"
 import Console from "./console-panel"
+import ContentPanel, { CONTENT_COL_WIDTH } from "./content-panel"
 import Controls from "./controls"
+import DetailsPanel, { DETAILS_ROW_HEIGHT } from "./details-panel"
 import { DragHandleHorizontalRelative } from "./drag-handles"
 import LiveView from "./live-view"
 import Menu from "./menu"
-import MonacoProvider from "components/monaco-provider"
-import Router from "next/router"
 import Title from "./title"
-import codePanelState from "states/code-panel"
-import projectState from "states/project"
-import { styled } from "components/theme"
 
 export const CODE_COL_WIDTH = 320
 
@@ -72,7 +76,16 @@ export default function ProjectView({
     // change to a different project.
     Router.events.on("routeChangeStart", handleRouteChange)
 
+    // Save a screenshot every five minutes
+    saveProjectSocialScreenshot(oid, pid)
+
+    let interval = setInterval(() => {
+      saveProjectSocialScreenshot(oid, pid)
+    }, 60 * 5 * 1000)
+
     return () => {
+      clearInterval(interval)
+      saveProjectSocialScreenshot(oid, pid)
       Router.events.off("routeChangeStart", handleRouteChange)
       handleRouteChange()
     }

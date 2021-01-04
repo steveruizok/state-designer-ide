@@ -1,9 +1,5 @@
+import { saveProjectSocialScreenshot } from "lib/auth-server"
 import { NextApiRequest, NextApiResponse } from "next"
-
-import admin from "lib/firebase-admin"
-import captureWebsite from "capture-website"
-import getCodeSandboxUrl from "lib/codesandbox"
-import { getProjectData } from "lib/database"
 import { single } from "utils"
 
 export default async function sandbox(
@@ -19,14 +15,15 @@ export default async function sandbox(
   const oid = req.body.oid.toString()
   const pid = req.body.pid.toString()
 
-  const path = `/u/${oid}/p/${pid}/clean`
-  const url = process.env.NEXT_PUBLIC_BASE_API_URL + path
+  const url = await saveProjectSocialScreenshot(
+    single(oid),
+    single(pid),
+    "chart",
+  ).catch((e) => {
+    console.log("Could not save project screenshot.")
+  })
 
-  const screenshot = await captureWebsite.base64(url)
-
-  console.log("hello screenshot", screenshot)
-
-  res.send({ response: "Got screenshot.", url: screenshot })
+  res.send({ response: "Saved screenshot.", url })
 }
 
 export const config = {
