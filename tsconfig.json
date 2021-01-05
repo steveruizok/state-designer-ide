@@ -1,22 +1,23 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "sourceMap": true,
+    "outDir": "dist",
+    "strict": false,
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
+    "esModuleInterop": true,
+    "target": "es5",
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
 		"baseUrl": ".",
 		"paths": {
 			"types": ["types.ts"],
