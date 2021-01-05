@@ -25,7 +25,7 @@ export default async function sandbox(
     })
 
   res.status(200)
-  res.setHeader("Cache-Control", "s-maxage=3153600, state-while-revalidate")
+  res.setHeader("Cache-Control", "s-maxage=300000, stale-while-revalidate")
   res.setHeader("Content-Type", "image/png")
   res.send(buffer)
 }
