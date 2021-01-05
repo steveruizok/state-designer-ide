@@ -23,14 +23,17 @@ export default async function sandbox(
     timeout: 15 * 1000,
   })
 
-  await page.waitForTimeout(1500)
+  await page.waitForTimeout(2000)
 
   const data = await page.screenshot({
-    type: "png",
+    type: "jpeg",
   })
   await browser.close()
-  res.setHeader("Cache-Control", "s-maxage=31536000, stale-while-revalidate")
-  res.setHeader("Content-Type", "image/png")
+  res.setHeader(
+    "Cache-Control",
+    `s-maxage=${30 * 60 * 1000}, stale-while-revalidate`,
+  )
+  res.setHeader("Content-Type", "image/jpeg")
   res.status(200).end(data)
   return {}
 }
