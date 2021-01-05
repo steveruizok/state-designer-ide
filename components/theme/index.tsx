@@ -16,6 +16,7 @@ export const Container = styled.div({
   gap: "$2",
   bg: "$root",
   borderRadius: "$2",
+  boxShadow: "0px 0px 12px -2px $shadow",
 })
 
 export const Box = styled.div({})

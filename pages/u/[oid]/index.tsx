@@ -1,29 +1,33 @@
-import { Trigger } from "@radix-ui/react-dialog"
+import * as React from "react"
+import * as Types from "types"
+
 import {
   Button,
   IconButton,
   Input,
-  Label,
   Select,
   Text,
   styled,
 } from "components/theme"
-import useTheme from "hooks/useTheme"
-import { login, logout } from "lib/auth-client"
+import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
+import { Home, MoreHorizontal, Sun, X } from "react-feather"
+import IconDropdown, {
+  DropdownItem,
+  DropdownSeparator,
+} from "components/icon-dropdown"
 import { getCurrentUser, redirectToAuthPage } from "lib/auth-server"
 import {
   getUserProjects,
   setCustomToken,
   subscribeToProjects,
 } from "lib/database"
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
+import { login, logout } from "lib/auth-client"
+
 import Head from "next/head"
 import Link from "next/link"
-import * as React from "react"
-import { Home, MoreHorizontal, Sun, X } from "react-feather"
 import dialogState from "states/dialog"
-import * as Types from "types"
 import { single } from "utils"
+import useTheme from "hooks/useTheme"
 
 let INITIAL_SORT = "Date"
 let INITIAL_SORT_DIRECTION = "Descending"
@@ -172,38 +176,36 @@ export default function UserPage(props: UserPageProps) {
                       </Text>
                     </a>
                   </Link>
-                  <Select
-                    value={"Options"}
-                    onChange={(e) => {
-                      const project = projects.find((p) => p.id === id)
-
-                      switch (e.currentTarget.value) {
-                        case "Rename": {
-                          dialogState.send("OPENED_PROJECT_RENAME_DIALOG", {
-                            project,
-                          })
-                          break
-                        }
-                        case "Duplicate": {
-                          dialogState.send("OPENED_PROJECT_DUPLICATE_DIALOG", {
-                            project,
-                          })
-                          break
-                        }
-                        case "Delete": {
-                          dialogState.send("OPENED_PROJECT_DELETE_DIALOG", {
-                            project,
-                          })
-                          break
-                        }
+                  <IconDropdown icon={<MoreHorizontal />}>
+                    <DropdownItem
+                      onSelect={() =>
+                        dialogState.send("OPENED_PROJECT_RENAME_DIALOG", {
+                          project: projects.find((p) => p.id === id),
+                        })
                       }
-                    }}
-                  >
-                    <option disabled>Options</option>
-                    <option>Rename</option>
-                    <option>Duplicate</option>
-                    <option>Delete</option>
-                  </Select>
+                    >
+                      Rename
+                    </DropdownItem>
+                    <DropdownItem
+                      onSelect={() =>
+                        dialogState.send("OPENED_PROJECT_DUPLICATE_DIALOG", {
+                          project: projects.find((p) => p.id === id),
+                        })
+                      }
+                    >
+                      Duplicate
+                    </DropdownItem>
+                    <DropdownSeparator />
+                    <DropdownItem
+                      onSelect={() =>
+                        dialogState.send("OPENED_PROJECT_DELETE_DIALOG", {
+                          project: projects.find((p) => p.id === id),
+                        })
+                      }
+                    >
+                      Delete
+                    </DropdownItem>
+                  </IconDropdown>
                 </ProjectLink>
               </li>
             ))

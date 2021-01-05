@@ -178,7 +178,7 @@ export const darkTheme = css.theme({
     $root: "rgba(245, 240, 255, .04)",
     $node: "rgba(245, 240, 255, .02)",
     $scrim: "rgb(25, 24, 26, .9)",
-    $toastBg: "#1e1e1e",
+    $toastBg: "rgb(40, 40, 42)",
     $shadowLight: "rgba(0,0,0, .1)",
     $shadow: "rgba(0,0,0, .3)",
   },
