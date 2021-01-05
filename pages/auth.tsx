@@ -1,8 +1,10 @@
-import { Button } from "components/theme"
-import { login } from "lib/auth-client"
-import { getCurrentUser } from "lib/auth-server"
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 import * as Types from "types"
+
+import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
+
+import { Button } from "components/theme"
+import { getCurrentUser } from "lib/auth-server"
+import { login } from "lib/auth-client"
 
 export default function Auth({ error }: Types.AuthState) {
   return (

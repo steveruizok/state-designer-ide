@@ -1,8 +1,10 @@
 import "../styles/globals.css"
 
-import Dialog from "components/dialog"
 import Head from "next/head"
-import Toast from "components/toast"
+import dynamic from "next/dynamic"
+
+const Dialog = dynamic(() => import("components/dialog"))
+const Toast = dynamic(() => import("components/toast"))
 
 const TITLE = "State Designer"
 const DESCRIPTION = "Prototype with an interactive state chart."

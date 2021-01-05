@@ -1,16 +1,15 @@
 import * as Dialog from "@radix-ui/react-dialog"
-import { useStateDesigner } from "@state-designer/react"
+import * as React from "react"
+
 import CreateProjectDialog from "components/dialogs/create-project"
 import DeleteProjectDialog from "components/dialogs/delete-project"
 import DuplicateProjectDialog from "components/dialogs/duplicate-project"
-import RenameProjectDialog from "components/dialogs/rename-project"
 import LoadingDialog from "components/dialogs/rename-project"
-import { Button, Input, Label, Text, styled } from "components/theme"
-import useUser from "hooks/useUser"
-import { deleteProject, saveProjectName } from "lib/database"
-import * as React from "react"
+import RenameProjectDialog from "components/dialogs/rename-project"
 import dialogState from "states/dialog"
-import * as Types from "types"
+import { styled } from "components/theme"
+import { useStateDesigner } from "@state-designer/react"
+import useUser from "hooks/useUser"
 
 interface DialogProps {}
 

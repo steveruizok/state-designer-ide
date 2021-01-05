@@ -1,10 +1,12 @@
-import { useStateDesigner } from "@state-designer/react"
-import { IconButton, Text, styled } from "components/theme"
-import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion"
 import * as React from "react"
+
+import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion"
+import { IconButton, Text, styled } from "components/theme"
+
+import { ToastMessage } from "types"
 import { X } from "react-feather"
 import toastState from "states/toast"
-import { ToastMessage } from "types"
+import { useStateDesigner } from "@state-designer/react"
 
 export default function Toast() {
   const local = useStateDesigner(toastState)
