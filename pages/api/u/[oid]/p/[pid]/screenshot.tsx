@@ -11,21 +11,21 @@ export default async function sandbox(
   } = req
 
   const url = `https://app.state-designer.com/u/${oid}/p/${pid}/${page.toString()}-clean`
-  const buffer = await captureWebsite.buffer(url, {
-    width: 1200,
-    height: 630,
-    delay: 2,
-    scaleFactor: 1,
-  })
+
+  const buffer = await captureWebsite
+    .buffer(url, {
+      width: 1200,
+      height: 630,
+      delay: 2,
+      scaleFactor: 1,
+    })
+    .catch((e) => {
+      res.status(400)
+      res.send({ message: "Could not get screenshot image." })
+    })
 
   res.status(200)
   res.setHeader("Cache-Control", "s-maxage=3153600, state-while-revalidate")
   res.setHeader("Content-Type", "image/png")
-  res.end(buffer)
-}
-
-export const config = {
-  api: {
-    externalResolver: true,
-  },
+  res.send(buffer)
 }
