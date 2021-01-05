@@ -9,7 +9,7 @@ interface Props {
 export default function ProjectMeta({ name, oid, pid }: Props) {
   const title = `${name} - State Designer`
   const DESCRIPTION = "Prototype with an interactive state chart."
-  const IMAGE = `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/screenshots/${oid}-${pid}.jpg`
+  const IMAGE = `https://app.state-designer.com/api/u/${oid}/p/${pid}/screenshot`
   const URL = "https://app.state-designer.com"
 
   return (
