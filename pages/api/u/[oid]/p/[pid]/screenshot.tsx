@@ -20,11 +20,11 @@ export default async function sandbox(
       scaleFactor: 1,
     })
     .catch((e) => {
-      res.send({ message: "Could not get screenshot image. " + e.message })
+      res
+        .status(400)
+        .json({ message: "Could not get screenshot image. " + e.message })
       return
     })
-
-  res.setHeader("Cache-Control", "s-maxage=300000, stale-while-revalidate")
   res.setHeader("Content-Type", "image/png")
-  res.send(buffer)
+  res.status(200).end(buffer)
 }
