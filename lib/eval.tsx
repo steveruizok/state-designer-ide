@@ -4,7 +4,7 @@ import * as Utils from "components/static/utils"
 import throttle from "lodash/throttle"
 import consoleState from "states/console"
 
-export const printFrom = throttle(function printFrom(
+export const printFrom = function printFrom(
   source: string,
   ...messages: any[]
 ) {
@@ -13,8 +13,7 @@ export const printFrom = throttle(function printFrom(
     .join(", ")
 
   consoleState.send("LOGGED", { source, message })
-},
-32)
+}
 
 export function printFromState(...messages: any[]) {
   return printFrom("state", ...messages)
