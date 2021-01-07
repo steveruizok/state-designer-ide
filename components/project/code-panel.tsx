@@ -175,7 +175,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
         motionValue={motionValues.code}
         align="right"
         width={CODE_COL_WIDTH}
-        left={360}
+        left={720}
         right={280}
         offset="code"
       />
