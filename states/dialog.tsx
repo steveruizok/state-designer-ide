@@ -7,9 +7,7 @@ import {
   saveProjectName,
 } from "lib/database"
 
-import { ToastMessage } from "types"
 import { createState } from "@state-designer/react"
-import uniqueId from "lodash/uniqueId"
 
 const dialogState = createState({
   data: {

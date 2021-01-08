@@ -9,13 +9,11 @@ import RenameProjectDialog from "components/dialogs/rename-project"
 import dialogState from "states/dialog"
 import { styled } from "components/theme"
 import { useStateDesigner } from "@state-designer/react"
-import useUser from "hooks/useUser"
 
 interface DialogProps {}
 
 export default function DialogManager({}: DialogProps) {
   const local = useStateDesigner(dialogState)
-  const user = useUser()
 
   if (local.isIn("closed")) return null
 

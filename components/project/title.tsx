@@ -38,19 +38,3 @@ const TitleContainer = styled.div({
   justifyContent: "center",
   textAlign: "center",
 })
-
-const TitleInput = styled.input({
-  px: "$2",
-  py: "$0",
-  fontFamily: "$body",
-  fontSize: "$1",
-  fontWeight: "bold",
-  color: "$text",
-  bg: "transparent",
-  border: "none",
-  textAlign: "center",
-  outline: "none",
-  "&:focus": {
-    bg: "$shadow",
-  },
-})
