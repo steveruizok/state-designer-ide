@@ -80,7 +80,7 @@ export default function ProjectPage(props: PageProps) {
           <Sun />
         </IconButton>
       </NavContainer>
-      <LiveView showConsole={showConsole} />
+      <LiveView showResetState showConsole={showConsole} />
       {showConsole && <Console />}
     </Layout>
   )

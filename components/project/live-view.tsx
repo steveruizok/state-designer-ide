@@ -59,10 +59,14 @@ const WithMotionComponents: any = Object.fromEntries(
 )
 
 interface LiveViewProps {
+  showResetState?: boolean
   showConsole?: boolean
 }
 
-function Preview({ showConsole = true }: LiveViewProps) {
+function Preview({
+  showResetState = false,
+  showConsole = true,
+}: LiveViewProps) {
   const local = useStateDesigner(projectState)
   const localEditor = useStateDesigner(liveViewState)
   const theme = useTheme()
@@ -192,16 +196,7 @@ render(
       >
         <LiveViewOuterWrapper>
           {local.isIn("ready") ? <LivePreview /> : <Loading />}
-          <LiveViewControls>
-            <Button
-              data-hidey="true"
-              title="Reset Canvas"
-              variant="iconLeft"
-              onClick={() => projectState.send("RESET_VIEW")}
-            >
-              <RotateCcw size={14} strokeWidth={3} /> Reset View
-            </Button>
-          </LiveViewControls>
+          <Controls showResetState={showResetState} />
         </LiveViewOuterWrapper>
         {local.isIn("ready") && (
           <StyledLiveErrorWrapper>
@@ -287,3 +282,32 @@ const SafePreview = (props) => (
 )
 
 export default SafePreview
+
+function Controls({ showResetState }: { showResetState: boolean }) {
+  const localProject = useStateDesigner(projectState)
+  const localCaptive = useStateDesigner(localProject.data.captive)
+
+  return (
+    <LiveViewControls>
+      {showResetState && (
+        <Button
+          data-hidey="true"
+          title="Reset Canvas"
+          variant="iconLeft"
+          disabled={localCaptive.log.length === 0}
+          onClick={() => projectState.send("RESET_STATE")}
+        >
+          <RotateCcw size={14} strokeWidth={3} /> Reset State
+        </Button>
+      )}
+      <Button
+        data-hidey="true"
+        title="Reset Canvas"
+        variant="iconLeft"
+        onClick={() => projectState.send("RESET_VIEW")}
+      >
+        <RotateCcw size={14} strokeWidth={3} /> Reset View
+      </Button>
+    </LiveViewControls>
+  )
+}
