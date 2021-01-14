@@ -1,4 +1,6 @@
-import { useStateDesigner } from "@state-designer/react"
+import * as React from "react"
+
+import { AlignLeft, ChevronDown, ChevronUp, Copy } from "react-feather"
 import {
   IconButton,
   TabButton,
@@ -6,19 +8,13 @@ import {
   TitleRow,
   styled,
 } from "components/theme"
-import { animate } from "framer-motion"
-import useCustomEditor from "hooks/useCustomEditor"
 import { motionValues, saveWrapDetails, ui } from "lib/local-data"
-import {
-  useMonacoContext,
-  useTextModel,
-} from "node_modules/use-monaco/dist/cjs/use-monaco"
-import * as React from "react"
-import { AlignLeft, ChevronDown, ChevronUp, Copy } from "react-feather"
-import projectState from "states/project"
-import toastState from "states/toast"
 
 import { DragHandleVertical } from "./drag-handles"
+import { animate } from "framer-motion"
+import projectState from "states/project"
+import toastState from "states/toast"
+import { useStateDesigner } from "@state-designer/react"
 
 interface DetailsProps {}
 
@@ -34,61 +30,15 @@ export default function Details({}: DetailsProps) {
   )
   const [activeTab, setActiveTab] = React.useState(ui.details.activeTab)
   const [isWrapped, setIsWrapped] = React.useState(ui.details.wrap)
-  const [viewStates, setViewStates] = React.useState<Record<string, any>>({
-    data: null,
-    view: null,
-  })
-
-  const { monaco } = useMonacoContext()
-
-  const dataModel = useTextModel({
-    path: "data.json",
-    monaco,
-    defaultContents: JSON.stringify(captive.data, null, 2),
-    language: "json",
-  })
-
-  const valuesModel = useTextModel({
-    path: "values.json",
-    monaco,
-    defaultContents: JSON.stringify(captive.values, null, 2),
-    language: "json",
-  })
-
-  const { editor, containerRef } = useCustomEditor(
-    monaco,
-    dataModel,
-    true,
-    isWrapped,
-    (editor) => {
-      setTimeout(() => {
-        editor.setSelection(new monaco.Selection(0, 0, 0, 0))
-      }, 1000)
-    },
-    () => editor.setSelection(new monaco.Selection(0, 0, 0, 0)),
+  const rCodeScroll = React.useRef<HTMLDivElement>(null)
+  const code = JSON.stringify(
+    activeTab === "data" ? captive.data : captive.values,
+    null,
+    2,
   )
 
   // Handle editor changes when the user changes tabs
   function handleTabChange(tab: "data" | "values") {
-    // Save the viewstate
-    setViewStates({
-      ...viewStates,
-      [activeTab]: editor.saveViewState(),
-    })
-
-    // Set the new model
-    if (tab === "data") {
-      editor.setModel(dataModel)
-    } else if (tab === "values") {
-      editor.setModel(valuesModel)
-    }
-
-    // Restore view state
-    if (viewStates[tab]) {
-      editor.restoreViewState(viewStates[tab])
-    }
-
-    // Update the state
     setActiveTab(tab)
   }
 
@@ -100,7 +50,6 @@ export default function Details({}: DetailsProps) {
 
   // Copy the editor's current text to the clipboard
   function copyCurrent() {
-    const code = editor.getModel().getValue()
     const elm = document.createElement("textarea")
     document.body.appendChild(elm)
     elm.value = code
@@ -110,21 +59,23 @@ export default function Details({}: DetailsProps) {
     toastState.send("ADDED_TOAST", { message: "Copied to Clipboard" })
   }
 
+  function handleHeightChange(offset: number) {
+    const isAtMinHeight = DETAILS_ROW_HEIGHT - initialOffset - offset <= 40
+    if (!expanded && !isAtMinHeight) {
+      setExpanded(true)
+    } else if (expanded && isAtMinHeight) {
+      setExpanded(false)
+    }
+  }
+
   // Set exampled on initial mount (for hot reloads / concurrent)
   React.useEffect(() => {
-    setExpanded(DETAILS_ROW_HEIGHT - initialOffset > 40)
+    handleHeightChange(motionValues.detail.get())
   }, [])
 
   // When the motion value changes, update the expanded state if needed
   React.useEffect(() => {
-    return motionValues.detail.onChange((offset) => {
-      const isAtMinHeight = DETAILS_ROW_HEIGHT - initialOffset - offset <= 40
-      if (!expanded && !isAtMinHeight) {
-        setExpanded(true)
-      } else if (expanded && isAtMinHeight) {
-        setExpanded(false)
-      }
-    })
+    return motionValues.detail.onChange(handleHeightChange)
   }, [expanded])
 
   // Animate the drag handle to the closed or open offset
@@ -183,7 +134,11 @@ export default function Details({}: DetailsProps) {
           {expanded ? <ChevronDown /> : <ChevronUp />}
         </IconButton>
       </TitleRow>
-      <CodeContainer ref={containerRef} />
+      <CodeWrapper ref={rCodeScroll} wrap={isWrapped}>
+        <pre>
+          <code>{code}</code>
+        </pre>
+      </CodeWrapper>
       <DragHandleVertical
         motionValue={motionValues.detail}
         height={DETAILS_ROW_HEIGHT}
@@ -207,6 +162,28 @@ const DetailsContainer = styled.div({
   bg: "$codeBg",
 })
 
-const CodeContainer = styled.div({
-  overflow: "hidden",
+const CodeWrapper = styled.div({
+  display: "flex",
+  overflowX: "scroll",
+  overflowY: "scroll",
+  "& pre": {
+    bg: "$codeBg",
+    p: "$2",
+    m: 0,
+  },
+  "& code": {
+    fontFamily: "$monospace",
+    lineHeight: "$body",
+    fontSize: "$1",
+    fontWeight: 400,
+  },
+  variants: {
+    wrap: {
+      true: {
+        "& pre": {
+          whiteSpace: "pre-wrap",
+        },
+      },
+    },
+  },
 })
