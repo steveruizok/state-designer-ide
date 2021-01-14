@@ -2,10 +2,13 @@ import * as Dialog from "@radix-ui/react-dialog"
 import * as React from "react"
 
 import CreateProjectDialog from "components/dialogs/create-project"
+import CreateProjectGroupDialog from "components/dialogs/create-project-group"
 import DeleteProjectDialog from "components/dialogs/delete-project"
 import DuplicateProjectDialog from "components/dialogs/duplicate-project"
 import LoadingDialog from "components/dialogs/rename-project"
+import MoveProjectDialog from "components/dialogs/move-project"
 import RenameProjectDialog from "components/dialogs/rename-project"
+import RenameProjectGroupDialog from "components/dialogs/rename-project-group"
 import dialogState from "states/dialog"
 import { styled } from "components/theme"
 import { useStateDesigner } from "@state-designer/react"
@@ -28,7 +31,10 @@ export default function DialogManager({}: DialogProps) {
         deletingProject: <DeleteProjectDialog />,
         duplicatingProject: <DuplicateProjectDialog />,
         creatingProject: <CreateProjectDialog />,
+        movingProjectToGroup: <MoveProjectDialog />,
         loadingProject: <LoadingDialog />,
+        creatingProjectGroup: <CreateProjectGroupDialog />,
+        renamingProjectGroup: <RenameProjectGroupDialog />,
       })}
     </Dialog.Root>
   )

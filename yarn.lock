@@ -90,6 +90,38 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
+"@dnd-kit/accessibility@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/accessibility/-/accessibility-1.0.0.tgz#306726518b89d588082f27a6ed9e4aa2cc145a34"
+  integrity sha512-jigv1H7IleOTbtsYoErEwq35EtTGBdSWGKuHt/UVtRRV4qJJXP8+/Wm/glUyz/ryT2dhlGU1ty7v5gsr3zRiQA==
+  dependencies:
+    tslib "^2.0.0"
+
+"@dnd-kit/core@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/core/-/core-1.0.0.tgz#05357d637739ea413c7e9b4917732eec8c209e7b"
+  integrity sha512-3w1q0ez6Pzy7rz5c20MvarKlNPQPazRWzciVSLYdXt7SziQiBEMC5WdwyZR4lp9YYgx6alPLUkUUiLvBSKtDvg==
+  dependencies:
+    "@dnd-kit/accessibility" "^1.0.0"
+    "@dnd-kit/utilities" "^1.0.0"
+    tslib "^2.0.0"
+
+"@dnd-kit/modifiers@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/modifiers/-/modifiers-1.0.0.tgz#e1d81a5677c43e1a3b98eb90f503354b651426a5"
+  integrity sha512-PVYZjG67IKQwEmXZoNRr2wZyaR3NLzjBdbOnLyhwha0siB0YNOW6vdKgtrushSrZfWHihXnQiP+O+1FQn8kaXA==
+  dependencies:
+    "@dnd-kit/core" "^1.0.0"
+    "@dnd-kit/utilities" "^1.0.0"
+    tslib "^2.0.0"
+
+"@dnd-kit/utilities@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/utilities/-/utilities-1.0.0.tgz#175a203f0cd2fc1c7d09f9a92edf37b4c03d9a04"
+  integrity sha512-ukMGUI5Op500zn6+YhP5vL777ieBYmZ0SZYI3XfoPFtcGOkM/kKKeZECY37QJMbP6b36QqcHRVK1bYJHZBqIVg==
+  dependencies:
+    tslib "^2.0.0"
+
 "@emotion/is-prop-valid@^0.8.2":
   version "0.8.8"
   resolved "https://registry.yarnpkg.com/@emotion/is-prop-valid/-/is-prop-valid-0.8.8.tgz#db28b1c4368a259b60a97311d6a952d4fd01ac1a"
@@ -5571,6 +5603,11 @@ tslib@^1.0.0, tslib@^1.10.0, tslib@^1.11.1, tslib@^1.9.0, tslib@^1.9.3:
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
+
+tslib@^2.0.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.1.0.tgz#da60860f1c2ecaa5703ab7d39bc05b6bf988b97a"
+  integrity sha512-hcVC3wYEziELGGmEEXue7D75zbwIIVUMWAVbHItGPx0ziyXxrOMQx4rQEVEV45Ut/1IotuEvwqPopzIOkDMf0A==
 
 tty-browserify@0.0.0:
   version "0.0.0"

@@ -18,17 +18,17 @@ interface RenameProjectDialogProps {}
 export default function RenameProjectDialog({}: RenameProjectDialogProps) {
   const local = useStateDesigner(dialogState)
 
-  const { currentName } = local.data.project
+  const { currentName } = local.data.projectGroup
 
   return (
     <StyledContent>
       <InputWrapper>
-        <Label htmlFor="projectName">Rename Project</Label>
+        <Label htmlFor="projectName">Rename Project Group</Label>
         <Input
           name="projectName"
           value={currentName}
           onChange={(e) =>
-            dialogState.send("CHANGED_PROJECT_NAME", {
+            dialogState.send("CHANGED_PROJECT_GROUP_NAME", {
               name: e.currentTarget.value,
             })
           }

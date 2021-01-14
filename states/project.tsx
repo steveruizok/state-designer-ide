@@ -1,10 +1,10 @@
 import { S, createState } from "@state-designer/react"
 import { getCaptiveState, getStaticValues } from "lib/eval"
-import { EventDetails } from "types"
-import { findFirstTransitionTarget } from "utils"
 
+import { EventDetails } from "types"
 import codePanelState from "./code-panel"
 import consoleState from "./console"
+import { findFirstTransitionTarget } from "utils"
 
 const projectState = createState({
   data: {
@@ -54,15 +54,30 @@ const projectState = createState({
           to: "resettingView",
         },
         SOURCE_UPDATED: [
-          "updateFromDatabase",
-          "updateCodePanelState",
+          {
+            ifAny: ["captiveHasChanged", "staticHasChanged"],
+            do: [
+              "updateFromDatabase",
+              "updateCodePanelState",
+              "createStatic",
+              "createCaptiveState",
+              "setEventMap",
+            ],
+          },
           "resetConsole",
-          "createStatic",
-          "createCaptiveState",
-          "setEventMap",
         ],
         UNLOADED: { to: "loading" },
       },
+    },
+  },
+  conditions: {
+    captiveHasChanged(data, { source }) {
+      const { code } = data
+      return code.state !== source.code.state
+    },
+    staticHasChanged(data, { source }) {
+      const { code } = data
+      return code.static !== source.code.static
     },
   },
   actions: {
@@ -79,8 +94,6 @@ const projectState = createState({
       data.oid = oid
       data.pid = pid
 
-      consoleState.send("RESET")
-
       codePanelState.send("SOURCE_LOADED", {
         state: stateCode,
         view: viewCode,
@@ -88,7 +101,6 @@ const projectState = createState({
       })
     },
     updateCodePanelState(data) {
-      consoleState.send("RESET")
       codePanelState.send("SOURCE_UPDATED", {
         state: data.code.state,
         view: data.code.view,
@@ -109,7 +121,7 @@ const projectState = createState({
         console.error("Error building captive state!", err.message)
       }
     },
-    resetConsole(data) {
+    resetConsole() {
       consoleState.send("RESET")
     },
     setEventMap(data) {

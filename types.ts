@@ -23,6 +23,16 @@ export interface User {
   picture: string
 }
 
+export interface ProjectGroup {
+  id: string
+  name: string
+  projectIds: string[]
+}
+
+export interface ProjectGroups {
+  [key: string]: ProjectGroup
+}
+
 export interface AuthState {
   user: User | null
   error: string
@@ -54,7 +64,7 @@ export type ProjectData = {
 }
 
 export type AdminResponse = {
-  projects: ProjectData[]
+  projects: { [key: string]: ProjectData }
   authenticated: boolean
   error?: Error
 }

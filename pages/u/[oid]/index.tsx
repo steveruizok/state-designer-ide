@@ -25,49 +25,33 @@ import { login, logout } from "lib/auth-client"
 
 import Head from "next/head"
 import Link from "next/link"
+import ProjectGroup from "components/home/project-group"
+import ProjectLink from "components/home/project-link"
 import dialogState from "states/dialog"
 import { single } from "utils"
+import useProjects from "hooks/useProjects"
 import useTheme from "hooks/useTheme"
+import useUser from "hooks/useUser"
+import useUserData from "hooks/useUserData"
 
 let INITIAL_SORT = "Date"
 let INITIAL_SORT_DIRECTION = "Descending"
 
-interface UserNotFoundProps {
-  isUser: false
-}
-
-interface UserFoundProps {
+type UserPageProps = {
   uid: string
   oid: string
   token: string
-  isUser: true
   user: Types.User
-  projects: Types.ProjectData[]
+  projects: Record<string, Types.ProjectData>
 }
 
-type UserPageProps = UserFoundProps | UserNotFoundProps
-
 export default function UserPage(props: UserPageProps) {
-  if (!props.isUser) return null
-
   const { uid, oid, token } = props
 
   const { toggle } = useTheme()
-  const [user, setUser] = React.useState(props.user)
-  const [projects, setProjects] = React.useState(props.projects)
-
-  React.useEffect(() => {
-    let unsub: any
-
-    setCustomToken(token)
-
-    subscribeToProjects(uid, oid, (projects) => {
-      setProjects(projects)
-    }).then((cb) => (unsub = cb))
-    return () => {
-      unsub && unsub()
-    }
-  }, [])
+  const user = useUser() || props.user
+  const projects = useProjects(oid) || props.projects
+  const userData = useUserData(oid)
 
   const [sortBy, setSortBy] = React.useState(INITIAL_SORT)
   const [sortDirection, setSortDirection] = React.useState(
@@ -75,38 +59,49 @@ export default function UserPage(props: UserPageProps) {
   )
   const [filter, setFilter] = React.useState(null)
 
-  let sortedProjects = projects.map((p) => ({
-    ...p,
-    lcName: p.name.toLowerCase(),
-    lastModified: Date.parse(p.lastModified),
-    dateCreated: Date.parse(p.dateCreated),
-  }))
+  let projectsByGroup = React.useMemo(() => {
+    if (!userData) return null
+    if (!projects) return null
 
-  if (filter) {
-    sortedProjects = sortedProjects.filter((p) => p.lcName.startsWith(filter))
-  }
+    let sorter: (a: any, b: any) => number
 
-  if (sortBy === "Name") {
-    if (sortDirection === "Descending") {
-      sortedProjects = sortedProjects.sort((a, b) =>
-        b.lcName < a.lcName ? -1 : 1,
-      )
-    } else if (sortDirection === "Ascending") {
-      sortedProjects = sortedProjects.sort((a, b) =>
-        a.lcName < b.lcName ? -1 : 1,
-      )
+    if (sortBy === "Name") {
+      if (sortDirection === "Descending") {
+        sorter = (a, b) => (b.lcName < a.lcName ? -1 : 1)
+      } else if (sortDirection === "Ascending") {
+        sorter = (a, b) => (a.lcName < b.lcName ? -1 : 1)
+      }
+    } else if (sortBy === "Date") {
+      if (sortDirection === "Descending") {
+        sorter = (a, b) => b.lastModified - a.lastModified
+      } else if (sortDirection === "Ascending") {
+        sorter = (a, b) => a.lastModified - b.lastModified
+      }
     }
-  } else if (sortBy === "Date") {
-    if (sortDirection === "Descending") {
-      sortedProjects = sortedProjects.sort(
-        (a, b) => b.lastModified - a.lastModified,
-      )
-    } else if (sortDirection === "Ascending") {
-      sortedProjects = sortedProjects.sort(
-        (a, b) => a.lastModified - b.lastModified,
-      )
-    }
-  }
+
+    let groups = Object.values(userData.groups).map((group) => ({
+      ...group,
+      projects: group.projectIds
+        .map((id) => {
+          const p = projects[id]
+
+          if (p === undefined) {
+            console.log(id, projects)
+          }
+
+          return {
+            ...p,
+            lcName: p.name.toLowerCase(),
+            lastModified: Date.parse(p.lastModified),
+            dateCreated: Date.parse(p.dateCreated),
+          }
+        })
+        .filter((p) => (filter ? p.lcName.startsWith(filter) : true))
+        .sort(sorter),
+    }))
+
+    return groups
+  }, [userData, projects, sortBy, sortDirection])
 
   return (
     <Layout>
@@ -161,60 +156,35 @@ export default function UserPage(props: UserPageProps) {
             </Button>
           </ListControlsGroup>
         </ListControls>
-        <ul>
-          {sortedProjects.length > 0 ? (
-            sortedProjects.map(({ id, name, dateCreated, lastModified }, i) => (
-              <li key={id}>
-                <ProjectLink>
-                  <Link href={`/u/${user.uid}/p/${id}`}>
-                    <a>
-                      <h4>{name}</h4>
-                      <Text variant="ui">
-                        Last modified{" "}
-                        {new Date(lastModified).toLocaleDateString()} - Created{" "}
-                        {new Date(dateCreated).toLocaleDateString()}
-                      </Text>
-                    </a>
-                  </Link>
-                  <IconDropdown icon={<MoreHorizontal />}>
-                    <DropdownItem
-                      onSelect={() =>
-                        dialogState.send("OPENED_PROJECT_RENAME_DIALOG", {
-                          project: projects.find((p) => p.id === id),
-                        })
-                      }
-                    >
-                      Rename
-                    </DropdownItem>
-                    <DropdownItem
-                      onSelect={() =>
-                        dialogState.send("OPENED_PROJECT_DUPLICATE_DIALOG", {
-                          project: projects.find((p) => p.id === id),
-                        })
-                      }
-                    >
-                      Duplicate
-                    </DropdownItem>
-                    <DropdownSeparator />
-                    <DropdownItem
-                      onSelect={() =>
-                        dialogState.send("OPENED_PROJECT_DELETE_DIALOG", {
-                          project: projects.find((p) => p.id === id),
-                        })
-                      }
-                    >
-                      Delete
-                    </DropdownItem>
-                  </IconDropdown>
-                </ProjectLink>
-              </li>
-            ))
-          ) : (
-            <ProjectLink>
-              <Text>No projects found.</Text>
-            </ProjectLink>
-          )}
-        </ul>
+        {projectsByGroup ? (
+          projectsByGroup.map((group) => (
+            <ProjectGroup key={group.id} group={group}>
+              <ul>
+                {group.projects.length > 0 ? (
+                  group.projects.map((project) => (
+                    <ProjectLink
+                      key={project.id}
+                      user={user}
+                      project={projects[project.id]}
+                      groupId={group.id}
+                    />
+                  ))
+                ) : (
+                  <li>
+                    <Text variant="ui">This group is empty.</Text>
+                  </li>
+                )}
+              </ul>
+            </ProjectGroup>
+          ))
+        ) : (
+          <Text>Loading projects...</Text>
+        )}
+        <Button
+          onClick={() => dialogState.send("OPENED_CREATE_PROJECT_GROUP_DIALOG")}
+        >
+          Create New Project Group
+        </Button>
       </MainContainer>
     </Layout>
   )
@@ -222,7 +192,7 @@ export default function UserPage(props: UserPageProps) {
 
 export async function getServerSideProps(
   context: GetServerSidePropsContext,
-): Promise<GetServerSidePropsResult<UserPageProps>> {
+): Promise<GetServerSidePropsResult<UserPageProps | { isUser: false }>> {
   const authState = await getCurrentUser(context)
 
   if (!authState.authenticated) {
@@ -239,7 +209,6 @@ export async function getServerSideProps(
 
   return {
     props: {
-      isUser: true,
       user: authState.user,
       projects: data.projects,
       oid: data.oid,
@@ -335,43 +304,4 @@ const ControlsContainer = styled.div({
   alignItems: "center",
   justifyContent: "flex-end",
   borderBottom: "2px solid $shadow",
-})
-
-const ProjectLink = styled.div({
-  display: "flex",
-  alignItems: "center",
-  borderRadius: "$2",
-  px: "$3",
-  mx: "-$3",
-  "& > p": {
-    py: "$2",
-  },
-  "& > a": {
-    py: "$2",
-    color: "$text",
-    textDecoration: "none",
-    flexGrow: 2,
-    [`${Text}`]: {
-      mt: "$1",
-      opacity: 0.3,
-      fontWeight: "normal",
-    },
-    "&:hover": {
-      color: "$accent",
-      h4: { color: "$accent" },
-      [`${Text}:nth-of-type(1)`]: {
-        opacity: 0.8,
-      },
-    },
-  },
-  "&:hover": {
-    bg: "$shadowLight",
-  },
-  "& select": {
-    py: "$1",
-    opacity: 0.3,
-  },
-  "&:hover select": {
-    opacity: 1,
-  },
 })

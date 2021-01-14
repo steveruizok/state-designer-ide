@@ -12,9 +12,7 @@ interface Props extends Partial<DropdownMenu.DropdownMenuContentOwnProps> {
 export default function IconDropdown({ icon, children, ...props }: Props) {
   return (
     <DropdownMenu.Root>
-      <StyledTrigger>
-        <IconButton>{icon}</IconButton>
-      </StyledTrigger>
+      <StyledTrigger>{icon}</StyledTrigger>
       <StyledContent {...props}>
         {children}
         <StyledArrow />
@@ -27,6 +25,13 @@ const StyledTrigger = styled(DropdownMenu.Trigger, {
   bg: "transparent",
   border: "none",
   outline: "none",
+  color: "$text",
+  p: "$1",
+  br: "$1",
+  cursor: "pointer",
+  "&:hover": {
+    bg: "$shadowLight",
+  },
 })
 
 const StyledContent = styled(DropdownMenu.Content, {

@@ -23,6 +23,24 @@ export const StyledContent = styled(Dialog.Content, {
   display: "grid",
 })
 
+export const StyledButton = styled.button({
+  cursor: "pointer",
+  bg: "transparent",
+  outline: "none",
+  border: "none",
+  fontFamily: "$body",
+  fontSize: "$1",
+  fontWeight: "bold",
+  color: "$text",
+  py: "$2",
+  px: "$1",
+  flexGrow: 2,
+  borderRadius: "$1",
+  "&:hover": {
+    bg: "$shadowLight",
+  },
+})
+
 export const StyledClose = styled(Dialog.Close, {
   cursor: "pointer",
   bg: "transparent",

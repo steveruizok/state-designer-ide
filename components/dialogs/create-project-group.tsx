@@ -5,6 +5,7 @@ import { Button, Input, Label, styled } from "components/theme"
 import {
   DialogButtonsRow,
   InputWrapper,
+  StyledButton,
   StyledClose,
   StyledContent,
 } from "./styled"
@@ -13,22 +14,22 @@ import dialogState from "states/dialog"
 import useProject from "hooks/useProject"
 import { useStateDesigner } from "@state-designer/react"
 
-interface RenameProjectDialogProps {}
+interface CreateProjectDialogProps {}
 
-export default function RenameProjectDialog({}: RenameProjectDialogProps) {
+export default function CreateProjectDialog({}: CreateProjectDialogProps) {
   const local = useStateDesigner(dialogState)
 
-  const { currentName } = local.data.project
+  const { currentName } = local.data.projectGroup
 
   return (
     <StyledContent>
       <InputWrapper>
-        <Label htmlFor="projectName">Rename Project</Label>
+        <Label htmlFor="projectNGroupame">Create Project Group</Label>
         <Input
-          name="projectName"
+          name="projectGroupName"
           value={currentName}
           onChange={(e) =>
-            dialogState.send("CHANGED_PROJECT_NAME", {
+            dialogState.send("CHANGED_PROJECT_GROUP_NAME", {
               name: e.currentTarget.value,
             })
           }

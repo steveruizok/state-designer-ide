@@ -53,7 +53,7 @@ export async function setCustomToken(token: string) {
   customToken = token
 }
 
-export async function checkAuth() {
+export async function checkAuth(): Promise<firebase.User> {
   const { currentUser } = db.app.auth()
 
   if (!currentUser) {
@@ -83,13 +83,11 @@ export async function checkAuth() {
     console.log("Ok, let's check that custom token again.")
     return checkAuth()
   } else {
-    console.log("All good, we have the current user.")
     return currentUser
   }
 }
 
 export function subscribeToUserAuth(callback: (user: Types.User) => void) {
-  checkAuth()
   return db.app.auth().onAuthStateChanged((res) => {
     if (!res) return
 
@@ -100,6 +98,32 @@ export function subscribeToUserAuth(callback: (user: Types.User) => void) {
       picture: res.photoURL,
     })
   })
+}
+
+export async function subscribeToUserChanges(
+  uid: string,
+  callback: (user: any) => void,
+) {
+  const docRef = db.collection("users").doc(uid)
+  return docRef.onSnapshot((snapshot) => {
+    callback(snapshot.data())
+  })
+}
+
+export async function getUserGroups() {
+  const user = await checkAuth()
+  const docRef = db.collection("users").doc(user.uid)
+  const doc = await docRef.get()
+  return Object.values(doc.data().groups || {})
+}
+
+export async function getProjectIds(uid: string) {
+  const docRef = db.collection("users").doc(uid).collection("projects")
+  const initial = await docRef.get()
+  let ids: string[] = []
+  initial.forEach((doc) => ids.push(doc.id))
+
+  return ids
 }
 
 // New Users
@@ -233,6 +257,13 @@ export async function addUser(uid: string) {
         exists: true,
         dateCreated: dateString,
         dateLastLoggedIn: dateString,
+        groups: {
+          drafts: {
+            id: "drafts",
+            name: "Drafts",
+            projectIds: [],
+          },
+        },
       })
       .catch((e) => {
         console.log("Error setting user", uid, e.message)
@@ -251,9 +282,10 @@ export async function getUserProjects(oid: string, uid: string) {
     .collection("projects")
     .get()
 
-  const projects = snapshot.docs.map(
-    (doc) => ({ id: doc.id, ...doc.data() } as Types.ProjectData),
-  )
+  const projects = snapshot.docs.reduce((acc, doc) => {
+    acc[doc.id] = { id: doc.id, ...doc.data() } as Types.ProjectData
+    return acc
+  }, {})
 
   return {
     oid,
@@ -263,7 +295,6 @@ export async function getUserProjects(oid: string, uid: string) {
 }
 
 export async function subscribeToProjects(
-  uid: string,
   oid: string,
   callback: (projects: Types.ProjectData[]) => void,
 ) {
@@ -314,7 +345,6 @@ export async function getProjectData(
     return undefined
   }
 }
-
 /* ----------------- Project Editing ---------------- */
 
 export async function subscribeToProject(
@@ -402,6 +432,9 @@ export async function deleteProject(pid: string) {
     return
   }
 
+  const groupId = await getGroupId(user.uid, pid)
+  await removeProjectIdFromGroup(pid, groupId)
+
   await db
     .collection("users")
     .doc(user.uid)
@@ -417,19 +450,18 @@ export async function duplicateProject(
 ) {
   const user = await checkAuth()
 
-  const project = await db
-    .collection("users")
-    .doc(oid)
-    .collection("projects")
-    .doc(pid)
-    .get()
-
-  const dateString = new Date().toUTCString()
-
   if (!user) {
     console.log("User is not logged in!")
     return
   }
+
+  const projectRef = db
+    .collection("users")
+    .doc(oid)
+    .collection("projects")
+    .doc(pid)
+
+  const project = await projectRef.get()
 
   if (!project.exists) {
     console.log("That project does not exist!")
@@ -437,6 +469,8 @@ export async function duplicateProject(
   }
 
   const data = project.data()
+
+  const dateString = new Date().toUTCString()
 
   const docRef = await db
     .collection("users")
@@ -450,7 +484,25 @@ export async function duplicateProject(
       name: newName || data.name,
     })
 
+  // What's the group id for the source project?
+  const groupId = await getGroupId(user.uid, projectRef.id)
+
+  // Add the duplicate to the source project's groups
+  addProjectIdToProjectGroups(groupId, docRef.id)
+
   return getProjectData(docRef.id, user.uid)
+}
+
+export async function getGroupId(oid: string, pid: string) {
+  const groups = await getProjectGroups(oid)
+
+  for (let id in groups) {
+    if (groups[id].projectIds.includes(pid)) {
+      return id
+    }
+  }
+
+  return null
 }
 
 export async function duplicateProjectAndPush(
@@ -484,7 +536,169 @@ export async function createNewProject(name: string) {
     .collection("projects")
     .add(getNewProject(user.uid, dateString, name))
 
+  addProjectIdToProjectGroups("drafts", docRef.id)
+
   router.push(`/u/${user.uid}/p/${docRef.id}`)
+}
+
+export async function getProjectGroups(uid: string) {
+  const user = await checkAuth()
+
+  const groups = await db
+    .collection("users")
+    .doc(user.uid)
+    .get()
+    .then((d) => d.data().groups)
+
+  if (groups === undefined) {
+    const projectIds = await getProjectIds(uid)
+    await createProjectGroup({
+      name: "Drafts",
+      id: "drafts",
+      projectIds,
+    })
+    return getProjectGroups(uid)
+  }
+
+  return groups
+}
+
+// Project Groups
+
+export async function createProjectGroup(
+  group: Types.ProjectGroup,
+  projectIds: string[] = [],
+) {
+  const user = await checkAuth()
+  const docRef = db.collection("users").doc(user.uid)
+  const snapshot = await docRef.get()
+  const { groups = {} } = snapshot.data()
+
+  return docRef.update({
+    groups: {
+      ...groups,
+      [group.id]: group,
+    },
+  })
+}
+
+export async function renameProjectGroup(groupId: string, name: string) {
+  const user = await checkAuth()
+  const docRef = db.collection("users").doc(user.uid)
+  const snapshot = await docRef.get()
+  const { groups } = snapshot.data()
+
+  return docRef.update({
+    groups: {
+      ...groups,
+      [groupId]: {
+        ...groups[groupId],
+        name,
+      },
+    },
+  })
+}
+
+export async function deleteProjectGroup() {}
+
+export async function addProjectIdToProjectGroups(
+  groupId: string,
+  pid: string,
+) {
+  const user = await checkAuth()
+
+  const userDocRef = db.collection("users").doc(user.uid)
+
+  const current = await userDocRef.get().then((d) => d.data())
+
+  if (!current.groups[groupId]) {
+    console.log("No group with that name!")
+    return
+  }
+
+  userDocRef.update({
+    groups: {
+      ...current.groups,
+      [groupId]: {
+        id: groupId,
+        name: current.groups[groupId].name,
+        projectIds: [...current.groups[groupId].projectIds, pid],
+      },
+    },
+  })
+}
+
+export async function removeProjectIdFromGroup(pid: string, groupId: string) {
+  const user = await checkAuth()
+  const docRef = db.collection("users").doc(user.uid)
+  const snapshot = await docRef.get()
+  const { groups } = snapshot.data()
+
+  groups[groupId].projectIds = groups[groupId].projectIds.filter(
+    (id: string) => id !== pid,
+  )
+
+  return docRef.update({
+    groups,
+  })
+}
+
+export async function moveProjectToGroup(
+  pid: string,
+  fromId: string,
+  toId: string,
+) {
+  const user = await checkAuth()
+  const docRef = db.collection("users").doc(user.uid)
+  const snapshot = await docRef.get()
+  const { groups } = snapshot.data()
+
+  if (groups[toId].projectIds.includes(pid)) {
+    console.log("Id is already in that group!")
+    return
+  }
+
+  groups[toId].projectIds.push(pid)
+
+  groups[fromId].projectIds = groups[fromId].projectIds.filter(
+    (id: string) => id !== pid,
+  )
+
+  return docRef.update({
+    groups,
+  })
+}
+
+export async function moveProjectsToGroup(
+  uid: string,
+  toId: string,
+  projectIds: string[],
+) {
+  const user = await checkAuth()
+  const docRef = db.collection("users").doc(user.uid)
+  const snapshot = await docRef.get()
+  const { groups } = snapshot.data()
+
+  // Move ids into the target group
+  for (let pid of projectIds) {
+    if (groups[toId].projectIds.includes(pid)) {
+      console.log(`Project ${pid} is already in that group!`)
+      return
+    }
+    groups[toId].projectIds.push(pid)
+  }
+
+  // Filter ids out of all other groups
+  for (let gid in groups) {
+    if (gid === toId) continue
+    groups[gid].projectIds = groups[gid].projectIds.filter(
+      (id: string) => !projectIds.includes(id),
+    )
+  }
+
+  return docRef.update({
+    groups,
+  })
 }
 
 /* -------------------- Not used yet -------------------- */
