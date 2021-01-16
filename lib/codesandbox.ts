@@ -44,27 +44,34 @@ ReactDOM.render(
   const appCode = `
 import React from "react"
 import state from "./state"
-import { motion, useMotionValue, motionValue, useTransform, transform, AnimatePresence, AnimateSharedLayout } from "framer-motion"
+import {
+  motion,
+  useMotionValue,
+  motionValue,
+  useTransform,
+  transform,
+  AnimatePresence,
+  AnimateSharedLayout,
+} from "framer-motion"
+import * as _ from "lodash"
 import { Colors, Utils } from "./resources"
 import { useStateDesigner } from "@state-designer/react"
 import { styled, css } from "./stitches.config.js"
 import { Static } from "./static.js"
 import * as Icons from "react-feather"
 import {
-	Box,
-	Button,
-	Checkbox,
-	Container,
-	Divider,
-	Flex,
-	Grid,
-	Heading,
-	Input,
-	Label,
-	PlainButton,
-	PlainIconButton,
-	Text,
-	View
+  Box,
+  Checkbox,
+  Container,
+  Divider,
+  Flex,
+  Grid,
+  Heading,
+  Label,
+  Button,
+  IconButton,
+  Text,
+  View,
 } from "./styled"
 
 const rLiveView = React.createRef()
@@ -154,6 +161,7 @@ ${project.code.view.replace(`import state from './state';`, "")}
 `
 
   const staticCode = `
+import * as _ from "lodash"
 import { Colors, Utils } from "./resources"
 
 ${project.code.static}
@@ -537,348 +545,347 @@ import { styled } from "./stitches.config"
 import { Check } from "react-feather"
 
 const _Container = styled.div({
-	display: "grid",
-	p: "$3",
-	gap: "$2",
-	bg: "$root",
-	borderRadius: "$2"
+  display: "grid",
+  p: "$3",
+  gap: "$2",
+  bg: "$root",
+  borderRadius: "$2",
 })
 
 const _Box = styled.div({})
 
 const _Grid = styled.div({
-	display: "grid",
-	variants: {
-		gaps: {
-			none: {
-				gap: 0
-			},
-			tight: {
-				gap: "$0"
-			},
-			thin: {
-				gap: "$1"
-			},
-			normal: {
-				gap: "$2"
-			},
-			cozy: {
-				gap: "$3"
-			}
-		}
-	}
+  display: "grid",
+  variants: {
+    gaps: {
+      none: {
+        gap: 0,
+      },
+      tight: {
+        gap: "$0",
+      },
+      thin: {
+        gap: "$1",
+      },
+      normal: {
+        gap: "$2",
+      },
+      cozy: {
+        gap: "$3",
+      },
+    },
+  },
 })
 
 const _Flex = styled.div({
-	display: "flex",
-	alignItems: "center",
-	justifyContent: "center",
-	gap: "$1",
-	variants: {
-		gaps: {
-			none: {
-				gap: 0
-			},
-			tight: {
-				gap: "$0"
-			},
-			thin: {
-				gap: "$1"
-			},
-			normal: {
-				gap: "$2"
-			},
-			cozy: {
-				gap: "$3"
-			}
-		}
-	}
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "$1",
+  variants: {
+    gaps: {
+      none: {
+        gap: 0,
+      },
+      tight: {
+        gap: "$0",
+      },
+      thin: {
+        gap: "$1",
+      },
+      normal: {
+        gap: "$2",
+      },
+      cozy: {
+        gap: "$3",
+      },
+    },
+  },
 })
 
 const _Heading = styled.h2({
-	variants: {
-		highlight: {
-			true: { color: "$accent" }
-		},
-		center: {
-			true: { textAlign: "center" }
-		},
-		monospace: {
-			true: { fontFamily: "$monospace" }
-		}
-	}
+  variants: {
+    highlight: {
+      true: { color: "$accent" },
+    },
+    center: {
+      true: { textAlign: "center" },
+    },
+    monospace: {
+      true: { fontFamily: "$monospace" },
+    },
+  },
 })
 
 const _Text = styled.p({
-	m: 0,
-	p: 0,
-	fontSize: "$2",
-	fontWeight: "bold",
-	lineHeight: "$body",
-	color: "$text",
-	variants: {
-		highlight: {
-			true: { color: "$accent" }
-		},
-		center: {
-			true: { textAlign: "center" }
-		},
-		monospace: {
-			true: { fontFamily: "$monospace" }
-		},
-		variant: {
-			body: {
-				fontSize: "$2",
-				fontWeight: "normal",
-				lineHeight: "$body"
-			},
-			ui: {
-				fontSize: "$1",
-				lineHeight: "$ui",
-				m: 0,
-				p: 0
-			},
-			detail: {
-				fontSize: "$1",
-				lineHeight: "$ui",
-				color: "$inactive",
-				fontWeight: "normal"
-			}
-		}
-	}
+  m: 0,
+  p: 0,
+  fontSize: "$2",
+  fontWeight: "bold",
+  lineHeight: "$body",
+  color: "$text",
+  variants: {
+    highlight: {
+      true: { color: "$accent" },
+    },
+    center: {
+      true: { textAlign: "center" },
+    },
+    monospace: {
+      true: { fontFamily: "$monospace" },
+    },
+    variant: {
+      body: {
+        fontSize: "$2",
+        fontWeight: "normal",
+        lineHeight: "$body",
+      },
+      ui: {
+        fontSize: "$1",
+        lineHeight: "$ui",
+        m: 0,
+        p: 0,
+      },
+      detail: {
+        fontSize: "$1",
+        lineHeight: "$ui",
+        color: "$inactive",
+        fontWeight: "normal",
+      },
+    },
+  },
 })
 
 const _View = styled.div({
-	position: "relative",
-	height: "100%",
-	width: "100%",
-	display: "flex",
-	overflow: "hidden",
-	alignItems: "center",
-	justifyContent: "center"
+  position: "relative",
+  height: "100%",
+  width: "100%",
+  display: "flex",
+  overflow: "hidden",
+  alignItems: "center",
+  justifyContent: "center",
 })
 
 const _Input = styled.input({
-	fontFamily: "$body",
-	fontSize: "$2",
-	color: "$text",
-	bg: "$muted",
-	px: "$2",
-	py: "$1",
-	border: "none",
-	borderRadius: "$1",
-	outline: "none",
-	"&:focus": {
-		bg: "$hover"
-	},
-	"&:disabled": {
-		opacity: 0.5
-	}
+  fontFamily: "$body",
+  fontSize: "$2",
+  color: "$text",
+  bg: "$muted",
+  px: "$2",
+  py: "$1",
+  border: "none",
+  borderRadius: "$1",
+  outline: "none",
+  "&:focus": {
+    bg: "$hover",
+  },
+  "&:disabled": {
+    opacity: 0.5,
+  },
 })
 
 const _StyledCheckbox = styled(rCheckbox.Root, {
-	appearance: "none",
-	cursor: "pointer",
-	backgroundColor: "transparent",
-	border: "none",
-	padding: 0,
-	boxShadow: "inset 0 0 0 2px $text",
-	width: 15,
-	height: 15,
-	borderRadius: 2,
-	display: "flex",
-	alignItems: "center",
-	justifyContent: "center",
-	outline: "none",
-	color: "$text",
-	"& svg": {
-		mt: "2px",
-		height: 11,
-		width: 11
-	},
-	"&:disabled": {
-		opacity: 0.5
-	},
-	"&:hover": {
-		color: "$accent",
-		boxShadow: "inset 0 0 0 2px $accent"
-	}
+  appearance: "none",
+  cursor: "pointer",
+  backgroundColor: "transparent",
+  border: "none",
+  padding: 0,
+  boxShadow: "inset 0 0 0 2px $text",
+  width: 15,
+  height: 15,
+  borderRadius: 2,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  outline: "none",
+  color: "$text",
+  "& svg": {
+    mt: "2px",
+    height: 11,
+    width: 11,
+  },
+  "&:disabled": {
+    opacity: 0.5,
+  },
+  "&:hover": {
+    color: "$accent",
+    boxShadow: "inset 0 0 0 2px $accent",
+  },
 })
 
 const _Checkbox = React.forwardRef((props, ref) => (
-	<_StyledCheckbox
-		defaultChecked
-		{...props}
-		onCheckedChange={props.onChange}
-		ref={ref}
-	>
-		<rCheckbox.Indicator>
-			<Check strokeWidth={4} />
-		</rCheckbox.Indicator>
-	</_StyledCheckbox>
+  <_StyledCheckbox
+    defaultChecked
+    {...props}
+    onCheckedChange={props.onChange}
+    ref={ref}
+  >
+    <rCheckbox.Indicator>
+      <Check strokeWidth={4} />
+    </rCheckbox.Indicator>
+  </_StyledCheckbox>
 ))
 
 const _Label = styled.label({
-	fontSize: "_$1"
+  fontSize: "_$1",
 })
 
 const _Button = styled.button({
-	cursor: "pointer",
-	fontWeight: "bold",
-	fontFamily: "$body",
-	fontSize: "$2",
-	lineHeight: "$ui",
-	width: "100%",
-	px: "$3",
-	py: "$2",
-	alignItems: "center",
-	textAlign: "center",
-	display: "grid",
-	gridAutoFlow: "column",
-	gap: "$0",
-	outline: "none",
-	bg: "$muted",
-	border: "none",
-	borderRadius: "$1",
-	color: "$text",
-	"&:hover": {
-		color: "$accent",
-		bg: "$hover"
-	},
-	"&:disabled": {
-		opacity: 0.5
-	},
-	variants: {
-		highlight: {
-			true: {
-				color: "$accent"
-			}
-		},
-		variant: {
-			ghost: {
-				bg: "$transparent",
-				color: "$text"
-			}
-		},
-		display: {
-			tight: {
-				display: "block",
-				width: "100%",
-				flexGrow: 2
-			}
-		}
-	}
+  cursor: "pointer",
+  fontWeight: "bold",
+  fontFamily: "$body",
+  fontSize: "$2",
+  lineHeight: "$ui",
+  width: "100%",
+  px: "$3",
+  py: "$2",
+  alignItems: "center",
+  textAlign: "center",
+  display: "grid",
+  gridAutoFlow: "column",
+  gap: "$0",
+  outline: "none",
+  bg: "$muted",
+  border: "none",
+  borderRadius: "$1",
+  color: "$text",
+  "&:hover": {
+    color: "$accent",
+    bg: "$hover",
+  },
+  "&:disabled": {
+    opacity: 0.5,
+  },
+  variants: {
+    highlight: {
+      true: {
+        color: "$accent",
+      },
+    },
+    variant: {
+      ghost: {
+        bg: "$transparent",
+        color: "$text",
+      },
+    },
+    display: {
+      tight: {
+        display: "block",
+        width: "100%",
+        flexGrow: 2,
+      },
+    },
+  },
 })
 
 const _IconButton = styled.button({
-	color: "$text",
-	bg: "$muted",
-	borderRadius: "$1",
-	fontFamily: "$body",
-	fontSize: "$2",
-	fontWeight: "bold",
-	border: "none",
-	outline: "none",
-	display: "flex",
-	alignItems: "center",
-	justifyContent: "center",
-	"&:disabled": {
-		opacity: 0.5
-	},
-	"& > p": {
-		pr: "$1"
-	},
-	"&:hover": {
-		color: "$accent",
-		bg: "$hover"
-	},
-	p: "$1",
-	cursor: "pointer",
-	svg: {
-		height: 18,
-		width: 18
-	}
+  color: "$text",
+  bg: "$muted",
+  borderRadius: "$1",
+  fontFamily: "$body",
+  fontSize: "$2",
+  fontWeight: "bold",
+  border: "none",
+  outline: "none",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  "&:disabled": {
+    opacity: 0.5,
+  },
+  "& > p": {
+    pr: "$1",
+  },
+  "&:hover": {
+    color: "$accent",
+    bg: "$hover",
+  },
+  p: "$1",
+  cursor: "pointer",
+  svg: {
+    height: 18,
+    width: 18,
+  },
 })
 
 const _Divider = styled.hr({
-	borderColor: "$inactive",
-	borderBottom: 0
+  borderColor: "$inactive",
+  borderBottom: 0,
 })
 
 const _Select = styled.select({
-	cursor: "pointer",
-	bg: "transparent",
-	border: "none",
-	color: "$text",
-	px: "$0",
-	outline: "none",
-	fontSize: "$1",
-	fontFamily: "$body",
-	fontWeight: "bold",
-	"&:hover": {
-		color: "$accent"
-	}
+  cursor: "pointer",
+  bg: "transparent",
+  border: "none",
+  color: "$text",
+  px: "$0",
+  outline: "none",
+  fontSize: "$1",
+  fontFamily: "$body",
+  fontWeight: "bold",
+  "&:hover": {
+    color: "$accent",
+  },
 })
 
 const components = {
-	Box: _Box,
-	Button: _Button,
-	Checkbox: _Checkbox,
-	Container: _Container,
-	Divider: _Divider,
-	Flex: _Flex,
-	Grid: _Grid,
-	Heading: _Heading,
-	Input: _Input,
-	Label: _Label,
-	IconButton: _IconButton,
-	Text: _Text,
-	View: _View,
-	Select: _Select
+  Box: _Box,
+  Button: _Button,
+  Checkbox: _Checkbox,
+  Container: _Container,
+  Divider: _Divider,
+  Flex: _Flex,
+  Grid: _Grid,
+  Heading: _Heading,
+  Input: _Input,
+  Label: _Label,
+  IconButton: _IconButton,
+  Text: _Text,
+  View: _View,
+  Select: _Select,
 }
 
 const {
-	Box,
-	Button,
-	Checkbox,
-	Container,
-	Divider,
-	Flex,
-	Grid,
-	Heading,
-	Input,
-	Label,
-	PlainButton,
-	PlainIconButton,
-	Text,
-	View,
-	Select
+  Box,
+  Checkbox,
+  Container,
+  Divider,
+  Flex,
+  Grid,
+  Heading,
+  Input,
+  Label,
+  Button,
+  IconButton,
+  Text,
+  View,
+  Select,
 } = Object.fromEntries(
-	Object.entries(components).map(([k, v]) => {
-		return [k, motion.custom(v)]
-	})
+  Object.entries(components).map(([k, v]) => {
+    return [k, motion.custom(v)]
+  })
 )
 
 export {
-	Box,
-	Button,
-	Checkbox,
-	Container,
-	Divider,
-	Flex,
-	Grid,
-	Heading,
-	Input,
-	Label,
-	PlainButton,
-	PlainIconButton,
-	Text,
-	View
+  Box,
+  Checkbox,
+  Container,
+  Divider,
+  Flex,
+  Grid,
+  Heading,
+  Input,
+  Label,
+  Button,
+  IconButton,
+  Text,
+  Select,
+  View,
 }
-	
 `
 
   const stateCode = `
+import * as _ from "lodash"
 import { Colors, Utils } from "./resources"
 import { createState } from "@state-designer/react"
 
