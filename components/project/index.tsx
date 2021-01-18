@@ -4,7 +4,7 @@ import * as Types from "types"
 import ContentPanel, { CONTENT_COL_WIDTH } from "./content-panel"
 import DetailsPanel, { DETAILS_ROW_HEIGHT } from "./details-panel"
 import { checkAuth, setCustomToken, subscribeToProject } from "lib/database"
-import { motionValues, updatePanelOffsets } from "lib/local-data"
+import { motionValues, loadPanelOffsets } from "lib/local-data"
 
 import ChartView from "./chart-view"
 import CodePanel from "./code-panel"
@@ -13,7 +13,6 @@ import Controls from "./controls"
 import { DragHandleHorizontalRelative } from "./drag-handles"
 import LiveView from "./live-view"
 import Menu from "./menu"
-import MonacoProvider from "components/monaco-provider"
 import Router from "next/router"
 import Title from "./title"
 import codePanelState from "states/code-panel"
@@ -32,13 +31,7 @@ interface ProjectViewProps {
   projectData: Types.ProjectData
 }
 
-export default function ProjectView({
-  oid,
-  pid,
-  uid,
-  user,
-  token,
-}: ProjectViewProps) {
+function ProjectView({ oid, pid, uid, user, token }: ProjectViewProps) {
   const rMainContainer = React.useRef<HTMLDivElement>(null)
   const rUnsub = React.useRef<any>()
 
@@ -64,7 +57,7 @@ export default function ProjectView({
     checkAuth()
 
     // Let's make sure that the panels are set up right, too.
-    updatePanelOffsets()
+    loadPanelOffsets()
 
     // Cleanup the project when when we leave this route, even if we
     // change to a different project.
@@ -77,30 +70,27 @@ export default function ProjectView({
   }, [oid, pid])
 
   return (
-    <MonacoProvider>
-      v
-      <Layout>
-        <Menu user={user} />
-        <Title pid={pid} oid={oid} readOnly={oid !== uid} />
-        <Controls oid={oid} pid={pid} uid={uid} />
-        <ContentPanel />
-        <MainContainer>
-          <ChartView />
-          <MainDragArea ref={rMainContainer} />
-          <LiveViewContainer>
-            <LiveView />
-            <Console />
-          </LiveViewContainer>
-          <DetailsPanel />
-          <DragHandleHorizontalRelative
-            motionValue={motionValues.main}
-            containerRef={rMainContainer}
-            offset="main"
-          />
-        </MainContainer>
-        <CodePanel oid={oid} pid={pid} uid={uid} />
-      </Layout>
-    </MonacoProvider>
+    <Layout>
+      <Menu user={user} />
+      <Title pid={pid} oid={oid} readOnly={oid !== uid} />
+      <Controls oid={oid} pid={pid} uid={uid} />
+      <ContentPanel />
+      <MainContainer>
+        <ChartView />
+        <MainDragArea ref={rMainContainer} />
+        <LiveViewContainer>
+          <LiveView />
+          <Console />
+        </LiveViewContainer>
+        <DetailsPanel />
+        <DragHandleHorizontalRelative
+          motionValue={motionValues.main}
+          containerRef={rMainContainer}
+          offset="main"
+        />
+      </MainContainer>
+      <CodePanel oid={oid} pid={pid} uid={uid} />
+    </Layout>
   )
 }
 
@@ -164,3 +154,5 @@ const LiveViewContainer = styled.div({
     zIndex: 99999,
   },
 })
+
+export default React.memo(ProjectView)

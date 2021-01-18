@@ -456,6 +456,9 @@ export const TabButton = styled.button({
       inactive: {
         opacity: 0.5,
       },
+      warn: {
+        color: "$accent",
+      },
     },
     codeState: {
       clean: {

@@ -49,7 +49,7 @@ export async function getCustomToken() {
 }
 
 export async function setCustomToken(token: string) {
-  console.log("Setting custom token received from server.")
+  // console.log("Setting custom token received from server.")
   customToken = token
 }
 
@@ -58,13 +58,13 @@ export async function checkAuth() {
 
   if (!currentUser) {
     if (!customToken) {
-      console.log("No custom token set! Getting a new one.")
+      // console.log("No custom token set! Getting a new one.")
       const newToken = await getCustomToken()
 
       if (!newToken) {
-        console.log(
-          "User will need to log in again. Session token is likely expired. ",
-        )
+        // console.log(
+        //   "User will need to log in again. Session token is likely expired. ",
+        // )
         return null
       }
 
@@ -75,15 +75,13 @@ export async function checkAuth() {
       .auth()
       .signInWithCustomToken(customToken)
       .catch(async () => {
-        console.log("Could not use the current token! Getting a new one...")
+        // console.log("Could not use the current token! Getting a new one...")
         const newToken = await getCustomToken()
         customToken = newToken
       })
 
-    console.log("Ok, let's check that custom token again.")
     return checkAuth()
   } else {
-    console.log("All good, we have the current user.")
     return currentUser
   }
 }
@@ -221,7 +219,7 @@ export async function addUser(uid: string) {
       await doc
         .update({ exists: true, dateLastLoggedIn: new Date().toUTCString() })
         .catch((e) => {
-          console.log("Error setting user", uid, e.message)
+          // console.log("Error setting user", uid, e.message)
         })
     }
   } else {
@@ -235,7 +233,7 @@ export async function addUser(uid: string) {
         dateLastLoggedIn: dateString,
       })
       .catch((e) => {
-        console.log("Error setting user", uid, e.message)
+        // console.log("Error setting user", uid, e.message)
       })
 
     await doc.collection("projects").add(getNewProject(uid, dateString))
@@ -342,7 +340,7 @@ export async function saveProjectCode(
   const user = await checkAuth()
 
   if (!user) {
-    console.log("User is not logged in!")
+    // console.log("User is not logged in!")
     return
   }
 
@@ -366,7 +364,7 @@ export async function savePayloads(
   const user = await checkAuth()
 
   if (!user) {
-    console.log("User is not logged in!")
+    // console.log("User is not logged in!")
     return
   }
 
@@ -398,7 +396,7 @@ export async function deleteProject(pid: string) {
   const user = await checkAuth()
 
   if (!user) {
-    console.log("User is not logged in!")
+    // console.log("User is not logged in!")
     return
   }
 
@@ -427,12 +425,12 @@ export async function duplicateProject(
   const dateString = new Date().toUTCString()
 
   if (!user) {
-    console.log("User is not logged in!")
+    // console.log("User is not logged in!")
     return
   }
 
   if (!project.exists) {
-    console.log("That project does not exist!")
+    // console.log("That project does not exist!")
     return
   }
 
@@ -461,7 +459,7 @@ export async function duplicateProjectAndPush(
   const project = await duplicateProject(pid, oid, name)
 
   if (!project) {
-    console.log("Could not duplicate project")
+    // console.log("Could not duplicate project")
     return
   }
 
@@ -472,7 +470,7 @@ export async function createNewProject(name: string) {
   const user = await checkAuth()
 
   if (!user) {
-    console.log("User is not logged in!")
+    // console.log("User is not logged in!")
     return
   }
 
@@ -512,7 +510,7 @@ export async function addProject(
   const initial = await project.get()
 
   if (initial.exists) {
-    console.log("That project already exists!")
+    // console.log("That project already exists!")
     return project
   }
 

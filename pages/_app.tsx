@@ -1,5 +1,6 @@
 import "../styles/globals.css"
 
+import MonacoProvider from "components/monaco-provider"
 import Head from "next/head"
 import dynamic from "next/dynamic"
 
@@ -27,7 +28,9 @@ function MyApp({ Component, pageProps }) {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@statedesigner" />
       </Head>
-      <Component {...pageProps} />
+      <MonacoProvider>
+        <Component {...pageProps} />
+      </MonacoProvider>
       <Toast />
       <Dialog />
     </>

@@ -10,6 +10,7 @@ import {
 import { CodeEditorTab } from "types"
 import { createState } from "@state-designer/react"
 import liveViewState from "./live-view"
+import projectState from "./project"
 import { saveProjectCode } from "lib/database"
 
 const EDITOR_TABS = ["state", "view", "static"]
@@ -327,12 +328,9 @@ const codePanelState = createState({
     formatCode(data) {
       data.editor.getAction("editor.action.formatDocument").run()
     },
-    saveCodeToFirebase(
-      data,
-      payload: { oid: string; pid: string; code: string },
-    ) {
+    saveCodeToFirebase(data) {
       const { code, activeTab } = data
-      const { oid, pid } = payload
+      const { oid, pid } = projectState.data
       code[activeTab].clean = code[activeTab].dirty
       saveProjectCode(pid, oid, activeTab, code[activeTab].dirty)
     },

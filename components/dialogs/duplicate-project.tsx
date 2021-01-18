@@ -1,7 +1,6 @@
-import * as Dialog from "@radix-ui/react-dialog"
 import * as React from "react"
 
-import { Button, Input, Label, styled } from "components/theme"
+import { Input, Label } from "components/theme"
 import {
   DialogButtonsRow,
   InputWrapper,
@@ -9,8 +8,8 @@ import {
   StyledContent,
 } from "./styled"
 
+import projectState from "states/project"
 import dialogState from "states/dialog"
-import useProject from "hooks/useProject"
 import { useStateDesigner } from "@state-designer/react"
 
 interface RenameProjectDialogProps {}
@@ -38,7 +37,10 @@ export default function RenameProjectDialog({}: RenameProjectDialogProps) {
       <DialogButtonsRow>
         <StyledClose>Cancel</StyledClose>
         <StyledClose
-          onClick={() => dialogState.send("CONFIRMED")}
+          onClick={() => {
+            dialogState.send("CONFIRMED")
+            projectState.send("UNLOADED")
+          }}
           disabled={currentName.length === 0}
         >
           Duplicate

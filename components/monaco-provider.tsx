@@ -72,6 +72,7 @@ export default function CustomMonacoProvider({ children }) {
         }),
       ]}
       onLoad={(monaco) => {
+        console.log("monaco provider loaded")
         if (monaco) {
           rMonaco.current = monaco
 
@@ -82,13 +83,13 @@ export default function CustomMonacoProvider({ children }) {
           // Types
 
           monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-            noSemanticValidation: true,
-            noSyntaxValidation: true,
+            noSemanticValidation: false,
+            noSyntaxValidation: false,
           })
 
           monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
             noSemanticValidation: true,
-            noSyntaxValidation: true,
+            noSyntaxValidation: false,
           })
 
           monaco.languages.typescript // Types

@@ -1,7 +1,6 @@
 import { createState } from "@state-designer/react"
 import Colors from "components/static/colors"
 import * as Utils from "components/static/utils"
-import throttle from "lodash/throttle"
 import consoleState from "states/console"
 
 export const printFrom = function printFrom(
@@ -27,7 +26,7 @@ export function printFromStatic(...messages: any[]) {
   return printFrom("static", ...messages)
 }
 
-export const fakePrint = throttle(function fakePrint(...messages: any[]) {}, 32)
+export function fakePrint(...messages: any[]) {}
 
 /* --------------------- Values --------------------- */
 
@@ -54,15 +53,11 @@ export function getCaptiveState(
   try {
     let Static = getStaticValues(staticCode)
     const code = stateCode.replace("export default ", "")
-    return Function(
-      "createState",
-      "Static",
-      "Colors",
-      "Utils",
-      "log",
-      "print",
-      `return ${code}`,
-    )(createState, Static, Colors, Utils, print, print)
+    const scope = { createState, Static, Colors, Utils, print, log: print }
+    return Function(...Object.keys(scope), `return ${code}`).call(
+      null,
+      ...Object.values(scope),
+    )
   } catch (err) {
     throw new Error(err.message)
   }

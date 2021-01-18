@@ -83,7 +83,9 @@ export default function UserPage(props: UserPageProps) {
   }))
 
   if (filter) {
-    sortedProjects = sortedProjects.filter((p) => p.lcName.startsWith(filter))
+    sortedProjects = sortedProjects.filter((p) =>
+      p.lcName.startsWith(filter.toLowerCase()),
+    )
   }
 
   if (sortBy === "Name") {

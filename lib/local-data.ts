@@ -7,7 +7,10 @@ export const ui = {
   details: {
     activeTab: "data",
     wrap: false,
-    fontSize: 13,
+  },
+  console: {
+    activeTab: "console",
+    wrap: false,
   },
   content: {},
   code: {
@@ -25,6 +28,8 @@ export const ui = {
   payloads: {},
   theme: "dark" as "dark" | "light",
 }
+
+const unsubs: Record<string, any> = {}
 
 export const themeState = createState({
   data: {
@@ -83,16 +88,27 @@ function loadLocalUI() {
 export function updatePanelOffsets() {
   for (let key in ui.panelOffsets) {
     const initial = ui.panelOffsets[key]
-    motionValues[key].set(0)
-    motionValues[key].onChange((v: number) =>
+
+    if (unsubs[key]) {
+      unsubs[key]()
+    }
+
+    unsubs[key] = motionValues[key].onChange((v: number) =>
       savePanelOffset(key as LayoutOffset, initial + v),
     )
+
+    motionValues[key].set(0)
   }
+}
+
+export function loadPanelOffsets() {
+  loadLocalUI()
 }
 
 export function resetOffsets() {
   const { panelOffsets } = ui
   for (let key in ui.panelOffsets) {
+    motionValues[key].set(motionValues[key].get() - panelOffsets[key])
     panelOffsets[key] = 0
   }
   updateCssVariables()
@@ -132,6 +148,11 @@ export function saveWrapDetails(value: boolean) {
 
 export function saveDetailsTab(value: "data" | "values") {
   ui.details.activeTab = value
+  saveUI()
+}
+
+export function saveConsoleTab(value: "console" | "error") {
+  ui.console.activeTab = value
   saveUI()
 }
 

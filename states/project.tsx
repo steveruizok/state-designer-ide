@@ -17,7 +17,7 @@ const projectState = createState({
       static: "",
     },
     static: undefined as any,
-    captive: createState({}),
+    captive: createState({ id: "loading" }),
     eventMap: {} as Record<string, EventDetails>,
   },
   initial: "loading",
@@ -39,19 +39,10 @@ const projectState = createState({
         ],
       },
     },
-    resettingView: {
-      onEnter: {
-        wait: 0.01,
-        to: "ready",
-      },
-    },
     ready: {
       on: {
         RESET_STATE: {
           do: "resetCaptiveState",
-        },
-        RESET_VIEW: {
-          to: "resettingView",
         },
         SOURCE_UPDATED: [
           {
@@ -174,7 +165,7 @@ function processEventFromState(
             isSecondary,
           })
         } catch (e) {
-          console.log("Error processing targets", e.message)
+          // console.log("Error processing targets", e.message)
         }
       }
 

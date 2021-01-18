@@ -53,13 +53,17 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
     language: "typescript",
   })
 
+  function handleChange(code: string) {
+    codePanelState.send("CHANGED_CODE", { code, oid, pid })
+  }
+
   const { editor, containerRef } = useCustomEditor(
     monaco,
     stateModel,
     oid !== uid,
     false,
     undefined,
-    (code) => local.send("CHANGED_CODE", { code, oid, pid }),
+    handleChange,
   )
 
   // Setup save action and load up the state machine

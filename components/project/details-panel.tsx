@@ -8,7 +8,12 @@ import {
   TitleRow,
   styled,
 } from "components/theme"
-import { motionValues, saveWrapDetails, ui } from "lib/local-data"
+import {
+  motionValues,
+  saveWrapDetails,
+  saveDetailsTab,
+  ui,
+} from "lib/local-data"
 
 import { DragHandleVertical } from "./drag-handles"
 import { animate } from "framer-motion"
@@ -40,6 +45,7 @@ export default function Details({}: DetailsProps) {
   // Handle editor changes when the user changes tabs
   function handleTabChange(tab: "data" | "values") {
     setActiveTab(tab)
+    saveDetailsTab(tab)
   }
 
   // Toggle whether the editor should wrap its content

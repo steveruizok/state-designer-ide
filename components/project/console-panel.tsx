@@ -1,4 +1,4 @@
-import { createState, useStateDesigner } from "@state-designer/react"
+import { useStateDesigner } from "@state-designer/react"
 import {
   IconButton,
   TabButton,
@@ -7,9 +7,9 @@ import {
   styled,
 } from "components/theme"
 import { animate } from "framer-motion"
-import { motionValues, ui } from "lib/local-data"
+import { motionValues, ui, saveConsoleTab } from "lib/local-data"
 import * as React from "react"
-import { ChevronDown, ChevronUp, Copy } from "react-feather"
+import { ChevronDown, ChevronUp, Trash, Copy } from "react-feather"
 import consoleState from "states/console"
 import toastState from "states/toast"
 
@@ -24,10 +24,16 @@ interface ConsoleProps {}
 export default function Console({}: ConsoleProps) {
   const local = useStateDesigner(consoleState)
   const { value } = local.values
+  const { error } = local.data
 
+  const [activeTab, setActiveTab] = React.useState(ui.console.activeTab)
   const [expanded, setExpanded] = React.useState(
     CONSOLE_ROW_HEIGHT - initialOffset > 40,
   )
+
+  function clearConsole() {
+    consoleState.send("RESET")
+  }
 
   // Copy the editor's current text to the clipboard
   function copyCurrent() {
@@ -78,14 +84,42 @@ export default function Console({}: ConsoleProps) {
     elm.scrollTo(0, elm.scrollHeight)
   }, [value])
 
+  // Handle editor changes when the user changes tabs
+  function handleTabChange(tab: "console" | "error") {
+    setActiveTab(tab)
+    saveConsoleTab(tab)
+  }
+
   return (
     <ConsoleContainer>
       <TitleRow onDoubleClick={toggleExpanded}>
         <TabsContainer>
-          <TabButton variant="details" title="Console" activeState={"active"}>
-            Console
+          <TabButton
+            variant="details"
+            title="Console"
+            activeState={activeTab === "console" ? "active" : "inactive"}
+            onClick={() => handleTabChange("console")}
+          >
+            Console!!
+          </TabButton>
+          <TabButton
+            variant="details"
+            title="Console"
+            activeState={
+              activeTab === "error" ? "active" : error ? "warn" : "inactive"
+            }
+            onClick={() => handleTabChange("error")}
+          >
+            Error
           </TabButton>
         </TabsContainer>
+        <IconButton
+          data-hidey="true"
+          title="Clear Console"
+          onClick={clearConsole}
+        >
+          <Trash />
+        </IconButton>
         <IconButton
           data-hidey="true"
           title="Copy to clipboard"
@@ -102,7 +136,7 @@ export default function Console({}: ConsoleProps) {
       </TitleRow>
       <CodeWrapper ref={rCodeScroll}>
         <pre>
-          <code>{value}</code>
+          <code>{activeTab === "console" ? value : error}</code>
         </pre>
       </CodeWrapper>
       <DragHandleVertical

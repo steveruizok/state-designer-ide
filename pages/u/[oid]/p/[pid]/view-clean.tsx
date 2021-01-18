@@ -1,7 +1,8 @@
 import * as React from "react"
 
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
-import LiveView, { LiveViewControls } from "components/project/live-view"
+import LiveView from "components/project/live-view"
+import LiveViewControls from "components/project/react-view"
 
 import Head from "next/head"
 import Router from "next/router"

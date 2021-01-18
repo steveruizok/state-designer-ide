@@ -32,7 +32,7 @@ export default async function login(req: NextApiRequest, res: NextApiResponse) {
     .auth()
     .verifySessionCookie(sessionCookie)
     .catch((e) => {
-      console.log("Could not verify session cookie!")
+      // console.log("Could not verify session cookie!")
     })
 
   if (!decodedClaims) {
