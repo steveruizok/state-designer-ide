@@ -1,4 +1,6 @@
-import { useStateDesigner } from "@state-designer/react"
+import * as React from "react"
+
+import { ChevronDown, ChevronUp, Copy, Trash } from "react-feather"
 import {
   IconButton,
   TabButton,
@@ -6,14 +8,13 @@ import {
   TitleRow,
   styled,
 } from "components/theme"
-import { animate } from "framer-motion"
-import { motionValues, ui, saveConsoleTab } from "lib/local-data"
-import * as React from "react"
-import { ChevronDown, ChevronUp, Trash, Copy } from "react-feather"
-import consoleState from "states/console"
-import toastState from "states/toast"
+import { motionValues, saveConsoleTab, ui } from "lib/local-data"
 
 import { DragHandleVertical } from "./drag-handles"
+import { animate } from "framer-motion"
+import consoleState from "states/console"
+import toastState from "states/toast"
+import { useStateDesigner } from "@state-designer/react"
 
 const initialOffset = ui.panelOffsets.console
 
@@ -100,7 +101,7 @@ export default function Console({}: ConsoleProps) {
             activeState={activeTab === "console" ? "active" : "inactive"}
             onClick={() => handleTabChange("console")}
           >
-            Console!!
+            Console
           </TabButton>
           <TabButton
             variant="details"
