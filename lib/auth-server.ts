@@ -24,7 +24,7 @@ export async function verifyCookie(
       authenticated = true
     })
     .catch(() => {
-      console.log("Could not authenticate!")
+      // console.log("Could not authenticate!")
       authenticated = false
       return {
         authenticated,

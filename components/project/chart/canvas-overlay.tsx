@@ -3,6 +3,7 @@ import { styled } from "components/theme"
 import { MotionValue, motion } from "framer-motion"
 import { getBoxToBoxArrow } from "perfect-arrows"
 import * as React from "react"
+import throttle from "lodash/throttle"
 import highlightsState from "states/highlights"
 
 const CanvasOverlay: React.FC<{
@@ -21,7 +22,7 @@ const CanvasOverlay: React.FC<{
   const { event } = local.data
 
   React.useEffect(() => {
-    const updateCanvasSize = () => {
+    const updateCanvasSize = throttle(() => {
       const canvas = rCanvas.current
       if (!canvas) return
       const w = width.get()
@@ -33,7 +34,7 @@ const CanvasOverlay: React.FC<{
       canvas.style.setProperty("transform", `scale(${1 / dpr})`)
       rCtx.current = canvas.getContext("2d") as CanvasRenderingContext2D
       rCtx.current.scale(dpr, dpr)
-    }
+    }, 100)
 
     updateCanvasSize()
 

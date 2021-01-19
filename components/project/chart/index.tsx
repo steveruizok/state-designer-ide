@@ -1,6 +1,6 @@
 import * as React from "react"
 
-import { AnimatePresence, AnimateSharedLayout } from "framer-motion"
+import { AnimateSharedLayout } from "framer-motion"
 import { Button, IconButton, styled } from "components/theme"
 import { Compass, RotateCcw } from "react-feather"
 import { S, useStateDesigner } from "@state-designer/react"
@@ -11,7 +11,7 @@ import StateNode from "./state-node"
 import highlightsState from "states/highlights"
 import { motion } from "framer-motion"
 import projectState from "states/project"
-import throttle from "lodash/throttle"
+import debounce from "lodash/debounce"
 import useMotionResizeObserver from "use-motion-resize-observer"
 import usePreventZooming from "hooks/usePreventZooming"
 import useScaleZooming from "hooks/useScaleZooming"
@@ -24,7 +24,11 @@ interface ChartProps {
 function Chart({ state, zoomedPath }: ChartProps) {
   const captive = useStateDesigner(state)
 
-  const { ref: rCanvas, width: mvCanvasWidth } = useMotionResizeObserver()
+  const {
+    ref: rCanvas,
+    width: mvCanvasWidth,
+    height: mvCanvasHeight,
+  } = useMotionResizeObserver()
 
   const {
     ref: rRootNode,
@@ -33,6 +37,7 @@ function Chart({ state, zoomedPath }: ChartProps) {
   } = useMotionResizeObserver()
 
   const rAutoScale = React.useRef(1)
+  const rScaling = React.useRef(false)
 
   const mvScale = useMotionValue(1)
   const mvX = useMotionValue(0)
@@ -40,50 +45,41 @@ function Chart({ state, zoomedPath }: ChartProps) {
 
   const animation = useAnimation()
 
-  const [bind, scale] = useScaleZooming(true, true, 0.25, 3, mvScale)
+  const { bind } = useScaleZooming(true, true, 0.25, 3, mvScale)
 
   // Centers and re-scales canvas
   const resetView = React.useCallback(
-    throttle(() => {
-      const stateNode = rRootNode.current
-      if (!stateNode) return
+    debounce(() => {
+      // Don't rescale if we're already scaling
+      if (rScaling.current) return
 
       const nodeWidth = mvStateNodeWidth.get()
       const canvasWidth = mvCanvasWidth.get()
+      const nodeHeight = mvStateNodeHeight.get()
+      const canvasHeight = mvCanvasHeight.get()
 
       let scale = 1
 
       const chartPadding = canvasWidth < 320 ? 16 : 32
 
-      if (nodeWidth > canvasWidth - chartPadding) {
-        scale = (canvasWidth - chartPadding) / nodeWidth
+      if (
+        nodeWidth > canvasWidth - chartPadding ||
+        nodeHeight > canvasHeight - chartPadding
+      ) {
+        scale = Math.min(
+          (canvasHeight - chartPadding) / nodeHeight,
+          (canvasWidth - chartPadding) / nodeWidth,
+        )
       }
 
-      rAutoScale.current = scale
-      animation.start({ x: 0, y: 0, scale })
-    }, 60),
-    [],
-  )
-
-  const resize = React.useCallback(
-    throttle(() => {
-      const nodeWidth = mvStateNodeWidth.get()
-      const canvasWidth = mvCanvasWidth.get()
-
-      if (mvScale.get() !== rAutoScale.current) return
-
-      let scale = 1
-      const chartPadding = canvasWidth < 320 ? 16 : 32
-
-      if (nodeWidth > canvasWidth - chartPadding) {
-        scale = (canvasWidth - chartPadding) / nodeWidth
-      }
-
-      if (scale === mvScale.get()) return
+      if (!isFinite(scale)) return
 
       rAutoScale.current = scale
-      mvScale.set(scale)
-    }, 32),
+      rScaling.current = true
+      animation.start({ x: 0, y: 0, scale }).then(() => {
+        rScaling.current = false
+      })
+    }, 250),
     [],
   )
 
@@ -91,10 +87,55 @@ function Chart({ state, zoomedPath }: ChartProps) {
 
   // Resize statenode on mount
   React.useEffect(() => {
+    const resize = debounce(() => {
+      // Don't change if the user has a custom scale
+      if (mvScale.get() !== rAutoScale.current) return
+
+      // Don't rescale if we're already scaling
+      if (rScaling.current) return
+
+      const nodeWidth = mvStateNodeWidth.get()
+      const canvasWidth = mvCanvasWidth.get()
+      const nodeHeight = mvStateNodeHeight.get()
+      const canvasHeight = mvCanvasHeight.get()
+
+      let scale = 1
+
+      const chartPadding = canvasWidth < 320 ? 16 : 32
+
+      if (
+        nodeWidth > canvasWidth - chartPadding ||
+        nodeHeight > canvasHeight - chartPadding
+      ) {
+        scale = Math.min(
+          (canvasHeight - chartPadding) / nodeHeight,
+          (canvasWidth - chartPadding) / nodeWidth,
+        )
+      }
+
+      if (!isFinite(scale)) return
+
+      // Don't rescale if the scale has not changed.
+      if (scale === rAutoScale.current) return
+
+      rAutoScale.current = scale
+      rScaling.current = true
+      animation.start({ x: 0, y: 0, scale }).then(() => {
+        rScaling.current = false
+      })
+    }, 250)
+
     requestAnimationFrame(resize)
 
+    let unsubs = [
+      mvCanvasWidth.onChange(resize),
+      mvCanvasHeight.onChange(resize),
+    ]
+
     // Resize on canvas pane resize
-    return mvCanvasWidth.onChange(resize)
+    return () => {
+      unsubs.forEach((fn) => fn())
+    }
   }, [zoomedPath])
 
   // Zoomed states
@@ -115,14 +156,14 @@ function Chart({ state, zoomedPath }: ChartProps) {
         mvX.set(mvX.get() + info.delta.x)
         mvY.set(mvY.get() + info.delta.y)
       }}
-      onDoubleClick={() => resetView()}
+      onDoubleClick={resetView}
       {...bind()}
     >
       <ChartCanvas
         style={{
           x: mvX,
           y: mvY,
-          scale,
+          scale: mvScale,
         }}
         animate={animation}
         onDoubleClick={(e) => e.stopPropagation()}
@@ -161,11 +202,7 @@ function Chart({ state, zoomedPath }: ChartProps) {
         >
           <RotateCcw size={14} strokeWidth={3} /> Reset State
         </Button>
-        <IconButton
-          data-hidey="true"
-          title="Reset Canvas"
-          onClick={() => resetView()}
-        >
+        <IconButton data-hidey="true" title="Reset Canvas" onClick={resetView}>
           <Compass />
         </IconButton>
       </CanvasControls>

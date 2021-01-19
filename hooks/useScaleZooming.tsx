@@ -6,23 +6,21 @@ export default function useScaleZooming(
   pinch: boolean = true,
   minZoom: number = 0.25,
   maxZoom: number = 2.5,
-  mvScale?: MotionValue<number>,
+  mvScale: MotionValue<number>,
 ) {
-  const localMvScale = useMotionValue(0)
-
   const bind = useGesture({
     onPinch: ({ delta }) => {
-      const mv = mvScale || localMvScale
+      const mv = mvScale
       const scale = mv.get()
       pinch &&
         mv.set(Math.max(minZoom, Math.min(maxZoom, scale - delta[1] / 60)))
     },
     onWheel: ({ vxvy: [, vy] }) => {
-      const mv = mvScale || localMvScale
+      const mv = mvScale
       const scale = mv.get()
       wheel && mv.set(Math.max(minZoom, Math.min(maxZoom, scale + vy / 30)))
     },
   })
 
-  return [bind, mvScale || localMvScale] as const
+  return { bind }
 }

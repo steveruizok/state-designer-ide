@@ -72,7 +72,6 @@ export default function CustomMonacoProvider({ children }) {
         }),
       ]}
       onLoad={(monaco) => {
-        console.log("monaco provider loaded")
         if (monaco) {
           rMonaco.current = monaco
 
