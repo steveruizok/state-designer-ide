@@ -9,7 +9,6 @@ import {
 } from "framer-motion"
 import usePreventZooming from "hooks/usePreventZooming"
 import useScaleZooming from "hooks/useScaleZooming"
-// @jsx jsx
 import * as React from "react"
 import { Compass } from "react-feather"
 
@@ -26,7 +25,7 @@ const Canvas = React.forwardRef<HTMLDivElement, CanvasProps>(
 
     usePreventZooming(ref as any)
 
-    const [bind, scale] = useScaleZooming(true, true, 0.25, 3, mvScale)
+    const { bind } = useScaleZooming(true, true, 0.25, 3, mvScale)
 
     function resetScrollPosition() {
       animation.start({ x: 0, y: 0, scale: 1 })
@@ -47,7 +46,7 @@ const Canvas = React.forwardRef<HTMLDivElement, CanvasProps>(
           style={{
             x: mvX,
             y: mvY,
-            scale,
+            scale: mvScale,
           }}
           animate={animation}
           onDoubleClick={(e) => e.stopPropagation()}

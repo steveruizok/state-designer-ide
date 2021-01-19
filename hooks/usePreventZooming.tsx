@@ -1,4 +1,3 @@
-// @jsx jsx
 import * as React from "react"
 
 export default function usePreventZooming(
