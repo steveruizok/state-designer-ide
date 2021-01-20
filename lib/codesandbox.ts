@@ -43,7 +43,6 @@ ReactDOM.render(
 
   const appCode = `
 import React from "react"
-import state from "./state"
 import {
   motion,
   useMotionValue,
@@ -54,11 +53,8 @@ import {
   AnimateSharedLayout,
 } from "framer-motion"
 import * as _ from "lodash"
-import { Colors, Utils } from "./resources"
-import { useStateDesigner } from "@state-designer/react"
-import { styled, css } from "./stitches.config.js"
-import { Static } from "./static.js"
 import * as Icons from "react-feather"
+import { useStateDesigner } from "@state-designer/react"
 import {
   Box,
   Checkbox,
@@ -73,6 +69,10 @@ import {
   Text,
   View,
 } from "./styled"
+import state from "./state"
+import { Static } from "./static.js"
+import { Colors, Utils } from "./resources"
+import { styled, css } from "./stitches.config.js"
 
 const rLiveView = React.createRef()
 
@@ -888,6 +888,7 @@ export {
 import * as _ from "lodash"
 import { Colors, Utils } from "./resources"
 import { createState } from "@state-designer/react"
+import { Static } from "./static"
 
 ${project.code.state}
 `

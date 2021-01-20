@@ -1,3 +1,5 @@
+import type * as monacoApi from "monaco-editor"
+
 import { codeFormatValidators, codeValidators } from "lib/eval"
 import {
   decreaseFontSize,
@@ -12,6 +14,8 @@ import { createState } from "@state-designer/react"
 import liveViewState from "./live-view"
 import projectState from "./project"
 import { saveProjectCode } from "lib/database"
+
+type Monaco = typeof monacoApi
 
 const EDITOR_TABS = ["state", "view", "static"]
 let INITIAL_FONT_SIZE = 13
@@ -31,12 +35,12 @@ const codePanelState = createState({
     prevDecorations: [] as any[],
     fontSize: INITIAL_FONT_SIZE,
     activeTab: INITIAL_TAB as CodeEditorTab,
-    monaco: null as any,
-    editor: null as any,
+    monaco: null as Monaco,
+    editor: null as monacoApi.editor.ICodeEditor,
     models: {
-      state: null as any,
-      view: null as any,
-      static: null as any,
+      state: null as monacoApi.editor.ITextModel,
+      view: null as monacoApi.editor.ITextModel,
+      static: null as monacoApi.editor.ITextModel,
     },
     viewStates: {
       state: {
@@ -71,7 +75,7 @@ const codePanelState = createState({
     },
   },
   on: {
-    UNLOADED: { to: ["loading"] },
+    UNLOADED: { do: "cleanup", to: ["loading"] },
     SOURCE_UPDATED: ["updateFromDatabase", "notifyLiveViewClean"],
     CHANGED_CODE: ["updateDirtyCode", "highlightBlockTitles"],
     RESET_CODE: [
@@ -124,38 +128,41 @@ const codePanelState = createState({
       states: {
         loading: {
           on: {
-            LOADED: [
-              "loadData",
-              {
-                if: "hasSource",
-                to: "starting",
-              },
-            ],
-            SOURCE_LOADED: [
-              "initialLoadFromDatabase",
-              {
-                if: "hasEditor",
-                to: "starting",
-              },
-            ],
+            LOADED: "loadData",
+            SOURCE_LOADED: "initialLoadFromDatabase",
           },
-        },
-        starting: {
-          onEnter: [
-            "updateModels",
-            {
-              if: "initialTabIsState",
-              to: "state",
+          initial: "stageA",
+          states: {
+            stageA: {
+              on: {
+                LOADED: { to: "stageB" },
+                SOURCE_LOADED: { to: "stageB" },
+              },
             },
-            {
-              if: "initialTabIsView",
-              to: "view",
+            stageB: {
+              on: {
+                LOADED: { to: "stageC" },
+                SOURCE_LOADED: { to: "stageC" },
+              },
             },
-            {
-              if: "initialTabIsStatic",
-              to: "static",
+            stageC: {
+              onEnter: [
+                "updateModels",
+                {
+                  if: "initialTabIsState",
+                  to: "state",
+                },
+                {
+                  if: "initialTabIsView",
+                  to: "view",
+                },
+                {
+                  if: "initialTabIsStatic",
+                  to: "static",
+                },
+              ],
             },
-          ],
+          },
         },
         state: {
           onEnter: [
@@ -232,7 +239,18 @@ const codePanelState = createState({
   },
   actions: {
     // Data
-    loadData(data, payload = {}) {
+    loadData(
+      data,
+      payload: {
+        monaco: Monaco
+        editor: monacoApi.editor.ICodeEditor
+        models: {
+          state: monacoApi.editor.ITextModel
+          view: monacoApi.editor.ITextModel
+          static: monacoApi.editor.ITextModel
+        }
+      },
+    ) {
       const { monaco, editor, models } = payload
       if (!editor) {
         return
@@ -304,6 +322,7 @@ const codePanelState = createState({
     updateDirtyCode(data, payload: { code: string }) {
       const { models, code, activeTab } = data
       if (!codeFormatValidators[activeTab](payload.code)) {
+        // @ts-ignore
         models[activeTab].undo()
       } else {
         code[activeTab].dirty = payload.code
@@ -374,6 +393,7 @@ const codePanelState = createState({
         fontSize: next,
       })
     },
+    // Highlights
     highlightBlockTitles(data) {
       const { monaco, editor, prevDecorations } = data
       if (!editor) {
@@ -479,6 +499,15 @@ const codePanelState = createState({
     clearHighlights(data) {
       const { editor, prevDecorations } = data
       data.prevDecorations = editor.deltaDecorations(prevDecorations, [])
+    },
+    // Cleanup
+    cleanup(data) {
+      for (let tab of EDITOR_TABS) {
+        data.models[tab].setValue("")
+        data.code[tab].clean = ""
+        data.code[tab].dirty = ""
+        data.code[tab].error = ""
+      }
     },
   },
   values: {

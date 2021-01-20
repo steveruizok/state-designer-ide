@@ -167,8 +167,8 @@ const ConsoleContainer = styled.div({
 
 const CodeWrapper = styled.div({
   display: "flex",
-  alignItems: "flex-end",
-  overflow: "scroll",
+  overflowX: "scroll",
+  overflowY: "scroll",
   "& pre": {
     bg: "$codeBg",
     p: "$2",
@@ -179,5 +179,14 @@ const CodeWrapper = styled.div({
     lineHeight: "$body",
     fontSize: "$1",
     fontWeight: 400,
+  },
+  variants: {
+    wrap: {
+      true: {
+        "& pre": {
+          whiteSpace: "pre-wrap",
+        },
+      },
+    },
   },
 })

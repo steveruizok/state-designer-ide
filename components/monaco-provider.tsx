@@ -1,9 +1,8 @@
-import useTheme from "hooks/useTheme"
-import {
-  MonacoProvider,
-  plugins,
-} from "node_modules/use-monaco/dist/cjs/use-monaco"
 import * as React from "react"
+
+import { MonacoProvider, plugins } from "use-monaco/dist/cjs/use-monaco"
+
+import useTheme from "hooks/useTheme"
 
 const themes = {
   light: {

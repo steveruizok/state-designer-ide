@@ -104,7 +104,9 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
       },
       activeTab: ui.code.activeTab,
     })
-  }, [monaco, editor])
+
+    return () => codePanelState.send("UNLOADED")
+  }, [monaco, editor, oid, pid])
 
   return (
     <CodeContainer>

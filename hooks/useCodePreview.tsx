@@ -1,12 +1,13 @@
 import * as Comlink from "comlink"
+import * as React from "react"
+
 import {
   TransformFailure,
   TransformResult,
 } from "node_modules/esbuild-wasm/esm/browser.js"
-import * as React from "react"
-import { render } from "react-dom"
 
 import { WorkerApi } from "../workers/transpile.worker"
+import { render } from "react-dom"
 
 interface Props {
   code: string
@@ -78,6 +79,8 @@ export default function useCodePreview({
           try {
             const args = ["React", "render", "elm", ...Object.keys(scope)]
             const vArgs = [React, render, elm, ...Object.values(scope)]
+
+            elm.innerHTML = ""
 
             const fn = new Function(...args, (result as TransformResult).code)
 

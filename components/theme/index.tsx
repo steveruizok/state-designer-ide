@@ -143,7 +143,7 @@ export const Input = styled.input({
   border: "none",
   borderRadius: "$1",
   outline: "none",
-  "&:focus": {
+  "&:focus:enabled": {
     bg: "$hover",
   },
   "&:disabled": {
@@ -174,8 +174,7 @@ const StyledCheckbox = styled(_Checkbox.Root, {
   "&:disabled": {
     opacity: 0.5,
   },
-  "&:hover": {
-    color: "$accent",
+  "&:hover:enabled": {
     boxShadow: "inset 0 0 0 2px $accent",
   },
 })
@@ -219,8 +218,7 @@ export const PlainButton = styled.button({
   border: "none",
   borderRadius: "$1",
   color: "$text",
-  "&:hover": {
-    color: "$accent",
+  "&:hover:enabled": {
     bg: "$hover",
   },
   "&:disabled": {
@@ -261,8 +259,7 @@ export const PlainIconButton = styled.button({
   "& > p": {
     pr: "$1",
   },
-  "&:hover": {
-    color: "$accent",
+  "&:hover:enabled": {
     bg: "$hover",
   },
   p: "$1",

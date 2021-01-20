@@ -23,14 +23,15 @@ import {
 } from "components/theme"
 // import { LiveError, LivePreview, LiveProvider } from "react-live"
 import { fakePrint, printFromView } from "lib/eval"
-import useCodePreview from "hooks/useCodePreview"
+import { motion, useMotionValue } from "framer-motion"
 
 import Colors from "components/static/colors"
+import Loading from "components/loading"
 import { RotateCcw } from "react-feather"
-import liveViewState from "states/live-view"
-import { useMotionValue, motion } from "framer-motion"
-import projectState from "states/project"
 import consoleState from "states/console"
+import liveViewState from "states/live-view"
+import projectState from "states/project"
+import useCodePreview from "hooks/useCodePreview"
 import { useStateDesigner } from "@state-designer/react"
 import useTheme from "hooks/useTheme"
 
@@ -221,7 +222,9 @@ function ReactView({
         onFocus={() => localEditor.send("FOCUSED_REACT_VIEW")}
       >
         <PreviewScrollContainer ref={rLiveView} id="live-view">
-          <div ref={previewRef} />
+          <div ref={previewRef}>
+            <Loading />
+          </div>
         </PreviewScrollContainer>
         <Controls
           showResetState={showResetState}

@@ -1,7 +1,8 @@
 import * as Comlink from "comlink"
+
 import {
-  TransformResult,
   Service,
+  TransformResult,
   startService,
 } from "node_modules/esbuild-wasm/esm/browser.js"
 
@@ -23,7 +24,7 @@ async function transpile(code: string) {
   transformed = await service
     .transform(code, {
       loader: "jsx",
-      minify: true,
+      minify: false,
     })
     .catch((e) => (transformed = { ...e }))
 
