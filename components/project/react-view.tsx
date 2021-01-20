@@ -21,7 +21,6 @@ import {
   css,
   styled,
 } from "components/theme"
-// import { LiveError, LivePreview, LiveProvider } from "react-live"
 import { fakePrint, printFromView } from "lib/eval"
 import { motion, useMotionValue } from "framer-motion"
 
@@ -222,9 +221,7 @@ function ReactView({
         onFocus={() => localEditor.send("FOCUSED_REACT_VIEW")}
       >
         <PreviewScrollContainer ref={rLiveView} id="live-view">
-          <div ref={previewRef}>
-            <Loading />
-          </div>
+          <div ref={previewRef}></div>
         </PreviewScrollContainer>
         <Controls
           showResetState={showResetState}

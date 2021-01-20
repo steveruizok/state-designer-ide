@@ -80,8 +80,6 @@ export default function useCodePreview({
             const args = ["React", "render", "elm", ...Object.keys(scope)]
             const vArgs = [React, render, elm, ...Object.values(scope)]
 
-            elm.innerHTML = ""
-
             const fn = new Function(...args, (result as TransformResult).code)
 
             fn.call(null, ...vArgs)
