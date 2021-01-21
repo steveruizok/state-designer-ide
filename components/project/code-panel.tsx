@@ -124,8 +124,6 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
     return () => codePanelState.send("UNLOADED")
   }, [monaco, editor, oid, pid])
 
-  console.log(fontSize === 13)
-
   return (
     <CodeContainer>
       <Tabs>
