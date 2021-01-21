@@ -288,12 +288,12 @@ const codePanelState = createState({
     },
     updateModels(data) {
       EDITOR_TABS.forEach((tab) => {
-        data.models[tab].setValue(data.code[tab].clean)
+        data.models[tab]?.setValue(data.code[tab].clean)
       })
     },
     updateCleanViewStates(data) {
       EDITOR_TABS.forEach((tab) => {
-        data.viewStates[tab].clean.setValue(data.code[tab].clean)
+        data.viewStates[tab]?.clean.setValue(data.code[tab].clean)
       })
     },
     setStateActiveTab(data) {

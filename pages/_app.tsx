@@ -1,8 +1,11 @@
+import * as React from "react"
 import "../styles/globals.css"
 
 import MonacoProvider from "components/monaco-provider"
 import Head from "next/head"
 import dynamic from "next/dynamic"
+import { useRouter } from "next/router"
+import codePanelState from "states/code-panel"
 
 const Dialog = dynamic(() => import("components/dialog"))
 const Toast = dynamic(() => import("components/toast"))
@@ -14,6 +17,25 @@ const TW_IMAGE = "https://app.state-designer.com/sd-social-og.jpg"
 const URL = "https://app.state-designer.com"
 
 function MyApp({ Component, pageProps }) {
+  const { pathname, events } = useRouter()
+
+  React.useEffect(() => {
+    function handleRouteChange() {
+      codePanelState.send("UNLOADED")
+    }
+
+    events.on("routeChangeStart", handleRouteChange)
+    return () => events.off("routeChangeStart", handleRouteChange)
+  }, [])
+
+  const isProjectPath =
+    pathname.includes("/p/") &&
+    !(
+      pathname.endsWith("view") ||
+      pathname.endsWith("chart") ||
+      pathname.endsWith("clean")
+    )
+
   return (
     <>
       <Head>
@@ -28,9 +50,13 @@ function MyApp({ Component, pageProps }) {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@statedesigner" />
       </Head>
-      <MonacoProvider>
+      {isProjectPath ? (
+        <MonacoProvider>
+          <Component {...pageProps} />
+        </MonacoProvider>
+      ) : (
         <Component {...pageProps} />
-      </MonacoProvider>
+      )}
       <Toast />
       <Dialog />
     </>
