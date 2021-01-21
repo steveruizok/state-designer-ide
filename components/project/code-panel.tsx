@@ -1,6 +1,14 @@
 import * as React from "react"
 
-import { AlertCircle, RefreshCcw, Save } from "react-feather"
+import {
+  AlertCircle,
+  Check,
+  Minus,
+  Plus,
+  RefreshCcw,
+  Save,
+  Settings,
+} from "react-feather"
 import { IconButton, TabButton, styled } from "components/theme"
 import { motionValues, ui } from "lib/local-data"
 import {
@@ -13,6 +21,13 @@ import { DragHandleHorizontal } from "./drag-handles"
 import codePanelState from "states/code-panel"
 import useCustomEditor from "hooks/useCustomEditor"
 import { useStateDesigner } from "@state-designer/react"
+import IconDropdown, {
+  DropdownCheckboxItem,
+  DropdownItem,
+  DropdownLabel,
+  DropdownSeparator,
+  DropdownItemIndicator,
+} from "components/icon-dropdown"
 
 interface CodePanelProps {
   uid?: string
@@ -24,7 +39,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   // Local state
   const local = useStateDesigner(codePanelState)
 
-  const { code } = local.data
+  const { code, fontSize, minimap, wordWrap } = local.data
   const { error, isDirty } = local.values
   const hasError = !!error
 
@@ -57,14 +72,15 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
     codePanelState.send("CHANGED_CODE", { code, oid, pid })
   }
 
-  const { editor, containerRef } = useCustomEditor(
+  const { editor, containerRef } = useCustomEditor({
     monaco,
-    stateModel,
-    oid !== uid,
-    false,
-    undefined,
-    handleChange,
-  )
+    model: stateModel,
+    readOnly: oid !== uid,
+    wordWrap,
+    minimap,
+    fontSize,
+    onChange: handleChange,
+  })
 
   // Setup save action and load up the state machine
 
@@ -108,6 +124,8 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
     return () => codePanelState.send("UNLOADED")
   }, [monaco, editor, oid, pid])
 
+  console.log(fontSize === 13)
+
   return (
     <CodeContainer>
       <Tabs>
@@ -140,6 +158,58 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
         >
           Static
         </TabButton>
+        <IconDropdown icon={<Settings opacity={0.5} />}>
+          <DropdownLabel>Editor Style</DropdownLabel>
+          <DropdownCheckboxItem
+            checked={minimap}
+            onSelect={(e) => {
+              e.preventDefault()
+              codePanelState.send("TOGGLED_MINIMAP")
+            }}
+          >
+            Show Minimap
+            <DropdownItemIndicator>
+              <Check size={12} strokeWidth={4} />
+            </DropdownItemIndicator>
+          </DropdownCheckboxItem>
+          <DropdownCheckboxItem
+            checked={wordWrap}
+            onSelect={(e) => {
+              e.preventDefault()
+              codePanelState.send("TOGGLED_WORD_WRAP")
+            }}
+          >
+            Wrap code
+            <DropdownItemIndicator>
+              <Check size={12} strokeWidth={4} />
+            </DropdownItemIndicator>
+          </DropdownCheckboxItem>
+          <DropdownItem
+            onSelect={(e) => {
+              e.preventDefault()
+              codePanelState.send("DECREASED_FONT_SIZE")
+            }}
+          >
+            Font Size <Minus size={10} strokeWidth={4} />
+          </DropdownItem>
+          <DropdownItem
+            onSelect={(e) => {
+              e.preventDefault()
+              codePanelState.send("INCREASED_FONT_SIZE")
+            }}
+          >
+            Font Size <Plus size={10} strokeWidth={4} />
+          </DropdownItem>
+          <DropdownItem
+            disabled={fontSize === 13}
+            onSelect={(e) => {
+              e.preventDefault()
+              codePanelState.send("RESET_FONT_SIZE")
+            }}
+          >
+            Reset Font Size
+          </DropdownItem>
+        </IconDropdown>
       </Tabs>
       <EditorContainer
         ref={containerRef}
@@ -228,6 +298,8 @@ const EditorContainer = styled.div({
     textDecoration: "underline",
   },
   ".marginStateBlockCodeHl": {},
+  ".minimap-shadow-visible": { display: "none" },
+  ".minimap-shadow-hidden": { display: "none" },
 })
 
 const CodeContainer = styled.div({
@@ -274,4 +346,5 @@ const Tabs = styled.div({
   bg: "$muted",
   borderBottom: "1px solid $shadow",
   p: "$0",
+  pr: 0,
 })

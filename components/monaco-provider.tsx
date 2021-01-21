@@ -44,8 +44,9 @@ export default function CustomMonacoProvider({ children }) {
     <MonacoProvider
       themes={themes}
       theme={theme}
+      languages={["javascript", "typescript"]}
       plugins={[
-        plugins.prettier(["javascript", "typescript", "json"], {
+        plugins.prettier(["javascript", "typescript"], {
           semi: false,
           singleQuote: false,
           trailingComma: "es5",

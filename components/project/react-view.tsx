@@ -223,10 +223,7 @@ function ReactView({
         <PreviewScrollContainer ref={rLiveView} id="live-view">
           <div ref={previewRef}></div>
         </PreviewScrollContainer>
-        <Controls
-          showResetState={showResetState}
-          onReset={() => setResets((reset) => reset + 1)}
-        />
+        <Controls showResetState={showResetState} />
       </LiveViewOuterWrapper>
     </LiveViewWrapper>
   )
@@ -275,13 +272,7 @@ export const LiveViewControls = styled.div({
   bg: "$scrim",
 })
 
-function Controls({
-  showResetState,
-  onReset,
-}: {
-  showResetState: boolean
-  onReset: () => void
-}) {
+function Controls({ showResetState }: { showResetState: boolean }) {
   const localProject = useStateDesigner(projectState)
   const localCaptive = useStateDesigner(localProject.data.captive)
 
@@ -290,7 +281,7 @@ function Controls({
       {showResetState && (
         <Button
           data-hidey="true"
-          title="Reset Canvas"
+          title="Reset State"
           variant="iconLeft"
           disabled={localCaptive.log.length === 0}
           onClick={() => projectState.send("RESET_STATE")}
@@ -302,7 +293,7 @@ function Controls({
         data-hidey="true"
         title="Reset Canvas"
         variant="iconLeft"
-        onClick={onReset}
+        onClick={() => liveViewState.send("RESET_VIEW")}
       >
         <RotateCcw size={14} strokeWidth={3} /> Reset View
       </Button>

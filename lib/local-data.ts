@@ -15,6 +15,8 @@ export const ui = {
   content: {},
   code: {
     fontSize: 13,
+    minimap: true,
+    wordWrap: false,
     activeTab: "state",
   },
   panelOffsets: {
@@ -183,6 +185,12 @@ export function resetFontSize() {
   ui.code.fontSize = 13
   saveUI()
   return ui.code.fontSize
+}
+
+export function updateUI(changes: Partial<typeof ui>) {
+  Object.assign(ui, changes)
+  saveUI()
+  return ui
 }
 
 // Payloads

@@ -6,6 +6,7 @@ import {
   increaseFontSize,
   resetFontSize,
   saveCodeTab,
+  updateUI,
   ui,
 } from "lib/local-data"
 
@@ -18,23 +19,29 @@ import { saveProjectCode } from "lib/database"
 type Monaco = typeof monacoApi
 
 const EDITOR_TABS = ["state", "view", "static"]
-let INITIAL_FONT_SIZE = 13
-let INITIAL_TAB = "state"
+
+let INITIAL = {
+  minimap: true,
+  wordWrap: false,
+  fontSize: 13,
+  tab: "state" as CodeEditorTab,
+}
 
 if (typeof window !== "undefined") {
   const savedUI = window.localStorage.getItem(`sd_ui`)
   if (savedUI !== null) {
     const saved = JSON.parse(savedUI)
-    INITIAL_FONT_SIZE = saved.code.fontSize
-    INITIAL_TAB = saved.code.activeTab
+    INITIAL = { ...INITIAL, ...saved.code }
   }
 }
 
 const codePanelState = createState({
   data: {
     prevDecorations: [] as any[],
-    fontSize: INITIAL_FONT_SIZE,
-    activeTab: INITIAL_TAB as CodeEditorTab,
+    wordWrap: INITIAL.wordWrap,
+    minimap: INITIAL.minimap,
+    fontSize: INITIAL.fontSize,
+    activeTab: INITIAL.tab,
     monaco: null as Monaco,
     editor: null as monacoApi.editor.ICodeEditor,
     models: {
@@ -88,6 +95,8 @@ const codePanelState = createState({
     RESET_FONT_SIZE: "resetFontSize",
     CHANGED_HIGHLIGHTS: "highlightHoveredBlocks",
     CLEARED_HIGHLIGHTS: "clearHighlights",
+    TOGGLED_WORD_WRAP: "toggleWordWrap",
+    TOGGLED_MINIMAP: "toggleMinimap",
   },
   states: {
     editor: {
@@ -371,32 +380,38 @@ const codePanelState = createState({
       const { editor } = data
       if (!editor) return
       const next = increaseFontSize()
-      editor.updateOptions({
-        fontSize: next,
-      })
+      data.fontSize = next
     },
     decreaseFontSize(data) {
       const { editor } = data
       if (!editor) return
       const next = decreaseFontSize()
       data.fontSize = next
-      editor.updateOptions({
-        fontSize: next,
-      })
     },
     resetFontSize(data) {
       const { editor } = data
       if (!editor) return
       const next = resetFontSize()
       data.fontSize = next
-      editor.updateOptions({
-        fontSize: next,
-      })
+    },
+    // Word Wrap
+    toggleWordWrap(data) {
+      data.wordWrap = !data.wordWrap
+      updateUI({ code: { ...ui.code, wordWrap: data.wordWrap } })
+    },
+    toggleMinimap(data) {
+      data.minimap = !data.minimap
+      updateUI({ code: { ...ui.code, minimap: data.minimap } })
     },
     // Highlights
     highlightBlockTitles(data) {
       const { monaco, editor, prevDecorations } = data
       if (!editor) {
+        return
+      }
+
+      if (data.activeTab !== "state") {
+        data.prevDecorations = editor.deltaDecorations(prevDecorations, [])
         return
       }
 
@@ -437,64 +452,63 @@ const codePanelState = createState({
       if (!editor) {
         return
       }
+
       const code = editor.getValue()
 
-      if (search === null || search === "root") {
+      if (data.activeTab !== "state" || search === null || search === "root") {
         data.prevDecorations = editor.deltaDecorations(prevDecorations, [])
+        return
+      }
+
+      const searchString = search + ":"
+      const lines = code.split("\n")
+      const ranges: number[][] = []
+
+      if (searchString === "root:") {
+        ranges[0] = [0, 1, lines.length - 1, 1]
       } else {
-        const searchString = search + ":"
-        const lines = code.split("\n")
-        const ranges: number[][] = []
+        let rangeIndex = 0,
+          startSpaces = 0,
+          state = "searchingForStart"
 
-        if (searchString === "root:") {
-          ranges[0] = [0, 1, lines.length - 1, 1]
-        } else {
-          let rangeIndex = 0,
-            startSpaces = 0,
-            state = "searchingForStart"
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i]
+          if (state === "searchingForStart") {
+            if (line.includes(" " + searchString)) {
+              startSpaces = line.search(/\S/)
+              state = "searchingForEnd"
+              ranges[rangeIndex] = [i + 1, 1]
+            }
+          } else if (state === "searchingForEnd") {
+            if (i === 0) continue
+            const spaces = line.search(/\S/)
+            const range = ranges[rangeIndex]
 
-          for (let i = 0; i < lines.length; i++) {
-            const line = lines[i]
-            if (state === "searchingForStart") {
-              if (line.includes(" " + searchString)) {
-                startSpaces = line.search(/\S/)
-                state = "searchingForEnd"
-                ranges[rangeIndex] = [i + 1, 1]
-              }
-            } else if (state === "searchingForEnd") {
-              if (i === 0) continue
-              const spaces = line.search(/\S/)
-              const range = ranges[rangeIndex]
-
-              if (spaces <= startSpaces) {
-                range.push(spaces < startSpaces || i === range[0] ? i : i + 1)
-                range.push(1)
-                rangeIndex++
-                state = "searchingForStart"
-              }
+            if (spaces <= startSpaces) {
+              range.push(spaces < startSpaces || i === range[0] ? i : i + 1)
+              range.push(1)
+              rangeIndex++
+              state = "searchingForStart"
             }
           }
         }
-
-        const hlRanges = ranges.map(([a, b, c, d]) => ({
-          range: new monaco.Range(a, b, c, d),
-          options: {
-            isWholeLine: true,
-            linesDecorationsClassName: "lineCodeHighlight",
-            inlineClassName: "inlineCodeHighlight",
-            marginClassName: "marginCodeHighlight",
-          },
-        }))
-
-        if (scrollToLine && hlRanges.length > 0) {
-          editor.revealLineInCenter(hlRanges[0].range.startLineNumber - 1, 0)
-        }
-
-        data.prevDecorations = editor.deltaDecorations(
-          prevDecorations,
-          hlRanges,
-        )
       }
+
+      const hlRanges = ranges.map(([a, b, c, d]) => ({
+        range: new monaco.Range(a, b, c, d),
+        options: {
+          isWholeLine: true,
+          linesDecorationsClassName: "lineCodeHighlight",
+          inlineClassName: "inlineCodeHighlight",
+          marginClassName: "marginCodeHighlight",
+        },
+      }))
+
+      if (scrollToLine && hlRanges.length > 0) {
+        editor.revealLineInCenter(hlRanges[0].range.startLineNumber - 1, 0)
+      }
+
+      data.prevDecorations = editor.deltaDecorations(prevDecorations, hlRanges)
     },
     clearHighlights(data) {
       const { editor, prevDecorations } = data

@@ -44,23 +44,60 @@ const StyledContent = styled(DropdownMenu.Content, {
 
 const StyledArrow = styled(DropdownMenu.Arrow, {
   fill: "$toastBg",
+  mx: "12px",
 })
 
-export const DropdownItem = styled(DropdownMenu.Item, {
+const itemStyles = {
+  userSelect: "none" as any,
   py: "$1",
   px: "$2",
   cursor: "pointer",
   outline: "none",
-  "&:nth-of-type(1)": {
-    borderRadius: "$1 $1 0 0",
-  },
-  "&:nth-last-of-type(1)": {
-    borderRadius: "0 0 $1 $1",
-  },
+  br: "$1",
+  transition: "background-color .1s",
+  // "&:nth-of-type(1)": {
+  //   borderRadius: "$1 $1 0 0",
+  // },
+  // "&:nth-last-of-type(1)": {
+  //   borderRadius: "0 0 $1 $1",
+  // },
   "&:hover": {
     bg: "$shadow",
   },
+  "&[data-disabled]": {
+    opacity: 0.5,
+  },
+}
+
+export const DropdownItem = styled(DropdownMenu.Item, {
+  ...itemStyles,
+  svg: { ml: "$1", mr: 0 },
 })
+
+export const DropdownCheckboxItem = styled(DropdownMenu.CheckboxItem, {
+  ...itemStyles,
+  display: "grid",
+  gap: "$1",
+  gridTemplateColumns: "1fr minmax(auto, 16px)",
+  gridAutoFlow: "column",
+  svg: { ml: "$1", mr: 0 },
+})
+
+export const DropdownLabel = styled(DropdownMenu.DropdownMenuLabel, {
+  px: "$2",
+  py: "$1",
+  opacity: 0.5,
+  userSelect: "none",
+  fontSize: "$0",
+  textTransform: "uppercase",
+  letterSpacing: 1,
+  fontWeight: "bold",
+})
+
+export const DropdownItemIndicator = styled(
+  DropdownMenu.DropdownMenuItemIndicator,
+  { display: "block" },
+)
 
 export const DropdownSeparator = styled(DropdownMenu.Separator, {
   height: 1,

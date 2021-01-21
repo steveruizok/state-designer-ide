@@ -5,6 +5,7 @@ import { EventDetails } from "types"
 import codePanelState from "./code-panel"
 import consoleState from "./console"
 import { findFirstTransitionTarget } from "utils"
+import liveViewState from "./live-view"
 
 const projectState = createState({
   data: {
@@ -42,7 +43,7 @@ const projectState = createState({
     ready: {
       on: {
         RESET_STATE: {
-          do: "resetCaptiveState",
+          do: ["createStatic", "resetCaptiveState", "resetView"],
         },
         SOURCE_UPDATED: [
           {
@@ -120,6 +121,9 @@ const projectState = createState({
     },
     resetCaptiveState(data) {
       data.captive.reset()
+    },
+    resetView(data) {
+      liveViewState.send("RESET_VIEW")
     },
   },
 })

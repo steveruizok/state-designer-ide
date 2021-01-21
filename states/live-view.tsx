@@ -2,6 +2,7 @@ import { createState } from "@state-designer/react"
 
 const liveViewState = createState({
   data: {
+    resets: 0,
     code: "",
     shouldLog: false,
   },
@@ -9,6 +10,7 @@ const liveViewState = createState({
     CHANGED_CODE: "setCode",
     FOCUSED_REACT_VIEW: "enableLogging",
     BLURRED_REACT_VIEW: "disableLogging",
+    RESET_VIEW: "incrementResets",
   },
   actions: {
     enableLogging(data) {
@@ -20,6 +22,9 @@ const liveViewState = createState({
     setCode(data, payload: { code: string; shouldLog: boolean }) {
       data.code = payload.code
       data.shouldLog = payload.shouldLog
+    },
+    incrementResets(data) {
+      data.resets++
     },
   },
 })

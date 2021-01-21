@@ -58,18 +58,6 @@ export default function Controls({ oid, pid, uid }: ControlsProps) {
           <Copy />
         </IconButton>
       )}
-      <IconButton
-        title="Decrease Editor Font Size"
-        onClick={() => codePanelState.send("DECREASED_FONT_SIZE")}
-      >
-        <Minus />
-      </IconButton>
-      <IconButton
-        title="Increase Editor Font Size"
-        onClick={() => codePanelState.send("INCREASED_FONT_SIZE")}
-      >
-        <Plus />
-      </IconButton>
       <IconButton title="Toggle Dark Mode" onClick={toggle}>
         <Sun />
       </IconButton>

@@ -6,33 +6,50 @@ import { useEditor } from "use-monaco"
 import useMotionResizeObserver from "use-motion-resize-observer"
 import useTheme from "./useTheme"
 
-export default function useCustomEditor(
-  monaco: any,
-  model: any,
-  readOnly: boolean,
-  wrap: boolean,
-  onMount?: (editor: any) => void,
-  onChange?: (code: string) => void,
-) {
+interface UseCustomEditorOptions {
+  monaco: any
+  model: any
+  readOnly?: boolean
+  wordWrap?: boolean
+  minimap?: boolean
+  fontSize?: number
+  onMount?: (editor: any) => void
+  onChange?: (code: string) => void
+}
+
+export default function useCustomEditor({
+  monaco,
+  model,
+  onMount,
+  onChange,
+  readOnly = true,
+  wordWrap = false,
+  minimap = true,
+  fontSize = 13,
+}: UseCustomEditorOptions) {
   const { theme } = useTheme()
 
   const { editor, containerRef } = useEditor({
     monaco,
     model,
     options: {
-      fontSize: 13,
+      readOnly,
+      wordWrap: wordWrap ? "on" : "off",
+      minimap: {
+        enabled: minimap,
+        renderCharacters: false,
+      },
+      fontSize,
       showUnused: false,
       quickSuggestions: false,
       fontFamily: "Fira Code",
       fontWeight: "500",
-      minimap: { enabled: false },
       smoothScrolling: true,
       lineDecorationsWidth: 4,
       fontLigatures: true,
       cursorBlinking: "smooth",
       lineNumbers: "off",
-      scrollBeyondLastLine: false,
-      wordWrap: wrap ? "on" : "off",
+      scrollBeyondLastLine: true,
       scrollbar: {
         verticalScrollbarSize: 0,
         verticalSliderSize: 8,
@@ -86,17 +103,15 @@ export default function useCustomEditor(
       resizeEditor()
       editor.updateOptions({
         readOnly,
+        wordWrap: wordWrap ? "on" : "off",
+        minimap: {
+          enabled: minimap,
+          renderCharacters: false,
+        },
+        fontSize,
       })
     }
-  }, [editor, readOnly])
-
-  React.useEffect(() => {
-    if (editor) {
-      editor.updateOptions({
-        wordWrap: wrap ? "on" : "off",
-      })
-    }
-  }, [editor, wrap])
+  }, [editor, wordWrap, fontSize, readOnly])
 
   return { editor, containerRef: mergeRefs([resizeRef, containerRef]) }
 }

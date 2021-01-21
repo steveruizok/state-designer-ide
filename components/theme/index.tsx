@@ -131,6 +131,7 @@ export const View = styled.div({
   overflow: "hidden",
   alignItems: "center",
   justifyContent: "center",
+  zIndex: 1,
 })
 
 export const Input = styled.input({

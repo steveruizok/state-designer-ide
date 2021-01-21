@@ -168,42 +168,36 @@ export function getNewProject(
       view: `import state from './state';
 
 export default function App() {
-  const local = useStateDesigner(state);
-
-  return (
-    <Grid css={{ bg: '$border', textAlign: 'center' }}>
-      <Text>Hello {Static.name}</Text>
-      <Flex>
-        <IconButton
-          disabled={!state.can('DECREMENTED')}
-          onClick={() => state.send('DECREMENTED')}
-        >
-          <Icons.Minus />
-        </IconButton>
-        <Heading css={{ p: '$3' }}>{local.data.count}</Heading>
-        <IconButton
-          disabled={!state.can('INCREMENTED')}
-          onClick={() => local.send('INCREMENTED')}
-        >
-          <Icons.Plus />
-        </IconButton>
-      </Flex>
-      <Button onClick={() => state.send('TOGGLED')}>
-        {local.whenIn({
-          turnedOff: 'Turn On',
-          turnedOn: 'Turn Off',
-        })}
-      </Button>
-    </Grid>
-  );
+	const local = useStateDesigner(state);
+	return (
+		<View>
+			<Container>
+				{Static.title} is {local.whenIn({ off: 'Off', running: 'On' })}
+				<Flex drag>
+					<IconButton
+						disabled={!local.can('DECREMENTED')}
+						onClick={() => state.send('DECREMENTED')}
+					>
+						<Icons.Minus />
+					</IconButton>
+					{local.data.count}
+					<IconButton
+						disabled={!local.can('INCREMENTED')}
+						onClick={() => state.send('INCREMENTED')}
+					>
+						<Icons.Plus />
+					</IconButton>
+				</Flex>
+				<Button onClick={() => state.send('TOGGLED')}>Toggle</Button>
+			</Container>
+		</View>
+	);
 }
 `,
       static: `export default function getStatic() {
-  return {
-    name: 'Kitoko',
-    age: 93,
-    height: 184,
-  };
+	return {
+		title: 'Counter',
+	};
 }
 `,
     },
