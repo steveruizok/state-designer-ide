@@ -34,7 +34,7 @@ export default function useCodePreview<
   const [result, setResult] = React.useState<T>(null)
   const [error, setError] = React.useState<string | null>(null)
   const [status, setStatus] = React.useState<Status>("loading")
-  const [code, setCode] = React.useState<string | null>(null)
+  const [code, setCode] = React.useState<Folder<string>>({})
 
   React.useEffect(() => {
     setStatus("loading")
@@ -85,7 +85,7 @@ export default function useCodePreview<
         setResult(result)
 
         // Set the entry file's code (probably just for dev).
-        setCode(modules[entry])
+        setCode(modules)
 
         onChange && onChange()
       })

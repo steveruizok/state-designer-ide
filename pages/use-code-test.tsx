@@ -79,7 +79,7 @@ export const name = "Miranda"
           style={{ height: 400, width: 400 }}
         ></textarea>
         <textarea
-          value={code}
+          value={code[current] as any}
           disabled
           style={{ height: 400, width: 400 }}
         ></textarea>
