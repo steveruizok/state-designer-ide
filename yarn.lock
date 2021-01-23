@@ -667,23 +667,23 @@
   resolved "https://registry.yarnpkg.com/@radix-ui/utils/-/utils-0.0.1.tgz#d5dc98cb03f67ce2721526b347944628e44befb0"
   integrity sha512-IaKIopbvaq9EgpZ0kUZCU1sCvUmZUMNaJBJxpG3zAaMzhPdf08xmwtn79yzI3Zs0vKjsu2zpGLoM1+d75esFuw==
 
-"@state-designer/core@1.3.35":
-  version "1.3.35"
-  resolved "https://registry.yarnpkg.com/@state-designer/core/-/core-1.3.35.tgz#587e78100fd6602068dd1d73e436197a482d1719"
-  integrity sha512-xNpAbfyk4mhsJ3dy4Q8ekp86XJtrBqR3bWaUBMwAzetIAy3oHjv4+an3kLY0t9uXEeFjmhmFyEO2rMfFZJYxYQ==
+"@state-designer/core@1.3.37":
+  version "1.3.37"
+  resolved "https://registry.yarnpkg.com/@state-designer/core/-/core-1.3.37.tgz#7a4d665d92b878257ffc1b1640c3d945c407a3c9"
+  integrity sha512-pu1fD4DSVEitRdgPPuV9NFPv0kIr+G7tw0yBgzX4YH/HFrZ93biJF10vFpnmvtbOlhtR7TPZA5EQYeFAPyZJuA==
   dependencies:
-    immer "^7.0.0"
+    immer "^8.0.1"
     lodash "^4.17.15"
     lodash-es "^4.17.15"
     object.entries "^1.1.1"
     object.fromentries "^2.0.2"
 
-"@state-designer/react@^1.3.35":
-  version "1.3.35"
-  resolved "https://registry.yarnpkg.com/@state-designer/react/-/react-1.3.35.tgz#d411cb0fb249df0bae4abb7b140d818034655e41"
-  integrity sha512-+UlaXO3Ev/apgCjfG40gqvpsNBXhJ30KMJDcUhLs9oVq9vsuyeKXGQxsfO7R8ElSoPY1HwdnX887x2rryDR64g==
+"@state-designer/react@^1.3.37":
+  version "1.3.37"
+  resolved "https://registry.yarnpkg.com/@state-designer/react/-/react-1.3.37.tgz#c987e88f9ea225d25b323f629edc97673862ddc8"
+  integrity sha512-o5Lo1YUlNsP02PiyrY3R7Vm1dMYN1Ded3mtXec6aCMjiwd8Ft4WSBfgTkzOXVPGOIX+0lyd68GW1YJ4ZSftYpg==
   dependencies:
-    "@state-designer/core" "1.3.35"
+    "@state-designer/core" "1.3.37"
     lodash-es "^4.17.15"
 
 "@stitches/core@^0.0.2":
@@ -3008,10 +3008,10 @@ iferr@^0.1.5:
   resolved "https://registry.yarnpkg.com/iferr/-/iferr-0.1.5.tgz#c60eed69e6d8fdb6b3104a1fcbca1c192dc5b501"
   integrity sha1-xg7taebY/bazEEofy8ocGS3FtQE=
 
-immer@^7.0.0:
-  version "7.0.15"
-  resolved "https://registry.yarnpkg.com/immer/-/immer-7.0.15.tgz#dc3bc6db87401659d2e737c67a21b227c484a4ad"
-  integrity sha512-yM7jo9+hvYgvdCQdqvhCNRRio0SCXc8xDPzA25SvKWa7b1WVPjLwQs1VYU5JPXjcJPTqAa5NP5dqpORGYBQ2AA==
+immer@^8.0.1:
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/immer/-/immer-8.0.1.tgz#9c73db683e2b3975c424fb0572af5889877ae656"
+  integrity sha512-aqXhGP7//Gui2+UrEtvxZxSquQVXTpZ7KDxfCcKAF3Vysvw0CViVaW9RZ1j1xlIYqaaaipBoqdqeibkc18PNvA==
 
 imurmurhash@^0.1.4:
   version "0.1.4"

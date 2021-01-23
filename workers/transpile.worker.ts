@@ -23,6 +23,7 @@ async function transpile(code: string) {
 
   transformed = await service
     .transform(code, {
+      format: "cjs",
       loader: "jsx",
       minify: false,
     })
