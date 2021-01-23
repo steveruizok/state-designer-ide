@@ -1,16 +1,21 @@
 import useCode from "hooks/useCode"
 import * as React from "react"
 import { render } from "react-dom"
+import ErrorBoundary from "components/project/error-boundary"
 
-export default function UseCodeTest() {
+function UseCodeTest() {
+  const rPreview = React.useRef<HTMLDivElement>(null)
   const [current, setCurrent] = React.useState(Object.keys(reactFiles)[0])
   const [files, setFiles] = React.useState(reactFiles)
+  const [num, setNum] = React.useState(1)
 
-  const { previewRef, code } = useCode({
+  const { error, code, status } = useCode({
     files,
     entry: "index",
     scope: {
+      elm: rPreview.current,
       render,
+      num,
     },
     dependencies: {
       react: React,
@@ -18,7 +23,13 @@ export default function UseCodeTest() {
   })
   return (
     <div style={{ padding: 16 }}>
-      <h1>Hello</h1>
+      <h1>Esbuild Psuedo-bundler</h1>
+      {status}
+      <input
+        type="number"
+        value={num}
+        onChange={(e) => setNum(parseInt(e.currentTarget.value))}
+      />
       {Object.keys(files).map((key, i) => (
         <button key={i} onClick={() => setCurrent(key)}>
           {key}
@@ -38,9 +49,14 @@ export default function UseCodeTest() {
           style={{ height: 400, width: 400 }}
         ></textarea>
         <div
-          ref={previewRef}
+          ref={rPreview}
           style={{ height: 400, width: 400, border: "1px solid blue" }}
         ></div>
+      </div>
+      <div style={{ color: "#fff" }}>
+        <pre>
+          <code>{error}</code>
+        </pre>
       </div>
     </div>
   )
@@ -60,4 +76,12 @@ render(<App/>, elm)
   name: `
 export const name = "Steve"
 `,
+}
+
+export default function SafeUseCodeTest() {
+  return (
+    <ErrorBoundary>
+      <UseCodeTest />
+    </ErrorBoundary>
+  )
 }

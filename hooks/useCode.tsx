@@ -1,48 +1,53 @@
-import scopeEval from "scope-eval"
 import * as Comlink from "comlink"
 import * as React from "react"
 
 type Module = { exports: { [key: string]: any } }
-type Folder = { [key: string]: Module | Folder }
+type Folder<T> = { [key: string]: T | Folder<T> }
+type Status = "loading" | "transpiling" | "ready"
 
 import { WorkerApi } from "../workers/transpile.worker"
 
+const defaultDeps = []
+
 export default function useCodePreview<
-  Files extends Record<string, string>,
-  Entry extends keyof Files
+  T = any,
+  Files extends Record<string, string> = { index: string },
+  Entry extends string & keyof Files = "index"
 >({
   files,
   entry,
   scope = {},
   dependencies = {},
-  inline = false,
   onChange,
-  transform,
   onError,
-  deps = [],
+  deps = defaultDeps,
 }: {
   files: Files
-  entry: string
+  entry: Entry
   dependencies?: Record<string, any>
   scope?: Record<string, any>
-  inline?: boolean
-  transform?: (code: string) => string
   onChange?: () => void
-  onError?: (error: string) => void
+  onError?: (error: Error) => void
   deps?: any[]
 }) {
-  const previewRef = React.useRef<HTMLDivElement>()
   const rWorker = React.useRef<Worker>()
   const rWorkerAPI = React.useRef<Comlink.Remote<WorkerApi>>()
+  const rPrevious = React.useRef<Record<string, string> | null>(null)
+  const [result, setResult] = React.useState<T>(null)
+  const rError = React.useRef<string>("")
   const [error, setError] = React.useState<string | null>(null)
+  const [status, setStatus] = React.useState<Status>("loading")
+
   const [code, setCode] = React.useState<string | null>(null)
 
   React.useEffect(() => {
+    setStatus("loading")
+
     rWorker.current = new Worker("../workers/transpile.worker", {
       type: "module",
     })
     rWorkerAPI.current = Comlink.wrap<WorkerApi>(rWorker.current)
-    rWorkerAPI.current?.start()
+    rWorkerAPI.current?.start().then(() => setStatus("transpiling"))
 
     return () => {
       rWorkerAPI.current?.stop()
@@ -51,66 +56,61 @@ export default function useCodePreview<
   }, [])
 
   React.useEffect(() => {
-    setError(null)
-    const elm = previewRef.current
+    if (status === "loading") return
 
+    // Transpile all of the files.
     Promise.all(
-      Object.entries(files).map(async ([name, code]) => {
-        const transformResult = await rWorkerAPI.current?.transpile(code)
-        return [name, transformResult.code] as const
-      }),
+      Object.entries(files).map(
+        async ([name, code]) =>
+          [name, (await rWorkerAPI.current?.transpile(code)).code] as const,
+      ),
     )
-      .then((transformResults) => {
-        const tFiles = Object.fromEntries(transformResults)
-        const evaluated: Folder = {}
+      .then((transformResult) => {
+        // Form the results into an object.
+        const modules = Object.fromEntries(transformResult)
 
-        const require = (path: string) => {
-          if (path.startsWith("./")) {
-            let mod = traverseWithPath(evaluated, path)
+        // Evaluate the modules, starting with the entry file.
+        const result = evalModules(modules, entry, scope, dependencies)
 
-            if (mod === undefined) {
-              const exports = {}
-              const module: Module = { exports }
-              const code = traverseWithPath(tFiles, path)
+        // Update status.
+        if (status === "transpiling") setStatus("ready")
 
-              scopeEval(code, {
-                module,
-                exports,
-                require,
-                elm,
-                ...scope,
-              })
+        // Save transformed modules as a backup.
+        rPrevious.current = modules
 
-              mod = module
-              setWithPath(evaluated, path, mod)
-            }
-
-            return mod.exports
-          } else {
-            console.log(dependencies)
-            return dependencies[path]
-          }
+        // Clear error, if we have one.
+        if (rError.current) {
+          rError.current = null
+          onError && onError(null)
+          setError(null)
         }
 
-        const exports = {}
-        const module = { exports }
-        scopeEval(tFiles[entry], {
-          module,
-          exports,
-          require,
-          elm,
-          ...scope,
-        })
+        // Set the result
+        setResult(result)
 
-        setCode(tFiles[entry])
+        // Set the entry file's code (probably just for dev).
+        setCode(modules[entry])
+
+        onChange && onChange()
       })
       .catch((e) => {
-        setError(e.message)
-        onError && onError(e.message)
-      })
-  }, [files, scope, ...deps])
+        // If we have an (most likely thrown from the evalModules function)
+        // update the error state -- but only if it is a new error.
+        if (e.message !== rError.current) {
+          setError(e.message)
+          rError.current = e.message
 
-  return { previewRef, error, code }
+          onError && onError(e)
+        }
+
+        // If we have modules that worked before, eval them again.
+        if (rPrevious.current) {
+          evalModules(rPrevious.current, entry, scope, dependencies)
+        }
+      })
+  }, [files, entry, status, scope, dependencies, ...deps])
+
+  return { error, code, status, result }
 }
 
 function traverseWithPath(obj: { [key: string]: any }, path: string) {
@@ -133,16 +133,51 @@ function setWithPath(obj: { [key: string]: any }, path: string, value: any) {
   return obj
 }
 
-// console.log(
-//   setWithPath(
-//     {
-//       animals: {
-//         cat: {
-//           cute: true,
-//         },
-//       },
-//     },
-//     "./animals/cat",
-//     false,
-//   ),
-// )
+function evalWithScope(code: string, scope: { [key: string]: any }) {
+  return Function(...Object.keys(scope), code).call(
+    null,
+    ...Object.values(scope),
+  )
+}
+
+function getModule(code: string, scope: { [key: string]: any }) {
+  const exports = {}
+  const module = { exports }
+
+  const result = evalWithScope(code, {
+    module,
+    exports,
+    ...scope,
+  })
+
+  return { result, module }
+}
+
+function evalModules(
+  modules: Record<string, string>,
+  entry: string,
+  scope: Record<string, any> = {},
+  dependencies: Record<string, any> = {},
+) {
+  const evaluated: Folder<Module> = {}
+
+  const require = (path: string) => {
+    if (path.startsWith("./")) {
+      let module = traverseWithPath(evaluated, path)
+
+      if (module === undefined) {
+        const code = traverseWithPath(modules, path)
+        const result = getModule(code, { require, ...scope })
+        module = result.module
+        setWithPath(evaluated, path, module)
+      }
+
+      return module.exports
+    } else {
+      return dependencies[path]
+    }
+  }
+
+  return getModule(traverseWithPath(modules, entry), { require, ...scope })
+    .result
+}
