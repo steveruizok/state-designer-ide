@@ -32,12 +32,11 @@ export default function useCodePreview<
 }) {
   const rWorker = React.useRef<Worker>()
   const rWorkerAPI = React.useRef<Comlink.Remote<WorkerApi>>()
-  const rPrevious = React.useRef<Record<string, string> | null>(null)
-  const [result, setResult] = React.useState<T>(null)
+  const rSafeModules = React.useRef<Record<string, string> | null>(null)
   const rError = React.useRef<string>("")
+  const [result, setResult] = React.useState<T>(null)
   const [error, setError] = React.useState<string | null>(null)
   const [status, setStatus] = React.useState<Status>("loading")
-
   const [code, setCode] = React.useState<string | null>(null)
 
   React.useEffect(() => {
@@ -76,7 +75,7 @@ export default function useCodePreview<
         if (status === "transpiling") setStatus("ready")
 
         // Save transformed modules as a backup.
-        rPrevious.current = modules
+        rSafeModules.current = modules
 
         // Clear error, if we have one.
         if (rError.current) {
@@ -104,8 +103,9 @@ export default function useCodePreview<
         }
 
         // If we have modules that worked before, eval them again.
-        if (rPrevious.current) {
-          evalModules(rPrevious.current, entry, scope, dependencies)
+        const safeModules = rSafeModules.current
+        if (safeModules) {
+          evalModules(safeModules, entry, scope, dependencies)
         }
       })
   }, [files, entry, status, scope, dependencies, ...deps])
