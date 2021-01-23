@@ -1,13 +1,10 @@
 import * as Comlink from "comlink"
 import * as React from "react"
+import { WorkerApi } from "../workers/transpile.worker"
 
 type Module = { exports: { [key: string]: any } }
 type Folder<T> = { [key: string]: T | Folder<T> }
 type Status = "loading" | "transpiling" | "ready"
-
-import { WorkerApi } from "../workers/transpile.worker"
-
-const defaultDeps = []
 
 export default function useCodePreview<
   T = any,
@@ -20,7 +17,7 @@ export default function useCodePreview<
   dependencies = {},
   onChange,
   onError,
-  deps = defaultDeps,
+  deps = [],
 }: {
   files: Files
   entry: Entry

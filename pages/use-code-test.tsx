@@ -5,9 +5,28 @@ import ErrorBoundary from "components/project/error-boundary"
 
 function UseCodeTest() {
   const rPreview = React.useRef<HTMLDivElement>(null)
-  const [current, setCurrent] = React.useState(Object.keys(reactFiles)[0])
-  const [files, setFiles] = React.useState(reactFiles)
   const [num, setNum] = React.useState(1)
+  const [current, setCurrent] = React.useState("index")
+  const [files, setFiles] = React.useState({
+    index: `
+import * as React from "react"
+import { name } from "./name"
+
+function App() {
+  return (
+    <div>
+      <h2>Hello {name}!</h2>
+      <div>The number is {num}!</div>
+    </div>
+  )
+}
+	
+render(<App/>, elm)
+	`,
+    name: `
+export const name = "Miranda"
+	`,
+  })
 
   const { error, code, status } = useCode({
     files,
@@ -24,17 +43,33 @@ function UseCodeTest() {
   return (
     <div style={{ padding: 16 }}>
       <h1>Esbuild Psuedo-bundler</h1>
-      {status}
-      <input
-        type="number"
-        value={num}
-        onChange={(e) => setNum(parseInt(e.currentTarget.value))}
-      />
-      {Object.keys(files).map((key, i) => (
-        <button key={i} onClick={() => setCurrent(key)}>
-          {key}
-        </button>
-      ))}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "auto 200px",
+          width: "fit-content",
+          gap: 8,
+          marginBottom: 8,
+        }}
+      >
+        <div>Status:</div>
+        <div>{status}</div>
+        <div>Number: </div>
+        <input
+          type="number"
+          value={num}
+          onChange={(e) => setNum(parseInt(e.currentTarget.value))}
+        />
+        <div>Files:</div>
+        <div>
+          {Object.keys(files).map((key, i) => (
+            <button key={i} onClick={() => setCurrent(key)}>
+              {key}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div style={{ display: "flex" }}>
         <textarea
           value={files[current]}
@@ -60,22 +95,6 @@ function UseCodeTest() {
       </div>
     </div>
   )
-}
-
-const reactFiles = {
-  index: `
-import * as React from "react"
-import { name } from "./name"
-
-function App() {
-return <div>Hello {name}!</div>
-}
- 
-render(<App/>, elm)
-`,
-  name: `
-export const name = "Steve"
-`,
 }
 
 export default function SafeUseCodeTest() {
