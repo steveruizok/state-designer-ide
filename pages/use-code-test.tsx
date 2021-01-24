@@ -1,4 +1,4 @@
-import useCode from "hooks/useCode"
+import useTranspiledEval from "hooks/useTranspiledEval"
 import * as React from "react"
 import { render } from "react-dom"
 import ErrorBoundary from "components/project/error-boundary"
@@ -28,7 +28,7 @@ export const name = "Miranda"
 	`,
   })
 
-  const { error, code, status } = useCode({
+  const { error, modules, status } = useTranspiledEval({
     files,
     entry: "index",
     scope: {
@@ -79,7 +79,7 @@ export const name = "Miranda"
           style={{ height: 400, width: 400 }}
         ></textarea>
         <textarea
-          value={code[current] as any}
+          value={modules[current] as any}
           disabled
           style={{ height: 400, width: 400 }}
         ></textarea>

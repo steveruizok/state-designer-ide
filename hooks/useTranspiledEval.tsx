@@ -1,12 +1,12 @@
-import * as Comlink from "comlink"
 import * as React from "react"
+import * as Comlink from "comlink"
 import { WorkerApi } from "../workers/transpile.worker"
 
 type Module = { exports: { [key: string]: any } }
 type Folder<T> = { [key: string]: T | Folder<T> }
 type Status = "loading" | "transpiling" | "ready"
 
-export default function useCodePreview<
+export default function useTranspiledEval<
   T = any,
   Files extends Record<string, string> = { index: string },
   Entry extends string & keyof Files = "index"
@@ -23,7 +23,7 @@ export default function useCodePreview<
   entry: Entry
   dependencies?: Record<string, any>
   scope?: Record<string, any>
-  onChange?: () => void
+  onChange?: (result: T) => void
   onError?: (error: Error) => void
   deps?: any[]
 }) {
@@ -34,7 +34,6 @@ export default function useCodePreview<
   const [result, setResult] = React.useState<T>(null)
   const [error, setError] = React.useState<string | null>(null)
   const [status, setStatus] = React.useState<Status>("loading")
-  const [code, setCode] = React.useState<Folder<string>>({})
 
   React.useEffect(() => {
     setStatus("loading")
@@ -84,10 +83,7 @@ export default function useCodePreview<
         // Set the result
         setResult(result)
 
-        // Set the entry file's code (probably just for dev).
-        setCode(modules)
-
-        onChange && onChange()
+        onChange && onChange(result)
       })
       .catch((e) => {
         // If we have an (most likely thrown from the evalModules function)
@@ -95,10 +91,8 @@ export default function useCodePreview<
         if (e.message !== rError.current) {
           setError(e.message)
           rError.current = e.message
-
           onError && onError(e)
         }
-
         // If we have modules that worked before, eval them again.
         const safeModules = rSafeModules.current
         if (safeModules) {
@@ -107,7 +101,7 @@ export default function useCodePreview<
       })
   }, [files, entry, status, scope, dependencies, ...deps])
 
-  return { error, code, status, result }
+  return { error, status, result, modules: rSafeModules.current || {} }
 }
 
 function traverseWithPath(obj: { [key: string]: any }, path: string) {

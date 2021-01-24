@@ -1,40 +1,20 @@
 import * as Comlink from "comlink"
+import { transform } from "sucrase-browser"
 
-import {
-  Service,
-  TransformResult,
-  startService,
-} from "node_modules/esbuild-wasm/esm/browser.js"
+// The start and stop functions are left over API from esbuild,
+// I'm keeping it for now so that I don't have to change the
+// useCode hook.
 
-let service: Service
-
-async function start() {
-  if (service) return
-
-  await startService({
-    wasmURL: "/esbuild.wasm",
-  }).then((s) => (service = s))
-}
+async function start() {}
 
 async function transpile(code: string) {
-  await start()
-
-  let transformed: TransformResult
-
-  transformed = await service
-    .transform(code, {
-      format: "cjs",
-      loader: "jsx",
-      minify: false,
-    })
-    .catch((e) => (transformed = { ...e }))
-
-  return transformed
+  return transform(code, {
+    transforms: ["typescript", "jsx", "imports"],
+    filePath: "code",
+  })
 }
 
-async function stop() {
-  service?.stop()
-}
+async function stop() {}
 
 export interface WorkerApi {
   transpile: typeof transpile
