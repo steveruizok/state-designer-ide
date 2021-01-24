@@ -1,11 +1,6 @@
 import * as Comlink from "comlink"
 import * as React from "react"
 
-import {
-  TransformFailure,
-  TransformResult,
-} from "node_modules/esbuild-wasm/esm/browser.js"
-
 import { WorkerApi } from "../workers/transpile.worker"
 import { render } from "react-dom"
 
@@ -74,13 +69,13 @@ export default function useCodePreview({
 
     rWorkerAPI.current
       ?.transpile(transformed)
-      .then((result: TransformResult | TransformFailure) => {
-        if ((result as TransformResult).code) {
+      .then((result) => {
+        if (result.code) {
           try {
             const args = ["React", "render", "elm", ...Object.keys(scope)]
             const vArgs = [React, render, elm, ...Object.values(scope)]
 
-            const fn = new Function(...args, (result as TransformResult).code)
+            const fn = new Function(...args, result.code)
 
             fn.call(null, ...vArgs)
 
@@ -90,7 +85,7 @@ export default function useCodePreview({
             onError && onError(e.message)
           }
         } else {
-          setError((result as TransformFailure).errors[0].text)
+          setError("Encountered an error")
         }
       })
       .catch((e: Error) => {
