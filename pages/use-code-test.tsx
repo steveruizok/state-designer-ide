@@ -1,4 +1,4 @@
-import useTranspiledEval from "hooks/useTranspiledEval"
+import useTranspiledEval from "hooks/useCompiler"
 import * as React from "react"
 import { render } from "react-dom"
 import ErrorBoundary from "components/project/error-boundary"
@@ -42,7 +42,7 @@ export const name = "Miranda"
   })
   return (
     <div style={{ padding: 16 }}>
-      <h1>Esbuild Psuedo-bundler</h1>
+      <h1>In browser packer with sucrase</h1>
       <div
         style={{
           display: "grid",

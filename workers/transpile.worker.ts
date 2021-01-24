@@ -7,11 +7,8 @@ import { transform } from "sucrase-browser"
 
 async function start() {}
 
-async function transpile(code: string) {
-  return transform(code, {
-    transforms: ["typescript", "jsx", "imports"],
-    filePath: "code",
-  })
+async function transpile(code: string, transforms = []) {
+  return transform(code, { transforms })
 }
 
 async function stop() {}

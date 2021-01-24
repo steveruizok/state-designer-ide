@@ -68,7 +68,7 @@ export default function useCodePreview({
     transformed += `; render(<App/>, elm);`
 
     rWorkerAPI.current
-      ?.transpile(transformed)
+      ?.transpile(transformed, ["jsx"])
       .then((result) => {
         if (result.code) {
           try {
