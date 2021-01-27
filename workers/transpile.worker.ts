@@ -13,6 +13,7 @@ async function start() {
 
   await startService({
     wasmURL: "/esbuild.wasm",
+    worker: typeof Worker !== "undefined",
   }).then((s) => (service = s))
 }
 
@@ -25,7 +26,6 @@ async function transpile(code: string) {
     .transform(code, {
       format: "cjs",
       loader: "jsx",
-      minify: false,
     })
     .catch((e) => (transformed = { ...e }))
 
