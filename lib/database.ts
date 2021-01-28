@@ -169,26 +169,28 @@ export function getNewProject(
 
 export default function App() {
 	const local = useStateDesigner(state);
+
 	return (
 		<View>
 			<Container>
-				{Static.title} is {local.whenIn({ off: 'Off', running: 'On' })}
-				<Flex drag>
-					<IconButton
-						disabled={!local.can('DECREMENTED')}
-						onClick={() => state.send('DECREMENTED')}
-					>
-						<Icons.Minus />
-					</IconButton>
-					{local.data.count}
-					<IconButton
-						disabled={!local.can('INCREMENTED')}
-						onClick={() => state.send('INCREMENTED')}
-					>
-						<Icons.Plus />
-					</IconButton>
+				<Flex>
+					<Heading>{local.data.count}</Heading>
 				</Flex>
-				<Button onClick={() => state.send('TOGGLED')}>Toggle</Button>
+				<IconButton
+					disabled={!local.can('DECREMENTED')}
+					onClick={() => state.send('DECREMENTED')}
+				>
+					<Icons.Minus />
+				</IconButton>
+				<IconButton
+					disabled={!local.can('INCREMENTED')}
+					onClick={() => state.send('INCREMENTED')}
+				>
+					<Icons.Plus />
+				</IconButton>
+				<Button onClick={() => state.send('TOGGLED')}>
+					Turn {local.whenIn({ turnedOff: 'On', turnedOn: 'Off' })}
+				</Button>
 			</Container>
 		</View>
 	);
