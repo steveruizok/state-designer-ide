@@ -17,7 +17,7 @@ const TW_IMAGE = "https://app.state-designer.com/sd-social-og.jpg"
 const URL = "https://app.state-designer.com"
 
 function MyApp({ Component, pageProps }) {
-  const { pathname, events } = useRouter()
+  const { asPath, events } = useRouter()
 
   React.useEffect(() => {
     function handleRouteChange() {
@@ -29,12 +29,15 @@ function MyApp({ Component, pageProps }) {
   }, [])
 
   const isProjectPath =
-    pathname.includes("/p/") &&
+    asPath.includes("/p/") &&
     !(
-      pathname.endsWith("view") ||
-      pathname.endsWith("chart") ||
-      pathname.endsWith("clean")
+      asPath.endsWith("view") ||
+      asPath.endsWith("chart") ||
+      asPath.endsWith("clean") ||
+      asPath.endsWith("screenshot")
     )
+
+  const image = isProjectPath ? `${asPath}/screenshot` : TW_IMAGE
 
   return (
     <>
@@ -42,11 +45,11 @@ function MyApp({ Component, pageProps }) {
         <title>State Designer</title>
         <meta name="og:title" content={TITLE} />
         <meta name="og:description" content={DESCRIPTION} />
-        <meta name="og:image" content={OG_IMAGE} />
+        <meta name="og:image" content={image} />
         <meta name="og:url" content={URL} />
         <meta name="twitter:title" content={TITLE} />
         <meta name="twitter:description" content={DESCRIPTION} />
-        <meta name="twitter:image" content={TW_IMAGE} />
+        <meta name="twitter:image" content={image} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@statedesigner" />
       </Head>
