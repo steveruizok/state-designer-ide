@@ -3,6 +3,5 @@
 	"editor.folding": false,
 	"window.zoomLevel": 0,
 	"editor.fontSize": 13.5,
-	"debug.console.fontSize": 13,
-	"terminal.integrated.fontSize": 13
+	"debug.console.fontSize": 13
 }
