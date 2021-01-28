@@ -37,7 +37,9 @@ function MyApp({ Component, pageProps }) {
       asPath.endsWith("screenshot")
     )
 
-  const image = isProjectPath ? `${asPath}/screenshot` : TW_IMAGE
+  const image = isProjectPath
+    ? `${process.env.NEXT_PUBLIC_BASE_API_URL}/api${asPath}/screenshot`
+    : TW_IMAGE
 
   return (
     <>
