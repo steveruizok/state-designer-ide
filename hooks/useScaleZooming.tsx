@@ -1,5 +1,5 @@
 import { useGesture } from "react-use-gesture"
-import { useMotionValue, MotionValue } from "framer-motion"
+import { MotionValue } from "framer-motion"
 
 export default function useScaleZooming(
   wheel: boolean = true,

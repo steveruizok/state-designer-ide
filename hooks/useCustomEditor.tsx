@@ -43,7 +43,7 @@ export default function useCustomEditor({
       showUnused: false,
       quickSuggestions: false,
       fontFamily: "Fira Code",
-      fontWeight: "500",
+      fontWeight: "$1",
       smoothScrolling: true,
       lineDecorationsWidth: 4,
       fontLigatures: true,

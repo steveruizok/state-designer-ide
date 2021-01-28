@@ -73,14 +73,18 @@ export async function getCurrentUser(
   }
 
   const cookies = parseCookies(context)
-  const cookie = cookies[process.env.NEXT_PUBLIC_COOKIE_NAME]
+  const sessionCookie = cookies[process.env.NEXT_PUBLIC_COOKIE_NAME]
+  const customToken = cookies[process.env.NEXT_PUBLIC_TOKEN_NAME]
 
-  if (!cookie) {
-    result.error = "No cookie."
+  if (!sessionCookie) {
+    result.error = "No session cookie."
     return result
   }
 
-  const [sessionCookie, customToken] = cookie.split("+")
+  if (!customToken) {
+    result.error = "No custom token."
+    return result
+  }
 
   const authentication = await verifyCookie(sessionCookie).catch((e) => {
     // console.log("Could not verify session cookie!")

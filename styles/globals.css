@@ -1,1 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@500&family=Fira+Sans:wght@400;600");
+
+select {
+  -webkit-appearance: none;
+}

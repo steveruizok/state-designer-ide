@@ -49,14 +49,10 @@ export default async function login(req: NextApiRequest, res: NextApiResponse) {
     path: "/",
   }
 
-  res.setHeader(
-    "Set-Cookie",
-    serialize(
-      process.env.NEXT_PUBLIC_COOKIE_NAME,
-      `${cookie}+${customToken}`,
-      options,
-    ),
-  )
+  res.setHeader("Set-Cookie", [
+    serialize(process.env.NEXT_PUBLIC_COOKIE_NAME, cookie, options),
+    serialize(process.env.NEXT_PUBLIC_TOKEN_NAME, customToken, options),
+  ])
 
   res.send({ response: "Refreshed token.", customToken })
 }

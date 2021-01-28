@@ -1,14 +1,6 @@
 import * as React from "react"
 
-import {
-  AlertCircle,
-  Check,
-  Minus,
-  Plus,
-  RefreshCcw,
-  Save,
-  Settings,
-} from "react-feather"
+import { AlertCircle, RefreshCcw, Save } from "react-feather"
 import { IconButton, TabButton, styled } from "components/theme"
 import { motionValues, ui } from "lib/local-data"
 import {
@@ -21,13 +13,6 @@ import { DragHandleHorizontal } from "./drag-handles"
 import codePanelState from "states/code-panel"
 import useCustomEditor from "hooks/useCustomEditor"
 import { useStateDesigner } from "@state-designer/react"
-import IconDropdown, {
-  DropdownCheckboxItem,
-  DropdownItem,
-  DropdownLabel,
-  DropdownSeparator,
-  DropdownItemIndicator,
-} from "components/icon-dropdown"
 
 interface CodePanelProps {
   uid?: string
@@ -156,58 +141,6 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
         >
           Static
         </TabButton>
-        <IconDropdown icon={<Settings opacity={0.5} />}>
-          <DropdownLabel>Editor Style</DropdownLabel>
-          <DropdownCheckboxItem
-            checked={minimap}
-            onSelect={(e) => {
-              e.preventDefault()
-              codePanelState.send("TOGGLED_MINIMAP")
-            }}
-          >
-            Show Minimap
-            <DropdownItemIndicator>
-              <Check size={12} strokeWidth={4} />
-            </DropdownItemIndicator>
-          </DropdownCheckboxItem>
-          <DropdownCheckboxItem
-            checked={wordWrap}
-            onSelect={(e) => {
-              e.preventDefault()
-              codePanelState.send("TOGGLED_WORD_WRAP")
-            }}
-          >
-            Wrap code
-            <DropdownItemIndicator>
-              <Check size={12} strokeWidth={4} />
-            </DropdownItemIndicator>
-          </DropdownCheckboxItem>
-          <DropdownItem
-            onSelect={(e) => {
-              e.preventDefault()
-              codePanelState.send("DECREASED_FONT_SIZE")
-            }}
-          >
-            Font Size <Minus size={10} strokeWidth={4} />
-          </DropdownItem>
-          <DropdownItem
-            onSelect={(e) => {
-              e.preventDefault()
-              codePanelState.send("INCREASED_FONT_SIZE")
-            }}
-          >
-            Font Size <Plus size={10} strokeWidth={4} />
-          </DropdownItem>
-          <DropdownItem
-            disabled={fontSize === 13}
-            onSelect={(e) => {
-              e.preventDefault()
-              codePanelState.send("RESET_FONT_SIZE")
-            }}
-          >
-            Reset Font Size
-          </DropdownItem>
-        </IconDropdown>
       </Tabs>
       <EditorContainer
         ref={containerRef}

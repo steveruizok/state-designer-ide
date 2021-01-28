@@ -6,7 +6,7 @@ export default async function logout(
   res: NextApiResponse,
 ) {
   if (req.method === "POST") {
-    const [cookie] = req.cookies[process.env.NEXT_PUBLIC_COOKIE_NAME].split("+")
+    const cookie = req.cookies[process.env.NEXT_PUBLIC_COOKIE_NAME]
     const decodedClaims = await admin.auth().verifySessionCookie(cookie)
     await admin.auth().revokeRefreshTokens(decodedClaims.sub)
     res.status(200)

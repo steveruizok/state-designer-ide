@@ -16,7 +16,6 @@
     "atob": "^2.1.2",
     "comlink": "^4.3.0",
     "cookie": "^0.4.1",
-    "esbuild-wasm": "^0.8.33",
     "firebase": "^8.2.1",
     "firebase-admin": "^9.4.2",
     "framer-motion": "^3.1.1",
@@ -33,6 +32,7 @@
     "react-merge-refs": "^1.1.0",
     "react-use-gesture": "^9.0.0-beta.11",
     "scope-eval": "^1.0.0",
+    "sucrase-browser": "^3.16.0",
     "use-monaco": "^0.0.40",
     "use-motion-resize-observer": "^2.0.0",
     "worker-plugin": "^5.0.0"
