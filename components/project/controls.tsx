@@ -20,10 +20,13 @@ import IconDropdown, {
 
 import codePanelState from "states/code-panel"
 import dialogState from "states/dialog"
+import { ui, resetOffsets } from "lib/local-data"
 import { getCodeSandboxUrl } from "lib/database"
 import toastState from "states/toast"
 import useProject from "hooks/useProject"
 import useTheme from "hooks/useTheme"
+import projectState from "states/project"
+import uiState from "states/ui"
 
 interface ControlsProps {
   oid: string
@@ -63,41 +66,9 @@ export default function Controls({ oid, pid, uid }: ControlsProps) {
 
   return (
     <ControlsContainer>
-      <IconDropdown icon={<ShareIcon size={16} />}>
-        <DropdownLabel>Export and Share</DropdownLabel>
-        <DropdownItem
-          title="Export to CodeSandbox"
-          onSelect={(e) => {
-            e.preventDefault()
-            openCodeSandbox()
-          }}
-        >
-          Export to Code Sandbox
-        </DropdownItem>
-        <DropdownItem
-          title="Export to CodeSandbox"
-          onSelect={(e) => {
-            e.preventDefault()
-            dialogState.send("OPENED_PROJECT_DUPLICATE_DIALOG", {
-              project,
-            })
-          }}
-        >
-          Duplicate Project
-        </DropdownItem>
-        <DropdownItem
-          title="Copy View Link"
-          onSelect={(e) => {
-            e.preventDefault()
-            copyShareLink("view")
-          }}
-        >
-          Copy Share Link
-        </DropdownItem>
-      </IconDropdown>
       {!(oid === uid) && (
         <IconButton
-          title="Duplicate Project"
+          title="Copy Project"
           onClick={() =>
             dialogState.send("OPENED_PROJECT_DUPLICATE_DIALOG", {
               project,
@@ -108,6 +79,38 @@ export default function Controls({ oid, pid, uid }: ControlsProps) {
           <Copy />
         </IconButton>
       )}
+      <IconDropdown icon={<ShareIcon size={16} />}>
+        <DropdownLabel>Export and Share</DropdownLabel>
+        <DropdownItem
+          title="Copy CodeSandbox Link"
+          onSelect={(e) => {
+            e.preventDefault()
+            openCodeSandbox()
+          }}
+        >
+          Copy CodeSandbox Link
+        </DropdownItem>
+        <DropdownItem
+          title="Copy Share Link"
+          onSelect={(e) => {
+            e.preventDefault()
+            copyShareLink("view")
+          }}
+        >
+          Copy Share Link
+        </DropdownItem>
+        <DropdownItem
+          title="Duplicate Project"
+          onSelect={(e) => {
+            e.preventDefault()
+            dialogState.send("OPENED_PROJECT_DUPLICATE_DIALOG", {
+              project,
+            })
+          }}
+        >
+          Duplicate Project
+        </DropdownItem>
+      </IconDropdown>
       <Settings />
     </ControlsContainer>
   )
@@ -124,6 +127,13 @@ function Settings() {
   const {
     data: { minimap, fontSize, wordWrap },
   } = useStateDesigner(codePanelState)
+
+  const {
+    data: {
+      content: { visible },
+    },
+  } = useStateDesigner(uiState)
+
   const { toggle, theme } = useTheme()
 
   return (
@@ -141,6 +151,26 @@ function Settings() {
           <Check size={12} strokeWidth={4} />
         </DropdownItemIndicator>
       </DropdownCheckboxItem>
+      <DropdownCheckboxItem
+        checked={visible}
+        onSelect={(e) => {
+          e.preventDefault()
+          uiState.send("TOGGLED_CONTENT_PANEL")
+        }}
+      >
+        Content Panel
+        <DropdownItemIndicator>
+          <Check size={12} strokeWidth={4} />
+        </DropdownItemIndicator>
+      </DropdownCheckboxItem>
+      <DropdownItem
+        onSelect={(e) => {
+          e.preventDefault()
+          resetOffsets()
+        }}
+      >
+        Reset Panels
+      </DropdownItem>
       <DropdownSeparator />
       <DropdownLabel>Code Editor</DropdownLabel>
       <DropdownCheckboxItem

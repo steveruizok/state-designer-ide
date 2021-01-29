@@ -21,6 +21,7 @@ const DragHandle = styled(motion.div, {
   position: "absolute",
   zIndex: 999,
   bg: "transparent",
+  // bg: "red",
   variants: {
     direction: {
       horizontal: {

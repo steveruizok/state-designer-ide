@@ -71,25 +71,29 @@ function ProjectView({ oid, pid, uid, user, token }: ProjectViewProps) {
 
   return (
     <Layout>
-      <Menu user={user} />
-      <Title pid={pid} oid={oid} readOnly={oid !== uid} />
-      <Controls oid={oid} pid={pid} uid={uid} />
-      <ContentPanel />
-      <MainContainer>
-        <ChartView />
-        <MainDragArea ref={rMainContainer} />
-        <LiveViewContainer>
-          <LiveView />
-          <Console />
-        </LiveViewContainer>
-        <DetailsPanel />
-        <DragHandleHorizontalRelative
-          motionValue={motionValues.main}
-          containerRef={rMainContainer}
-          offset="main"
-        />
-      </MainContainer>
-      <CodePanel oid={oid} pid={pid} uid={uid} />
+      <TitleRow>
+        <Menu user={user} />
+        <Title pid={pid} oid={oid} readOnly={oid !== uid} />
+        <Controls oid={oid} pid={pid} uid={uid} />
+      </TitleRow>
+      <BodyRow>
+        <ContentPanel />
+        <MainContainer>
+          <ChartView />
+          <MainDragArea ref={rMainContainer} />
+          <LiveViewContainer>
+            <LiveView />
+            <Console />
+          </LiveViewContainer>
+          <DetailsPanel />
+          <DragHandleHorizontalRelative
+            motionValue={motionValues.main}
+            containerRef={rMainContainer}
+            offset="main"
+          />
+        </MainContainer>
+        <CodePanel oid={oid} pid={pid} uid={uid} />
+      </BodyRow>
     </Layout>
   )
 }
@@ -107,11 +111,19 @@ const Layout = styled.div({
   maxHeight: "100%",
   minHeight: "auto",
   overflow: "hidden",
-  gridTemplateColumns: `calc(${CONTENT_COL_WIDTH}px + var(--content-offset)) minmax(10%, 1fr) calc(${CODE_COL_WIDTH}px - var(--code-offset))`,
   gridTemplateRows: "40px minmax(0, 1fr)",
-  gridTemplateAreas: `
-	"menu    title controls"
-	"content main  code"`,
+})
+
+const TitleRow = styled.div({
+  display: "grid",
+  gridTemplateAreas: '"menu title controls"',
+  alignItems: "center",
+})
+
+const BodyRow = styled.div({
+  display: "grid",
+  gridTemplateAreas: `"content main  code"`,
+  gridTemplateColumns: `auto minmax(10%, 1fr) calc(${CODE_COL_WIDTH}px - var(--code-offset))`,
 })
 
 const MainContainer = styled.div({

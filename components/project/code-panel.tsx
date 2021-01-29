@@ -191,6 +191,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
 }
 
 const EditorContainer = styled.div({
+  userSelect: "none",
   bg: "$codeBg",
   borderBottom: "2px solid $border",
   overflow: "hidden",
@@ -207,6 +208,9 @@ const EditorContainer = styled.div({
         opacity: 1,
       },
     },
+  },
+  "& > div": {
+    userSelect: "all",
   },
   ".inlineCodeHighlight": {
     "&::after": {
@@ -234,6 +238,7 @@ const EditorContainer = styled.div({
 })
 
 const CodeContainer = styled.div({
+  userSelect: "none",
   position: "relative",
   gridArea: "code",
   display: "grid",

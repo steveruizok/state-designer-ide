@@ -107,7 +107,7 @@ export default function Console({}: ConsoleProps) {
             variant="details"
             title="Console"
             activeState={
-              activeTab === "error" ? "active" : error ? "warn" : "inactive"
+              error ? "warn" : activeTab === "error" ? "active" : "inactive"
             }
             onClick={() => handleTabChange("error")}
           >

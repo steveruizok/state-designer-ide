@@ -186,6 +186,7 @@ const ContentTitle = styled.div({
   height: 40,
   color: "$text",
   borderBottom: "1px solid $shadow",
+  whiteSpace: "nowrap",
   "& p": {
     flexGrow: 1,
   },

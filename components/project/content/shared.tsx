@@ -68,15 +68,6 @@ export const Spacer = styled.div({
   flexGrow: 2,
 })
 
-export const ContentContainer = styled.div({
-  gridArea: "content",
-  position: "relative",
-  display: "grid",
-  gridTemplateRows: "auto auto auto 1fr auto",
-  borderRight: "2px solid $border",
-  borderTop: "2px solid $border",
-})
-
 export const ContentTitle = styled.div({
   display: "flex",
   fontSize: "$1",
@@ -86,6 +77,7 @@ export const ContentTitle = styled.div({
   height: 40,
   color: "$text",
   borderBottom: "1px solid $shadow",
+  whiteSpace: "nowrap",
 })
 
 export const ContentSection = styled.ul({
@@ -93,4 +85,5 @@ export const ContentSection = styled.ul({
   pl: 0,
   overflowY: "scroll",
   borderBottom: "2px solid $border",
+  whiteSpace: "nowrap",
 })

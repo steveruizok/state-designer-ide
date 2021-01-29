@@ -12,7 +12,9 @@ export const ui = {
     activeTab: "console",
     wrap: false,
   },
-  content: {},
+  content: {
+    visible: true,
+  },
   code: {
     fontSize: 13,
     minimap: true,
@@ -212,6 +214,11 @@ export function setTheme(theme: "dark" | "light") {
 export function toggleTheme() {
   const next = ui.theme === "light" ? "dark" : "light"
   return setTheme(next)
+}
+
+export function togglePanel() {
+  ui.content.visible = !ui.content.visible
+  saveUI()
 }
 
 // Setup
