@@ -122,6 +122,9 @@ const TitleRow = styled.div({
 
 const BodyRow = styled.div({
   display: "grid",
+  maxHeight: "100%",
+  minHeight: "auto",
+  overflow: "hidden",
   gridTemplateAreas: `"content main  code"`,
   gridTemplateColumns: `auto minmax(10%, 1fr) calc(${CODE_COL_WIDTH}px - var(--code-offset))`,
 })

@@ -86,4 +86,5 @@ export const ContentSection = styled.ul({
   overflowY: "scroll",
   borderBottom: "2px solid $border",
   whiteSpace: "nowrap",
+  "&::-webkit-overflow-scrolling": "auto",
 })

@@ -3,3 +3,21 @@
 select {
   -webkit-appearance: none;
 }
+
+* {
+  box-sizing: border-box;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  visibility: hidden;
+}
+
+body {
+  position: fixed;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: none;
+  margin: 0;
+  padding: 0;
+}

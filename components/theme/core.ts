@@ -184,24 +184,14 @@ export const darkTheme = css.theme({
   },
 })
 
+// See styles.css for other globals not supported by Stitches
+
 css.global({
-  "*": {
-    boxSizing: "border-box",
-    "&::-webkit-scrollbar": {
-      width: "0",
-    },
-    p: 0,
-    m: 0,
-  },
-  html: {
-    overscrollBehavior: "none",
-  },
   body: {
     fontFamily: "$body",
     fontWeight: "$2",
     color: "$text",
     bg: "$background",
-    overscrollBehavior: "none",
   },
   a: { color: "$text" },
   "h1,h2,h3,h4,h5,h6": { color: "$text", m: 0, p: 0 },
