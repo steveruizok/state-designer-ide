@@ -4,7 +4,7 @@ import highlightsState from "states/highlights"
 import projectState from "states/project"
 import { getFlatStates } from "utils"
 
-import { ContentSection, ContentTitle } from "./shared"
+import { ContentWrapper, ContentSection, ContentTitle } from "./shared"
 import StateItem from "./state-item"
 
 interface StatesSectionProps {}
@@ -17,7 +17,7 @@ export default function StatesSection({}: StatesSectionProps) {
   const [zap, setZap] = React.useState(false)
 
   return (
-    <>
+    <ContentWrapper>
       <ContentTitle>States</ContentTitle>
       <ContentSection
         onMouseLeave={(e) => {
@@ -28,6 +28,6 @@ export default function StatesSection({}: StatesSectionProps) {
           <StateItem key={i} node={node} zap={zap} />
         ))}
       </ContentSection>
-    </>
+    </ContentWrapper>
   )
 }

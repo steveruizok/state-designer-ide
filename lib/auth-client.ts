@@ -1,5 +1,3 @@
-// /lib/auth-client.ts
-
 import router from "next/router"
 
 import { addUser } from "./database"

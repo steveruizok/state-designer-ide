@@ -45,7 +45,7 @@ export const ContentContainer = styled.div({
   gridArea: "content",
   position: "relative",
   display: "grid",
-  gridTemplateRows: "auto fit-content fit-content 1fr auto",
+  gridTemplateRows: "minmax(auto, 1fr) 1fr auto",
   borderRight: "2px solid $border",
   borderTop: "2px solid $border",
   overflow: "hidden",

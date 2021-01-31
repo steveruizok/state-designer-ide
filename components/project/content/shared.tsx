@@ -84,7 +84,14 @@ export const ContentSection = styled.ul({
   m: 0,
   pl: 0,
   overflowY: "scroll",
-  borderBottom: "2px solid $border",
+  height: "100%",
   whiteSpace: "nowrap",
   "&::-webkit-overflow-scrolling": "auto",
+})
+
+export const ContentWrapper = styled.div({
+  overflow: "hidden",
+  display: "flex",
+  flexDirection: "column",
+  borderBottom: "2px solid $border",
 })

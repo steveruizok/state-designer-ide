@@ -1,6 +1,6 @@
-import "firebase/firestore"
-
 import firebase from "firebase/app"
+import "firebase/firestore"
+import "firebase/auth"
 
 const config = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_PUBLIC_API_KEY,
@@ -12,7 +12,6 @@ const config = {
 
 if (!firebase.apps.length) {
   firebase.initializeApp(config)
-  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE)
 }
 
 export default firebase

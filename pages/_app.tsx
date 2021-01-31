@@ -5,7 +5,7 @@ import MonacoProvider from "components/monaco-provider"
 import Head from "next/head"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/router"
-import codePanelState from "states/code-panel"
+// import codePanelState from "states/code-panel"
 
 const Dialog = dynamic(() => import("components/dialog"))
 const Toast = dynamic(() => import("components/toast"))
@@ -19,14 +19,14 @@ const URL = "https://app.state-designer.com"
 function MyApp({ Component, pageProps }) {
   const { asPath, events } = useRouter()
 
-  React.useEffect(() => {
-    function handleRouteChange() {
-      codePanelState.send("UNLOADED")
-    }
+  // React.useEffect(() => {
+  //   function handleRouteChange() {
+  //     codePanelState.send("UNLOADED")
+  //   }
 
-    events.on("routeChangeStart", handleRouteChange)
-    return () => events.off("routeChangeStart", handleRouteChange)
-  }, [])
+  //   events.on("routeChangeStart", handleRouteChange)
+  //   return () => events.off("routeChangeStart", handleRouteChange)
+  // }, [])
 
   const isProjectPath =
     asPath.includes("/p/") &&
