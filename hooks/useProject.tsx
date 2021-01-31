@@ -1,19 +1,38 @@
 import * as React from "react"
 import * as Types from "types"
-
-import { subscribeToProject } from "lib/database"
+import db from "utils/firestore"
 
 export default function useProject(pid: string, oid: string) {
+  const [status, setStatus] = React.useState<"loading" | "error" | "ready">(
+    null,
+  )
   const [project, setProject] = React.useState<Types.ProjectData>(null)
 
   React.useEffect(() => {
-    let unsub: any
-    subscribeToProject(pid, oid, (project) =>
-      setProject(project as Types.ProjectData),
-    ).then((cb) => (unsub = cb))
+    let unsub: () => void
 
-    return () => unsub && unsub()
+    const docRef = db
+      .collection("users")
+      .doc(oid)
+      .collection("projects")
+      .doc(pid)
+
+    docRef.get().then((doc) => {
+      if (!doc.exists) {
+        setStatus("error")
+      }
+      setStatus("ready")
+      setProject({ id: doc.id, ...doc.data() } as Types.ProjectData)
+
+      unsub = docRef.onSnapshot((doc) =>
+        setProject({ id: doc.id, ...doc.data() } as Types.ProjectData),
+      )
+    })
+
+    return () => {
+      unsub?.()
+    }
   }, [pid, oid])
 
-  return project
+  return { status, project }
 }

@@ -1,9 +1,11 @@
 import { withAuthUser, AuthAction } from "next-firebase-auth"
 import FirebaseAuth from "components/firebase-auth"
 import { styled } from "components/theme"
-import * as Types from "types"
+import useAuthUser from "hooks/useAuthUser"
 
-function Auth({ error }: Types.AuthState) {
+function Auth() {
+  useAuthUser()
+
   return (
     <Container>
       <FirebaseAuth />

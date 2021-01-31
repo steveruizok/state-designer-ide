@@ -1,12 +1,7 @@
 import * as React from "react"
 import * as Types from "types"
 import db from "utils/firestore"
-import {
-  AuthAction,
-  withAuthUser,
-  withAuthUserSSR,
-  useAuthUser,
-} from "next-firebase-auth"
+import { AuthAction, withAuthUser, withAuthUserSSR } from "next-firebase-auth"
 
 import {
   Button,
@@ -24,9 +19,10 @@ import IconDropdown, {
 import Head from "next/head"
 import Link from "next/link"
 import dialogState from "states/dialog"
-import { single } from "utils"
 import useTheme from "hooks/useTheme"
 import Loading from "components/loading"
+import useAuthUser from "hooks/useAuthUser"
+import useUserProjects from "hooks/useUserProjects"
 
 let INITIAL_SORT = "Date"
 let INITIAL_SORT_DIRECTION = "Descending"
@@ -36,7 +32,7 @@ type UserPageProps = {}
 function UserPage({}: UserPageProps) {
   const user = useAuthUser()
   const { toggle } = useTheme()
-  const { status, projects } = useSubscribeToProjects(user.id)
+  const { status, projects } = useUserProjects(user.id)
 
   const [sortBy, setSortBy] = React.useState(INITIAL_SORT)
   const [sortDirection, setSortDirection] = React.useState(
@@ -85,7 +81,7 @@ function UserPage({}: UserPageProps) {
         <title>{user.name} - State Designer</title>
       </Head>
       <MenuContainer>
-        <Link href={user ? `/u/${user.uid}` : "/"}>
+        <Link href={user ? `/u/${user.id}` : "/"}>
           <IconButton>
             <Home />
           </IconButton>
@@ -141,7 +137,7 @@ function UserPage({}: UserPageProps) {
             sortedProjects.map(({ id, name, dateCreated, lastModified }, i) => (
               <li key={id}>
                 <ProjectLink>
-                  <Link href={`/u/${user.uid}/p/${id}`}>
+                  <Link href={`/u/${user.id}/p/${id}`}>
                     <a>
                       <h4>{name}</h4>
                       <Text variant="ui">
@@ -214,7 +210,8 @@ const Layout = styled.div({
 		"menu title controls"
 		"main main main"
 	`,
-  minHeight: "100vh",
+  height: "100vh",
+  maxHeight: "100vh",
 })
 
 const MenuContainer = styled.div({
@@ -254,6 +251,7 @@ const MainContainer = styled.div({
       borderBottom: "1px solid $shadowLight",
     },
   },
+  overflow: "scroll",
 })
 
 const ListControls = styled.div({
@@ -332,33 +330,3 @@ const ProjectLink = styled.div({
     opacity: 1,
   },
 })
-
-function useSubscribeToProjects(id: string) {
-  const [status, setStatus] = React.useState<"error" | "loading" | "ready">(
-    "loading",
-  )
-
-  const [projects, setProjects] = React.useState([])
-
-  React.useEffect(() => {
-    try {
-      const ref = db.collection("users").doc(id).collection("projects")
-
-      return ref.onSnapshot((snapshot) => {
-        const projects = snapshot.docs.map(
-          (doc) => ({ id: doc.id, ...doc.data() } as Types.ProjectData),
-        )
-
-        if (status === "loading") {
-          setStatus("ready")
-        }
-
-        setProjects(projects)
-      })
-    } catch (e) {
-      setStatus("error")
-    }
-  }, [id])
-
-  return { status, projects }
-}

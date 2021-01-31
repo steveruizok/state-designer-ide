@@ -12,7 +12,7 @@ import { Sun } from "react-feather"
 import { getProjectData } from "lib/database"
 import projectState from "states/project"
 import { single } from "utils"
-import { subscribeToProject } from "lib/database"
+import useProject from "hooks/useProject"
 import { updatePanelOffsets } from "lib/local-data"
 import useTheme from "hooks/useTheme"
 
@@ -32,35 +32,7 @@ type PageProps = ViewPageProps | ProjectNotFoundPageProps
 
 export default function ProjectPage(props: PageProps) {
   if (!props.isProject) return null
-
   const { oid, pid, name, showConsole } = props
-
-  const rUnsub = React.useRef<any>()
-
-  React.useEffect(() => {
-    function handleRouteChange() {
-      projectState.send("UNLOADED")
-      rUnsub.current?.()
-    }
-
-    subscribeToProject(pid, oid, (source) => {
-      projectState.send("SOURCE_UPDATED", {
-        source,
-        oid,
-        pid,
-      })
-    }).then((unsub) => (rUnsub.current = unsub))
-
-    updatePanelOffsets()
-
-    Router.events.on("routeChangeStart", handleRouteChange)
-
-    return () => {
-      Router.events.off("routeChangeStart", handleRouteChange)
-      handleRouteChange()
-    }
-  }, [oid, pid])
-
   const { toggle } = useTheme()
 
   return (

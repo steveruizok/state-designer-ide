@@ -10,7 +10,7 @@ import { getProjectData } from "lib/database"
 import projectState from "states/project"
 import { single } from "utils"
 import { styled } from "components/theme"
-import { subscribeToProject } from "lib/database"
+import useProject from "hooks/useProject"
 
 interface ChartPageProps {
   oid: string
@@ -27,34 +27,7 @@ type PageProps = ChartPageProps | ProjectNotFoundPageProps
 
 export default function ChartPage(props: PageProps) {
   if (!props.isProject) return null
-  const { oid, pid, name } = props
-
-  const rUnsub = React.useRef<any>()
-
-  React.useEffect(() => {
-    function handleRouteChange() {
-      projectState.send("UNLOADED")
-      rUnsub.current?.()
-    }
-
-    // Subscribe to the firebase document on mount.
-    subscribeToProject(pid, oid, (source) => {
-      projectState.send("SOURCE_UPDATED", {
-        source,
-        oid,
-        pid,
-      })
-    }).then((unsub) => (rUnsub.current = unsub))
-
-    // Cleanup the project when when we leave this route, even if we
-    // change to a different project.
-    Router.events.on("routeChangeStart", handleRouteChange)
-
-    return () => {
-      Router.events.off("routeChangeStart", handleRouteChange)
-      handleRouteChange()
-    }
-  }, [oid, pid])
+  const { name } = props
 
   return (
     <Layout>

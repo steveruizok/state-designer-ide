@@ -4,7 +4,7 @@ import * as React from "react"
 import CreateProjectDialog from "components/dialogs/create-project"
 import DeleteProjectDialog from "components/dialogs/delete-project"
 import DuplicateProjectDialog from "components/dialogs/duplicate-project"
-import LoadingDialog from "components/dialogs/rename-project"
+import LoadingDialog from "components/dialogs/loading"
 import RenameProjectDialog from "components/dialogs/rename-project"
 import dialogState from "states/dialog"
 import { styled } from "components/theme"
@@ -29,6 +29,7 @@ export default function DialogManager({}: DialogProps) {
         duplicatingProject: <DuplicateProjectDialog />,
         creatingProject: <CreateProjectDialog />,
         loadingProject: <LoadingDialog />,
+        loading: <LoadingDialog />,
       })}
     </Dialog.Root>
   )

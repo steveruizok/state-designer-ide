@@ -1,12 +1,11 @@
 import * as React from "react"
-import * as Types from "types"
-import { useAuthUser } from "next-firebase-auth"
+import useUser from "hooks/useUser"
 
 import ProjectMeta from "components/project-meta"
 import ContentPanel from "./content-panel"
 import DetailsPanel, { DETAILS_ROW_HEIGHT } from "./details-panel"
-import { checkAuth, subscribeToProject } from "lib/database"
-import { motionValues, loadPanelOffsets } from "lib/local-data"
+import useProject from "hooks/useProject"
+import { motionValues } from "lib/local-data"
 
 import ChartView from "./chart-view"
 import CodePanel from "./code-panel"
@@ -15,11 +14,10 @@ import Controls from "./controls"
 import { DragHandleHorizontalRelative } from "./drag-handles"
 import LiveView from "./live-view"
 import Menu from "./menu"
-import Router from "next/router"
 import Title from "./title"
-import codePanelState from "states/code-panel"
 import projectState from "states/project"
 import { styled } from "components/theme"
+import MonacoProvider from "components/monaco-provider"
 
 export const CODE_COL_WIDTH = 320
 
@@ -30,65 +28,47 @@ interface ProjectViewProps {
 
 function ProjectView({ oid, pid }: ProjectViewProps) {
   const rMainContainer = React.useRef<HTMLDivElement>(null)
-  const rUnsub = React.useRef<any>()
-  const user = useAuthUser()
+  const user = useUser()
+
+  const { project } = useProject(pid, oid)
 
   React.useEffect(() => {
-    function handleRouteChange() {
-      projectState.send("UNLOADED")
-      codePanelState.send("UNLOADED")
-      rUnsub.current?.()
-    }
-
-    // Subscribe to the firebase document on mount.
-    subscribeToProject(pid, oid, (source) => {
-      projectState.send("SOURCE_UPDATED", {
-        source,
-        oid,
-        pid,
-      })
-    }).then((unsub) => (rUnsub.current = unsub))
-
-    // Let's make sure that the panels are set up right, too.
-    loadPanelOffsets()
-
-    // Cleanup the project when when we leave this route, even if we
-    // change to a different project.
-    Router.events.on("routeChangeStart", handleRouteChange)
-
-    return () => {
-      Router.events.off("routeChangeStart", handleRouteChange)
-      handleRouteChange()
-    }
-  }, [oid, pid])
+    projectState.send("SOURCE_UPDATED", {
+      source: project,
+      oid,
+      pid,
+    })
+  }, [project])
 
   return (
-    <Layout>
-      <ProjectMeta oid={oid} pid={pid} />
-      <TitleRow>
-        <Menu />
-        <Title pid={pid} oid={oid} readOnly={oid !== user.id} />
-        <Controls oid={oid} pid={pid} uid={user.id} />
-      </TitleRow>
-      <BodyRow>
-        <ContentPanel />
-        <MainContainer>
-          <ChartView />
-          <MainDragArea ref={rMainContainer} />
-          <LiveViewContainer>
-            <LiveView />
-            <Console />
-          </LiveViewContainer>
-          <DetailsPanel />
-          <DragHandleHorizontalRelative
-            motionValue={motionValues.main}
-            containerRef={rMainContainer}
-            offset="main"
-          />
-        </MainContainer>
-        <CodePanel oid={oid} pid={pid} uid={user.id} />
-      </BodyRow>
-    </Layout>
+    <MonacoProvider>
+      <Layout>
+        <ProjectMeta oid={oid} pid={pid} />
+        <TitleRow>
+          <Menu />
+          <Title pid={pid} oid={oid} readOnly={oid !== user.id} />
+          <Controls oid={oid} pid={pid} uid={user.id} />
+        </TitleRow>
+        <BodyRow>
+          <ContentPanel />
+          <MainContainer>
+            <ChartView />
+            <MainDragArea ref={rMainContainer} />
+            <LiveViewContainer>
+              <LiveView />
+              <Console />
+            </LiveViewContainer>
+            <DetailsPanel />
+            <DragHandleHorizontalRelative
+              motionValue={motionValues.main}
+              containerRef={rMainContainer}
+              offset="main"
+            />
+          </MainContainer>
+          <CodePanel oid={oid} pid={pid} uid={user.id} />
+        </BodyRow>
+      </Layout>
+    </MonacoProvider>
   )
 }
 

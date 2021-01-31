@@ -3,7 +3,6 @@ import Head from "next/head"
 import projectState from "states/project"
 
 interface Props {
-  name: string
   oid: string
   pid: string
 }

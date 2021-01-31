@@ -1,5 +1,5 @@
 import type * as monacoApi from "monaco-editor"
-
+import db from "utils/firestore"
 import { codeFormatValidators, codeValidators } from "lib/eval"
 import {
   decreaseFontSize,
@@ -14,7 +14,6 @@ import { CodeEditorTab } from "types"
 import { createState } from "@state-designer/react"
 import liveViewState from "./live-view"
 import projectState from "./project"
-import { saveProjectCode } from "lib/database"
 
 type Monaco = typeof monacoApi
 
@@ -37,6 +36,23 @@ if (typeof window !== "undefined") {
 
 const codePanelState = createState({
   data: {
+    code: {
+      state: {
+        dirty: "",
+        clean: "",
+        error: "",
+      },
+      view: {
+        dirty: "",
+        clean: "",
+        error: "",
+      },
+      static: {
+        dirty: "",
+        clean: "",
+        error: "",
+      },
+    },
     prevDecorations: [] as any[],
     wordWrap: INITIAL.wordWrap,
     minimap: INITIAL.minimap,
@@ -63,28 +79,11 @@ const codePanelState = createState({
         dirty: null as any,
       },
     },
-    code: {
-      state: {
-        dirty: "",
-        clean: "",
-        error: "",
-      },
-      view: {
-        dirty: "",
-        clean: "",
-        error: "",
-      },
-      static: {
-        dirty: "",
-        clean: "",
-        error: "",
-      },
-    },
   },
   on: {
     UNLOADED: { do: "cleanup", to: "loading" },
     SOURCE_UPDATED: ["updateFromDatabase", "notifyLiveViewClean"],
-    CHANGED_CODE: ["updateDirtyCode", "highlightBlockTitles"],
+    CHANGED_CODE: ["updateDirtyCode", "highlightBlockTitles", "clearViewError"],
     RESET_CODE: [
       "resetCode",
       "restoreActiveTabCleanViewState",
@@ -97,6 +96,7 @@ const codePanelState = createState({
     CLEARED_HIGHLIGHTS: "clearHighlights",
     TOGGLED_WORD_WRAP: "toggleWordWrap",
     TOGGLED_MINIMAP: "toggleMinimap",
+    FOUND_VIEW_ERROR: "setViewError",
   },
   states: {
     editor: {
@@ -138,20 +138,20 @@ const codePanelState = createState({
         loading: {
           on: {
             LOADED: "loadData",
-            SOURCE_LOADED: "initialLoadFromDatabase",
+            SOURCE_UPDATED: "initialLoadFromDatabase",
           },
           initial: "stageA",
           states: {
             stageA: {
               on: {
                 LOADED: { to: "stageB" },
-                SOURCE_LOADED: { to: "stageB" },
+                SOURCE_UPDATED: { to: "stageB" },
               },
             },
             stageB: {
               on: {
                 LOADED: { to: "stageC" },
-                SOURCE_LOADED: { to: "stageC" },
+                SOURCE_UPDATED: { to: "stageC" },
               },
             },
             stageC: {
@@ -344,6 +344,12 @@ const codePanelState = createState({
         }
       }
     },
+    setViewError(data, { error }) {
+      data.code.view.error = error
+    },
+    clearViewError(data) {
+      data.code.view.error = ""
+    },
     setErrorInCurrentTab(data) {
       const { activeTab } = data
       data.code[activeTab].error = data.code[activeTab].error
@@ -360,7 +366,16 @@ const codePanelState = createState({
       const { code, activeTab } = data
       const { oid, pid } = projectState.data
       code[activeTab].clean = code[activeTab].dirty
-      saveProjectCode(pid, oid, activeTab, code[activeTab].dirty)
+
+      db.collection("users")
+        .doc(oid)
+        .collection("projects")
+        .doc(pid)
+        .update({
+          [`code.${activeTab}`]: code[activeTab].dirty,
+          payloads: ui.payloads,
+          lastModified: new Date().toUTCString(),
+        })
     },
     // Live View
     notifyLiveViewDirty(data) {
@@ -539,3 +554,5 @@ const codePanelState = createState({
 })
 
 export default codePanelState
+
+codePanelState.onUpdate((d) => console.log(d.active, d.log[0]))

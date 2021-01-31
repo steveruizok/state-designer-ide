@@ -1,23 +1,18 @@
 import { Button } from "components/theme"
+import useAuthUser from "hooks/useAuthUser"
 import Link from "next/link"
-import {
-  AuthAction,
-  useAuthUser,
-  withAuthUser,
-  withAuthUserTokenSSR,
-} from "next-firebase-auth"
+import { AuthAction, withAuthUser, withAuthUserSSR } from "next-firebase-auth"
 import Router from "next/router"
 
 function Home() {
-  const AuthUser = useAuthUser()
+  const user = useAuthUser()
 
-  if (typeof window !== "undefined" && AuthUser.id) {
-    Router.push(`/u/${AuthUser.id}`)
+  if (typeof window !== "undefined" && user.id) {
+    Router.push(`/u/${user.id}`)
   }
 
   return (
     <div>
-      <pre>{JSON.stringify(AuthUser, null, 2)}</pre>
       <Link href="/auth">
         <a>
           <Button>Sign in</Button>
@@ -27,7 +22,7 @@ function Home() {
   )
 }
 
-export const getServerSideProps = withAuthUserTokenSSR({
+export const getServerSideProps = withAuthUserSSR({
   whenAuthed: AuthAction.Render,
 })(async ({ AuthUser }) => {
   // Redirect to user page?

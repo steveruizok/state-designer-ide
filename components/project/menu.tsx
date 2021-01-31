@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useAuthUser } from "next-firebase-auth"
+import useUser from "hooks/useUser"
 
 import { Button, IconButton, styled } from "components/theme"
 
@@ -9,7 +9,8 @@ import Link from "next/link"
 interface MenuProps {}
 
 export default function Menu({}: MenuProps) {
-  const user = useAuthUser()
+  const user = useUser()
+
   return (
     <MenuContainer>
       <Link href={user ? `/u/${user.id}` : "/"}>

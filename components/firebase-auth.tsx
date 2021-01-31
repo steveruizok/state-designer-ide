@@ -1,5 +1,4 @@
 /* globals window */
-import React, { useEffect, useState } from "react"
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth"
 import firebase from "firebase/app"
 import "firebase/auth"
@@ -20,14 +19,6 @@ const firebaseAuthConfig = {
 }
 
 export default function FirebaseAuth() {
-  const [renderAuth, setRenderAuth] = useState(false)
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setRenderAuth(true)
-    }
-  }, [])
-
   return (
     <div>
       {typeof window !== "undefined" && (

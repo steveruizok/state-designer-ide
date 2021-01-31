@@ -26,6 +26,7 @@ const projectState = createState({
     loading: {
       on: {
         SOURCE_UPDATED: [
+          { unless: "hasSource", break: true },
           {
             do: [
               "updateFromDatabase",
@@ -63,6 +64,9 @@ const projectState = createState({
     },
   },
   conditions: {
+    hasSource(data, { source }) {
+      return !!source
+    },
     captiveHasChanged(data, { source }) {
       const { code } = data
       return code.state !== source.code.state
@@ -85,6 +89,8 @@ const projectState = createState({
       data.name = name
       data.oid = oid
       data.pid = pid
+
+      console.log("loaded, notifying code panel state")
 
       codePanelState.send("SOURCE_LOADED", {
         state: stateCode,
@@ -201,3 +207,5 @@ export function collectEventsFromState(
 
   return acc
 }
+
+projectState.onUpdate((d) => console.log(d.active, d.log[0]))

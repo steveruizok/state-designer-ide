@@ -26,7 +26,7 @@ import toastState from "states/toast"
 import useProject from "hooks/useProject"
 import useTheme from "hooks/useTheme"
 import uiState from "states/ui"
-import { useAuthUser } from "next-firebase-auth"
+import useUser from "hooks/useUser"
 import { useRouter } from "next/router"
 
 interface ControlsProps {
@@ -126,7 +126,7 @@ const ControlsContainer = styled.div({
 
 function Settings() {
   const router = useRouter()
-  const user = useAuthUser()
+  const user = useUser()
   const {
     data: { minimap, fontSize, wordWrap },
   } = useStateDesigner(codePanelState)

@@ -9,7 +9,7 @@ declare module "next-firebase-auth" {
     id: string
     email: string
     emailVerified: boolean
-    getIdToken: () => Promise<null | firebase.User.getToken>
+    getIdToken: () => Promise<null | (() => void)>
     clientInitialized: boolean
     firebaseUser: firebase.User | null
     signOut: () => Promise<void>

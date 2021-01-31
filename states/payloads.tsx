@@ -1,5 +1,5 @@
 import { createState } from "@state-designer/react"
-import { savePayloads } from "lib/database"
+import db from "utils/firestore"
 import { saveLocalPayloads } from "lib/local-data"
 
 let INITIAL_PAYLOADS = {} as Record<string, string>
@@ -31,6 +31,12 @@ const payloadsState = createState({
     },
     saveToDatabase(data, { oid, pid }) {
       saveLocalPayloads({ ...data.payloads })
+
+      db.collection("users").doc(oid).collection("projects").doc(pid).update({
+        payloads: data.payloads,
+        lastModified: new Date().toUTCString(),
+      })
+
       // savePayloads(pid, oid, { ...data.payloads })
     },
     resetPayloads(data) {

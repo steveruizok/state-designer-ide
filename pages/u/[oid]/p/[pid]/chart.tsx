@@ -6,12 +6,9 @@ import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 import ChartView from "components/project/chart-view"
 import Head from "next/head"
 import Link from "next/link"
-import Router from "next/router"
 import { Sun } from "react-feather"
 import { getProjectData } from "lib/database"
-import projectState from "states/project"
 import { single } from "utils"
-import { subscribeToProject } from "lib/database"
 import useTheme from "hooks/useTheme"
 
 interface ChartPageProps {
@@ -30,34 +27,6 @@ type PageProps = ChartPageProps | ProjectNotFoundPageProps
 export default function ProjectPage(props: PageProps) {
   if (!props.isProject) return null
   const { oid, pid, name } = props
-
-  const rUnsub = React.useRef<any>()
-
-  React.useEffect(() => {
-    function handleRouteChange() {
-      projectState.send("UNLOADED")
-      rUnsub.current?.()
-    }
-
-    // Subscribe to the firebase document on mount.
-    subscribeToProject(pid, oid, (source) => {
-      projectState.send("SOURCE_UPDATED", {
-        source,
-        oid,
-        pid,
-      })
-    }).then((unsub) => (rUnsub.current = unsub))
-
-    // Cleanup the project when when we leave this route, even if we
-    // change to a different project.
-    Router.events.on("routeChangeStart", handleRouteChange)
-
-    return () => {
-      Router.events.off("routeChangeStart", handleRouteChange)
-      handleRouteChange()
-    }
-  }, [oid, pid])
-
   const { toggle } = useTheme()
 
   return (

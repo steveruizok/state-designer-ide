@@ -5,13 +5,9 @@ import LiveView from "components/project/live-view"
 import LiveViewControls from "components/project/react-view"
 
 import Head from "next/head"
-import Router from "next/router"
 import { getProjectData } from "lib/database"
-import projectState from "states/project"
 import { single } from "utils"
 import { styled } from "components/theme"
-import { subscribeToProject } from "lib/database"
-import { updatePanelOffsets } from "lib/local-data"
 
 interface ViewPageProps {
   oid: string
@@ -30,33 +26,7 @@ type PageProps = ViewPageProps | ProjectNotFoundPageProps
 export default function ProjectPage(props: PageProps) {
   if (!props.isProject) return null
 
-  const { oid, pid, name, showConsole } = props
-
-  const rUnsub = React.useRef<any>()
-
-  React.useEffect(() => {
-    function handleRouteChange() {
-      projectState.send("UNLOADED")
-      rUnsub.current?.()
-    }
-
-    subscribeToProject(pid, oid, (source) => {
-      projectState.send("SOURCE_UPDATED", {
-        source,
-        oid,
-        pid,
-      })
-    }).then((unsub) => (rUnsub.current = unsub))
-
-    updatePanelOffsets()
-
-    Router.events.on("routeChangeStart", handleRouteChange)
-
-    return () => {
-      Router.events.off("routeChangeStart", handleRouteChange)
-      handleRouteChange()
-    }
-  }, [oid, pid])
+  const { name, showConsole } = props
 
   return (
     <Layout>
