@@ -1,8 +1,6 @@
 import * as Types from "types"
 
-import db from "./firestore"
-import firebase from "./firebase"
-import pick from "lodash/pick"
+import db from "utils/firestore"
 import router from "next/router"
 import { ui } from "./local-data"
 

@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -17,23 +13,22 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-		"baseUrl": ".",
-		"paths": {
-			"types": ["types.ts"],
-			"lib/*": ["lib/*"],
-			"site/*": ["site/*"],
-			"utils/*": ["utils/*"],
-			"states/*": ["states/*"],
-			"components/*": ["components/*"],
-		}
+    "baseUrl": ".",
+    "paths": {
+      "types": ["types.ts"],
+      "lib/*": ["lib/*"],
+      "site/*": ["site/*"],
+      "utils/*": ["utils/*"],
+      "states/*": ["states/*"],
+      "components/*": ["components/*"]
+    }
   },
   "include": [
+    "decs.d.ts",
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx", 
+    "**/*.tsx",
     "pages/_app.tsx"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

@@ -1,30 +1,27 @@
+import { withAuthUser, AuthAction } from "next-firebase-auth"
+import FirebaseAuth from "components/firebase-auth"
+import { styled } from "components/theme"
 import * as Types from "types"
 
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
-
-import { Button } from "components/theme"
-import { getCurrentUser } from "lib/auth-server"
-import { login } from "lib/auth-client"
-
-export default function Auth({ error }: Types.AuthState) {
+function Auth({ error }: Types.AuthState) {
   return (
-    <div>
-      <Button onClick={login}>Log in</Button>
-    </div>
+    <Container>
+      <FirebaseAuth />
+    </Container>
   )
 }
 
-export async function getServerSideProps(
-  context: GetServerSidePropsContext,
-): Promise<GetServerSidePropsResult<Types.AuthState>> {
-  const authState = await getCurrentUser(context)
+export default withAuthUser({
+  whenAuthed: AuthAction.REDIRECT_TO_APP,
+  whenUnauthedBeforeInit: AuthAction.RETURN_NULL,
+  whenUnauthedAfterInit: AuthAction.RENDER,
+})(Auth)
 
-  if (authState.user) {
-    context.res.setHeader("Location", `/u/${authState.user.uid}`)
-    context.res.statusCode = 307
-  }
-
-  return {
-    props: authState,
-  }
-}
+const Container = styled.div({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "100vw",
+  height: "100vh",
+  textAlign: "center",
+})

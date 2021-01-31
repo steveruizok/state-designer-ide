@@ -1,5 +1,12 @@
 import * as React from "react"
 import * as Types from "types"
+import db from "utils/firestore"
+import {
+  AuthAction,
+  withAuthUser,
+  withAuthUserSSR,
+  useAuthUser,
+} from "next-firebase-auth"
 
 import {
   Button,
@@ -9,65 +16,27 @@ import {
   Text,
   styled,
 } from "components/theme"
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 import { Home, MoreHorizontal, Sun, X } from "react-feather"
 import IconDropdown, {
   DropdownItem,
   DropdownSeparator,
 } from "components/icon-dropdown"
-import { getCurrentUser, redirectToAuthPage } from "lib/auth-server"
-import {
-  getUserProjects,
-  setCustomToken,
-  subscribeToProjects,
-} from "lib/database"
-import { login, logout } from "lib/auth-client"
-
 import Head from "next/head"
 import Link from "next/link"
 import dialogState from "states/dialog"
 import { single } from "utils"
 import useTheme from "hooks/useTheme"
+import Loading from "components/loading"
 
 let INITIAL_SORT = "Date"
 let INITIAL_SORT_DIRECTION = "Descending"
 
-interface UserNotFoundProps {
-  isUser: false
-}
+type UserPageProps = {}
 
-interface UserFoundProps {
-  uid: string
-  oid: string
-  token: string
-  isUser: true
-  user: Types.User
-  projects: Types.ProjectData[]
-}
-
-type UserPageProps = UserFoundProps | UserNotFoundProps
-
-export default function UserPage(props: UserPageProps) {
-  if (!props.isUser) return null
-
-  const { uid, oid, token } = props
-
+function UserPage({}: UserPageProps) {
+  const user = useAuthUser()
   const { toggle } = useTheme()
-  const [user, setUser] = React.useState(props.user)
-  const [projects, setProjects] = React.useState(props.projects)
-
-  React.useEffect(() => {
-    let unsub: any
-
-    setCustomToken(token)
-
-    subscribeToProjects(uid, oid, (projects) => {
-      setProjects(projects)
-    }).then((cb) => (unsub = cb))
-    return () => {
-      unsub && unsub()
-    }
-  }, [])
+  const { status, projects } = useSubscribeToProjects(user.id)
 
   const [sortBy, setSortBy] = React.useState(INITIAL_SORT)
   const [sortDirection, setSortDirection] = React.useState(
@@ -122,9 +91,11 @@ export default function UserPage(props: UserPageProps) {
           </IconButton>
         </Link>
         {user ? (
-          <Button onClick={() => logout()}>Log Out</Button>
+          <Button onClick={() => user.signOut()}>Log Out</Button>
         ) : (
-          <Button onClick={login}>Log in</Button>
+          <Link href="api/login">
+            <Button>Log in</Button>
+          </Link>
         )}
       </MenuContainer>
       <Title>{user.name}</Title>
@@ -164,7 +135,9 @@ export default function UserPage(props: UserPageProps) {
           </ListControlsGroup>
         </ListControls>
         <ul>
-          {sortedProjects.length > 0 ? (
+          {status === "loading" ? (
+            <Loading />
+          ) : sortedProjects.length > 0 ? (
             sortedProjects.map(({ id, name, dateCreated, lastModified }, i) => (
               <li key={id}>
                 <ProjectLink>
@@ -222,34 +195,16 @@ export default function UserPage(props: UserPageProps) {
   )
 }
 
-export async function getServerSideProps(
-  context: GetServerSidePropsContext,
-): Promise<GetServerSidePropsResult<UserPageProps>> {
-  const authState = await getCurrentUser(context)
+export const getServerSideProps = withAuthUserSSR({
+  whenUnauthed: AuthAction.REDIRECT_TO_LOGIN,
+})()
 
-  if (!authState.authenticated) {
-    redirectToAuthPage(context)
-    return { props: { isUser: false } }
-  }
-
-  const {
-    query: { oid },
-  } = context
-
-  const { uid } = authState.user
-  const data = await getUserProjects(single(oid), uid)
-
-  return {
-    props: {
-      isUser: true,
-      user: authState.user,
-      projects: data.projects,
-      oid: data.oid,
-      uid: authState.user.uid,
-      token: authState.token,
-    },
-  }
-}
+export default withAuthUser({
+  whenUnauthedAfterInit: AuthAction.REDIRECT_TO_LOGIN,
+  whenUnauthedBeforeInit: AuthAction.SHOW_LOADING,
+  whenAuthed: AuthAction.SHOW_LOADING,
+  LoaderComponent: Loading,
+})(UserPage)
 
 const Layout = styled.div({
   display: "grid",
@@ -377,3 +332,33 @@ const ProjectLink = styled.div({
     opacity: 1,
   },
 })
+
+function useSubscribeToProjects(id: string) {
+  const [status, setStatus] = React.useState<"error" | "loading" | "ready">(
+    "loading",
+  )
+
+  const [projects, setProjects] = React.useState([])
+
+  React.useEffect(() => {
+    try {
+      const ref = db.collection("users").doc(id).collection("projects")
+
+      return ref.onSnapshot((snapshot) => {
+        const projects = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() } as Types.ProjectData),
+        )
+
+        if (status === "loading") {
+          setStatus("ready")
+        }
+
+        setProjects(projects)
+      })
+    } catch (e) {
+      setStatus("error")
+    }
+  }, [id])
+
+  return { status, projects }
+}

@@ -82,7 +82,7 @@ const codePanelState = createState({
     },
   },
   on: {
-    UNLOADED: { do: "cleanup", to: ["loading"] },
+    UNLOADED: { do: "cleanup", to: "loading" },
     SOURCE_UPDATED: ["updateFromDatabase", "notifyLiveViewClean"],
     CHANGED_CODE: ["updateDirtyCode", "highlightBlockTitles"],
     RESET_CODE: [
@@ -517,10 +517,12 @@ const codePanelState = createState({
     // Cleanup
     cleanup(data) {
       for (let tab of EDITOR_TABS) {
-        data.models[tab].setValue("")
-        data.code[tab].clean = ""
-        data.code[tab].dirty = ""
-        data.code[tab].error = ""
+        if (data.models[tab]) {
+          data.models[tab].setValue("")
+          data.code[tab].clean = ""
+          data.code[tab].dirty = ""
+          data.code[tab].error = ""
+        }
       }
     },
   },

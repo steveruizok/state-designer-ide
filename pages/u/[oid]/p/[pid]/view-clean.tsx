@@ -12,7 +12,6 @@ import { single } from "utils"
 import { styled } from "components/theme"
 import { subscribeToProject } from "lib/database"
 import { updatePanelOffsets } from "lib/local-data"
-import useTheme from "hooks/useTheme"
 
 interface ViewPageProps {
   oid: string

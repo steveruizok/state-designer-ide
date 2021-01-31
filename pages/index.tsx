@@ -1,26 +1,37 @@
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
-
 import { Button } from "components/theme"
-import { getCurrentUser } from "lib/auth-server"
-import { login } from "lib/auth-client"
+import Link from "next/link"
+import {
+  AuthAction,
+  useAuthUser,
+  withAuthUser,
+  withAuthUserTokenSSR,
+} from "next-firebase-auth"
+import Router from "next/router"
 
-export default function Home() {
+function Home() {
+  const AuthUser = useAuthUser()
+
+  if (typeof window !== "undefined" && AuthUser.id) {
+    Router.push(`/u/${AuthUser.id}`)
+  }
+
   return (
     <div>
-      <Button onClick={login}>Log in</Button>
+      <pre>{JSON.stringify(AuthUser, null, 2)}</pre>
+      <Link href="/auth">
+        <a>
+          <Button>Sign in</Button>
+        </a>
+      </Link>
     </div>
   )
 }
 
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const authState = await getCurrentUser(context)
+export const getServerSideProps = withAuthUserTokenSSR({
+  whenAuthed: AuthAction.Render,
+})(async ({ AuthUser }) => {
+  // Redirect to user page?
+  return { uid: AuthUser.id }
+})
 
-  if (authState.user) {
-    context.res.setHeader("Location", `/u/${authState.user.uid}`)
-    context.res.statusCode = 307
-  }
-
-  return {
-    props: authState,
-  }
-}
+export default withAuthUser()(Home)
