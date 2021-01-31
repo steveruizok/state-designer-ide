@@ -33,6 +33,7 @@ import projectState from "states/project"
 import useCodePreview from "hooks/useCodePreview"
 import { useStateDesigner } from "@state-designer/react"
 import useTheme from "hooks/useTheme"
+import codePanelState from "states/code-panel"
 
 const Components = {
   Box,
@@ -173,17 +174,13 @@ function ReactView({
   const staticResults = local.data.static
   const dirtyViewCode = localEditor.data.code
 
-  const printFn = (...messages) => {
-    if (localEditor.data.shouldLog) {
-      printFromView(...messages)
-    } else {
-      fakePrint(...messages)
-    }
-  }
-
   let code = dirtyViewCode
     .replace(`import state from './state';`, "")
     .replace(`export default `, "")
+
+  React.useEffect(() => {
+    consoleState.send("RESET")
+  }, [code])
 
   const { previewRef, error } = useCodePreview({
     code,
@@ -200,8 +197,8 @@ function ReactView({
       ColorMode: theme.theme,
       useStateDesigner,
       Static: staticResults,
-      print: printFn,
-      log: printFn,
+      print: printFromView,
+      log: printFromView,
       rLiveView,
       usePointer,
       useKeyboardInputs,
@@ -210,7 +207,11 @@ function ReactView({
   })
 
   React.useEffect(() => {
-    consoleState.send("CHANGED_ERROR", { error })
+    if (error) {
+      codePanelState.send("FOUND_VIEW_ERROR", {
+        error: error.replace(/\(.*\)/, ""),
+      })
+    }
   }, [error])
 
   return (

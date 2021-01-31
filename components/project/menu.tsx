@@ -1,28 +1,27 @@
 import * as React from "react"
-import * as Types from "types"
+import useUser from "hooks/useUser"
 
 import { Button, IconButton, styled } from "components/theme"
 
 import { Home } from "react-feather"
 import Link from "next/link"
-import { login } from "lib/auth-client"
 
-interface MenuProps {
-  user: Types.User
-}
+interface MenuProps {}
 
-export default function Menu({ user }: MenuProps) {
+export default function Menu({}: MenuProps) {
+  const user = useUser()
+
   return (
     <MenuContainer>
-      <Link href={user ? `/u/${user.uid}` : "/"}>
+      <Link href={user ? `/u/${user.id}` : "/"}>
         <IconButton title="Home">
           <Home />
         </IconButton>
       </Link>
       {!user && (
-        <Button title="Log In" onClick={login}>
-          Log in
-        </Button>
+        <Link href="/login">
+          <Button title="Log In">Log in</Button>
+        </Link>
       )}
     </MenuContainer>
   )

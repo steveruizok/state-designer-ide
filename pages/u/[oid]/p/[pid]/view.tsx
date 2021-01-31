@@ -1,5 +1,5 @@
 import * as React from "react"
-
+import db from "utils/firestore"
 import { Button, IconButton, styled } from "components/theme"
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 
@@ -7,13 +7,8 @@ import Console from "components/project/console-panel"
 import Head from "next/head"
 import Link from "next/link"
 import LiveView from "components/project/live-view"
-import Router from "next/router"
 import { Sun } from "react-feather"
-import { getProjectData } from "lib/database"
-import projectState from "states/project"
 import { single } from "utils"
-import { subscribeToProject } from "lib/database"
-import { updatePanelOffsets } from "lib/local-data"
 import useTheme from "hooks/useTheme"
 
 interface ViewPageProps {
@@ -32,35 +27,7 @@ type PageProps = ViewPageProps | ProjectNotFoundPageProps
 
 export default function ProjectPage(props: PageProps) {
   if (!props.isProject) return null
-
   const { oid, pid, name, showConsole } = props
-
-  const rUnsub = React.useRef<any>()
-
-  React.useEffect(() => {
-    function handleRouteChange() {
-      projectState.send("UNLOADED")
-      rUnsub.current?.()
-    }
-
-    subscribeToProject(pid, oid, (source) => {
-      projectState.send("SOURCE_UPDATED", {
-        source,
-        oid,
-        pid,
-      })
-    }).then((unsub) => (rUnsub.current = unsub))
-
-    updatePanelOffsets()
-
-    Router.events.on("routeChangeStart", handleRouteChange)
-
-    return () => {
-      Router.events.off("routeChangeStart", handleRouteChange)
-      handleRouteChange()
-    }
-  }, [oid, pid])
-
   const { toggle } = useTheme()
 
   return (
@@ -85,14 +52,20 @@ export default function ProjectPage(props: PageProps) {
     </Layout>
   )
 }
+
 export async function getServerSideProps(
   context: GetServerSidePropsContext,
 ): Promise<GetServerSidePropsResult<PageProps>> {
   const { oid, pid, console } = context.query
 
-  const projectData = await getProjectData(single(pid), single(oid))
+  const project = await db
+    .collection("users")
+    .doc(single(oid))
+    .collection("projects")
+    .doc(single(pid))
+    .get()
 
-  if (!projectData) {
+  if (!project.exists) {
     context.res.setHeader("Location", `/u/${oid}/p/${pid}/not-found`)
     context.res.statusCode = 307
     return {
@@ -100,18 +73,17 @@ export async function getServerSideProps(
     }
   }
 
-  ;(projectData as any).timestamp = null
-
   return {
     props: {
       oid: single(oid),
       pid: single(pid),
-      name: projectData.name,
+      name: project.data().name,
       isProject: true,
-      showConsole: console === "true",
+      showConsole: single(console) === "true",
     },
   }
 }
+
 const Layout = styled.div({
   display: "grid",
   position: "fixed",

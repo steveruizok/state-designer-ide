@@ -1,5 +1,7 @@
 import getCodeSandboxUrl from "lib/codesandbox"
-import { getProjectData } from "lib/database"
+import { single } from "utils"
+import * as Types from "types"
+import db from "utils/firestore"
 import { NextApiRequest, NextApiResponse } from "next"
 
 export default async function sandbox(
@@ -15,9 +17,22 @@ export default async function sandbox(
   const oid = req.body.oid.toString()
   const pid = req.body.pid.toString()
 
-  const project = await getProjectData(pid, oid)
+  const doc = await db
+    .collection("users")
+    .doc(single(oid))
+    .collection("projects")
+    .doc(single(pid))
+    .get()
 
-  const url = await getCodeSandboxUrl(project)
+  if (doc.exists) {
+    res.send({ response: "Could not find that project." })
+    return
+  }
+
+  const url = await getCodeSandboxUrl({
+    id: doc.id,
+    ...doc.data(),
+  } as Types.ProjectData)
 
   res.send({ response: "Got code sandbox link.", url })
 }

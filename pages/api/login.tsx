@@ -1,52 +1,16 @@
-import { serialize } from "cookie"
-import admin from "lib/firebase-admin"
-import { NextApiRequest, NextApiResponse } from "next"
+import { setAuthCookies } from "next-firebase-auth"
+import initAuth from "utils/initAuth"
 
-const SESSION_DURATION_IN_DAYS = 5
+initAuth()
 
-export default async function login(req: NextApiRequest, res: NextApiResponse) {
-  const expiresIn = SESSION_DURATION_IN_DAYS * (24 * 60 * 60 * 1000)
-
-  if (req.method !== "POST") {
-    res.status(400)
-    res.send({ response: "You need to post to this endpoint." })
-    return
+const handler = async (req, res) => {
+  try {
+    await setAuthCookies(req, res)
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    return res.status(500).json({ error: "Unexpected error." })
   }
-
-  var idToken = req.body.token.toString()
-  var uid = req.body.uid.toString()
-
-  const decodedIdToken = await admin.auth().verifyIdToken(idToken)
-  const cookie = await admin.auth().createSessionCookie(idToken, { expiresIn })
-  const customToken = await admin.auth().createCustomToken(uid)
-
-  if (!cookie) {
-    res.status(401).send({ response: "Invalid authentication" })
-    return
-  }
-
-  if (new Date().getTime() / 1000 - decodedIdToken.auth_time > 5 * 60) {
-    res.status(401).send({ response: "Recent sign in required!" })
-    return
-  }
-
-  const options = {
-    maxAge: expiresIn,
-    httpOnly: true,
-    secure: process.env.NEXT_PUBLIC_SECURE_COOKIE === "true",
-    path: "/",
-  }
-
-  res.setHeader("Set-Cookie", [
-    serialize(process.env.NEXT_PUBLIC_COOKIE_NAME, cookie, options),
-    serialize(process.env.NEXT_PUBLIC_TOKEN_NAME, customToken, options),
-  ])
-
-  res.send({ response: "Logged in.", customToken })
+  return res.status(200).json({ status: true })
 }
 
-export const config = {
-  api: {
-    externalResolver: true,
-  },
-}
+export default handler

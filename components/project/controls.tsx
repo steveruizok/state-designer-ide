@@ -20,13 +20,13 @@ import IconDropdown, {
 
 import codePanelState from "states/code-panel"
 import dialogState from "states/dialog"
-import { ui, resetOffsets } from "lib/local-data"
-import { getCodeSandboxUrl } from "lib/database"
+import { resetOffsets } from "lib/local-data"
 import toastState from "states/toast"
 import useProject from "hooks/useProject"
 import useTheme from "hooks/useTheme"
-import projectState from "states/project"
 import uiState from "states/ui"
+import useUser from "hooks/useUser"
+import { useRouter } from "next/router"
 
 interface ControlsProps {
   oid: string
@@ -36,10 +36,17 @@ interface ControlsProps {
 }
 
 export default function Controls({ oid, pid, uid }: ControlsProps) {
-  const project = useProject(pid, oid)
+  const { project } = useProject(pid, oid)
 
   async function openCodeSandbox() {
-    const link = await getCodeSandboxUrl(oid, pid).catch((e) => {})
+    var path = `/api/sandbox`
+    var url = process.env.NEXT_PUBLIC_BASE_API_URL + path
+
+    const link = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ oid, pid }),
+    }).then((d) => d.json())
 
     if (!link) {
       toastState.send("ADDED_TOAST", {
@@ -66,7 +73,7 @@ export default function Controls({ oid, pid, uid }: ControlsProps) {
 
   return (
     <ControlsContainer>
-      {!(oid === uid) && (
+      {uid && !(oid === uid) && (
         <IconButton
           title="Copy Project"
           onClick={() =>
@@ -124,6 +131,8 @@ const ControlsContainer = styled.div({
 })
 
 function Settings() {
+  const router = useRouter()
+  const user = useUser()
   const {
     data: { minimap, fontSize, wordWrap },
   } = useStateDesigner(codePanelState)
@@ -222,6 +231,26 @@ function Settings() {
       >
         Reset Font Size
       </DropdownItem>
+      <DropdownSeparator />
+      <DropdownLabel>Account</DropdownLabel>
+      {user.id ? (
+        <DropdownItem
+          onSelect={(e) => {
+            e.preventDefault()
+            user.signOut()
+          }}
+        >
+          Sign Out
+        </DropdownItem>
+      ) : (
+        <DropdownItem
+          onSelect={(e) => {
+            router.push("/auth")
+          }}
+        >
+          Sign In
+        </DropdownItem>
+      )}
     </IconDropdown>
   )
 }

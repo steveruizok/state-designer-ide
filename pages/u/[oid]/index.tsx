@@ -1,5 +1,7 @@
 import * as React from "react"
 import * as Types from "types"
+import db from "utils/firestore"
+import { AuthAction, withAuthUser, withAuthUserSSR } from "next-firebase-auth"
 
 import {
   Button,
@@ -9,65 +11,28 @@ import {
   Text,
   styled,
 } from "components/theme"
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 import { Home, MoreHorizontal, Sun, X } from "react-feather"
 import IconDropdown, {
   DropdownItem,
   DropdownSeparator,
 } from "components/icon-dropdown"
-import { getCurrentUser, redirectToAuthPage } from "lib/auth-server"
-import {
-  getUserProjects,
-  setCustomToken,
-  subscribeToProjects,
-} from "lib/database"
-import { login, logout } from "lib/auth-client"
-
 import Head from "next/head"
 import Link from "next/link"
 import dialogState from "states/dialog"
-import { single } from "utils"
 import useTheme from "hooks/useTheme"
+import Loading from "components/loading"
+import useAuthUser from "hooks/useAuthUser"
+import useUserProjects from "hooks/useUserProjects"
 
 let INITIAL_SORT = "Date"
 let INITIAL_SORT_DIRECTION = "Descending"
 
-interface UserNotFoundProps {
-  isUser: false
-}
+type UserPageProps = {}
 
-interface UserFoundProps {
-  uid: string
-  oid: string
-  token: string
-  isUser: true
-  user: Types.User
-  projects: Types.ProjectData[]
-}
-
-type UserPageProps = UserFoundProps | UserNotFoundProps
-
-export default function UserPage(props: UserPageProps) {
-  if (!props.isUser) return null
-
-  const { uid, oid, token } = props
-
+function UserPage({}: UserPageProps) {
+  const user = useAuthUser()
   const { toggle } = useTheme()
-  const [user, setUser] = React.useState(props.user)
-  const [projects, setProjects] = React.useState(props.projects)
-
-  React.useEffect(() => {
-    let unsub: any
-
-    setCustomToken(token)
-
-    subscribeToProjects(uid, oid, (projects) => {
-      setProjects(projects)
-    }).then((cb) => (unsub = cb))
-    return () => {
-      unsub && unsub()
-    }
-  }, [])
+  const { status, projects } = useUserProjects(user.id)
 
   const [sortBy, setSortBy] = React.useState(INITIAL_SORT)
   const [sortDirection, setSortDirection] = React.useState(
@@ -116,15 +81,17 @@ export default function UserPage(props: UserPageProps) {
         <title>{user.name} - State Designer</title>
       </Head>
       <MenuContainer>
-        <Link href={user ? `/u/${user.uid}` : "/"}>
+        <Link href={user ? `/u/${user.id}` : "/"}>
           <IconButton>
             <Home />
           </IconButton>
         </Link>
         {user ? (
-          <Button onClick={() => logout()}>Log Out</Button>
+          <Button onClick={() => user.signOut()}>Log Out</Button>
         ) : (
-          <Button onClick={login}>Log in</Button>
+          <Link href="api/login">
+            <Button>Log in</Button>
+          </Link>
         )}
       </MenuContainer>
       <Title>{user.name}</Title>
@@ -164,11 +131,13 @@ export default function UserPage(props: UserPageProps) {
           </ListControlsGroup>
         </ListControls>
         <ul>
-          {sortedProjects.length > 0 ? (
+          {status === "loading" ? (
+            <Loading />
+          ) : sortedProjects.length > 0 ? (
             sortedProjects.map(({ id, name, dateCreated, lastModified }, i) => (
               <li key={id}>
                 <ProjectLink>
-                  <Link href={`/u/${user.uid}/p/${id}`}>
+                  <Link href={`/u/${user.id}/p/${id}`}>
                     <a>
                       <h4>{name}</h4>
                       <Text variant="ui">
@@ -189,11 +158,15 @@ export default function UserPage(props: UserPageProps) {
                       Rename
                     </DropdownItem>
                     <DropdownItem
-                      onSelect={() =>
+                      onSelect={() => {
+                        console.log(
+                          "finding project",
+                          projects.find((p) => p.id === id),
+                        )
                         dialogState.send("OPENED_PROJECT_DUPLICATE_DIALOG", {
                           project: projects.find((p) => p.id === id),
                         })
-                      }
+                      }}
                     >
                       Duplicate
                     </DropdownItem>
@@ -222,34 +195,16 @@ export default function UserPage(props: UserPageProps) {
   )
 }
 
-export async function getServerSideProps(
-  context: GetServerSidePropsContext,
-): Promise<GetServerSidePropsResult<UserPageProps>> {
-  const authState = await getCurrentUser(context)
+export const getServerSideProps = withAuthUserSSR({
+  whenUnauthed: AuthAction.REDIRECT_TO_LOGIN,
+})()
 
-  if (!authState.authenticated) {
-    redirectToAuthPage(context)
-    return { props: { isUser: false } }
-  }
-
-  const {
-    query: { oid },
-  } = context
-
-  const { uid } = authState.user
-  const data = await getUserProjects(single(oid), uid)
-
-  return {
-    props: {
-      isUser: true,
-      user: authState.user,
-      projects: data.projects,
-      oid: data.oid,
-      uid: authState.user.uid,
-      token: authState.token,
-    },
-  }
-}
+export default withAuthUser({
+  whenUnauthedAfterInit: AuthAction.REDIRECT_TO_LOGIN,
+  whenUnauthedBeforeInit: AuthAction.SHOW_LOADING,
+  whenAuthed: AuthAction.RENDER,
+  LoaderComponent: Loading,
+})(UserPage)
 
 const Layout = styled.div({
   display: "grid",
@@ -259,7 +214,8 @@ const Layout = styled.div({
 		"menu title controls"
 		"main main main"
 	`,
-  minHeight: "100vh",
+  height: "100vh",
+  maxHeight: "100vh",
 })
 
 const MenuContainer = styled.div({
@@ -299,6 +255,7 @@ const MainContainer = styled.div({
       borderBottom: "1px solid $shadowLight",
     },
   },
+  overflow: "scroll",
 })
 
 const ListControls = styled.div({

@@ -1,23 +1,16 @@
+import { AuthAction, withAuthUserSSR, withAuthUser } from "next-firebase-auth"
+import { GetServerSidePropsContext } from "next"
+import * as React from "react"
+import { single } from "utils"
+import db from "utils/firestore"
 import Loading from "components/loading"
 import ProjectView from "components/project"
-import ProjectMeta from "components/project-meta"
-import { getCurrentUser } from "lib/auth-server"
-import { getProjectData, getProjectExists } from "lib/database"
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
-import * as React from "react"
-import * as Types from "types"
-import { single } from "utils"
-import MonacoProvider from "components/monaco-provider"
+import useAuthUser from "hooks/useAuthUser"
 
 interface ProjectFoundPageProps {
   oid: string
   pid: string
-  uid?: string
-  user: Types.User
-  token?: string
-  isOwner?: boolean
   isProject: true
-  projectData: Types.ProjectData
 }
 
 interface ProjectNotFoundPageProps {
@@ -26,47 +19,33 @@ interface ProjectNotFoundPageProps {
 
 type ProjectPageProps = ProjectFoundPageProps | ProjectNotFoundPageProps
 
-export default function ProjectPage(props: ProjectPageProps) {
+function ProjectPage(props: ProjectPageProps) {
+  const user = useAuthUser()
+
   if (!props.isProject) return null
-  const { oid, pid, uid, user, token, isOwner, projectData } = props
-  const [isMounted, setIsMounted] = React.useState(false)
 
-  React.useEffect(() => {
-    setIsMounted(true)
-  }, [])
+  const { oid, pid } = props
 
-  return isMounted ? (
-    <>
-      <ProjectMeta name={projectData.name || ""} oid={oid} pid={pid} />
-      <MonacoProvider>
-        <ProjectView
-          oid={oid}
-          pid={pid}
-          uid={uid}
-          user={user}
-          token={token}
-          isOwner={isOwner}
-          projectData={projectData}
-        />
-      </MonacoProvider>
-    </>
-  ) : (
-    <Loading />
-  )
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => setMounted(true))
+
+  return mounted ? <ProjectView oid={oid} pid={pid} /> : <Loading />
 }
 
-export async function getServerSideProps(
-  context: GetServerSidePropsContext,
-): Promise<GetServerSidePropsResult<ProjectPageProps>> {
+export const getServerSideProps = withAuthUserSSR({
+  whenUnauthed: AuthAction.REDIRECT_TO_LOGIN,
+})(async function getServerSideProps(context: GetServerSidePropsContext) {
   const { oid, pid } = context.query
 
-  const authState = await getCurrentUser(context)
+  const project = await db
+    .collection("users")
+    .doc(single(oid))
+    .collection("projects")
+    .doc(single(pid))
+    .get()
 
-  const uid = authState.authenticated ? authState.user.uid : null
-
-  const { isProject } = await getProjectExists(single(pid), single(oid), uid)
-
-  if (!isProject) {
+  if (!project.exists) {
     context.res.setHeader("Location", `/u/${oid}/p/${pid}/not-found`)
     context.res.statusCode = 307
     return {
@@ -74,22 +53,16 @@ export async function getServerSideProps(
     }
   }
 
-  const projectData = await getProjectData(single(pid), single(oid))
-
-  if (projectData) {
-    ;(projectData as any).timestamp = null
-  }
-
   return {
-    props: {
-      oid: single(oid),
-      pid: single(pid),
-      uid,
-      user: authState.user,
-      token: authState.token,
-      isOwner: oid === uid,
-      isProject: true,
-      projectData,
-    },
+    oid: single(oid),
+    pid: single(pid),
+    isProject: true,
   }
-}
+})
+
+export default withAuthUser({
+  whenUnauthedAfterInit: AuthAction.RENDER,
+  whenUnauthedBeforeInit: AuthAction.SHOW_LOADING,
+  whenAuthed: AuthAction.RENDER,
+  LoaderComponent: Loading,
+})(ProjectPage)

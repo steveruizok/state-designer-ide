@@ -27,7 +27,7 @@ export default function Console({}: ConsoleProps) {
   const { value } = local.values
   const { error } = local.data
 
-  const [activeTab, setActiveTab] = React.useState(ui.console.activeTab)
+  const [activeTab, setActiveTab] = React.useState("console")
   const [expanded, setExpanded] = React.useState(
     CONSOLE_ROW_HEIGHT - initialOffset > 40,
   )
@@ -85,12 +85,6 @@ export default function Console({}: ConsoleProps) {
     elm.scrollTo(0, elm.scrollHeight)
   }, [value])
 
-  // Handle editor changes when the user changes tabs
-  function handleTabChange(tab: "console" | "error") {
-    setActiveTab(tab)
-    saveConsoleTab(tab)
-  }
-
   return (
     <ConsoleContainer>
       <TitleRow onDoubleClick={toggleExpanded}>
@@ -99,19 +93,8 @@ export default function Console({}: ConsoleProps) {
             variant="details"
             title="Console"
             activeState={activeTab === "console" ? "active" : "inactive"}
-            onClick={() => handleTabChange("console")}
           >
             Console
-          </TabButton>
-          <TabButton
-            variant="details"
-            title="Console"
-            activeState={
-              error ? "warn" : activeTab === "error" ? "active" : "inactive"
-            }
-            onClick={() => handleTabChange("error")}
-          >
-            Error
           </TabButton>
         </TabsContainer>
         <IconButton

@@ -1,13 +1,14 @@
 import * as Types from "types"
-
+import db from "utils/firestore"
+import router from "next/router"
 import {
-  createNewProject,
-  deleteProject,
-  duplicateProjectAndPush,
-  saveProjectName,
+  getNewProject,
+  // deleteProject,
+  // duplicateProjectAndPush,
 } from "lib/database"
 
 import { createState } from "@state-designer/react"
+import authState from "./auth"
 
 const dialogState = createState({
   data: {
@@ -15,6 +16,7 @@ const dialogState = createState({
       project: null as Types.ProjectData | null,
       currentName: "",
     },
+    error: "",
   },
   initial: "closed",
   states: {
@@ -46,9 +48,21 @@ const dialogState = createState({
       states: {
         idle: {},
         creatingProject: {
-          on: {
-            CHANGED_PROJECT_NAME: "setProjectName",
-            CONFIRMED: { do: "createNewProject", to: "closed" },
+          initial: "confirmingNewProject",
+          states: {
+            confirmingNewProject: {
+              on: {
+                CHANGED_PROJECT_NAME: "setProjectName",
+                CONFIRMED: { to: "creatingProject.loading" },
+              },
+            },
+            loading: {
+              async: {
+                await: "createNewProject",
+                onResolve: { to: "closed" },
+                onReject: { to: "confirmingNewProject" },
+              },
+            },
           },
         },
         renamingProject: {
@@ -59,9 +73,25 @@ const dialogState = createState({
           },
         },
         duplicatingProject: {
-          on: {
-            CHANGED_PROJECT_NAME: "setProjectName",
-            CONFIRMED: { do: "duplicateProject", to: "closed" },
+          initial: "confirmingNewDuplicate",
+          states: {
+            confirmingNewDuplicate: {
+              on: {
+                CHANGED_PROJECT_NAME: "setProjectName",
+                CONFIRMED: { to: "duplicatingProject.loading" },
+              },
+            },
+            loading: {
+              async: {
+                await: "duplicateProject",
+                onResolve: {
+                  to: "closed",
+                },
+                onReject: {
+                  to: "confirmingNewDuplicate",
+                },
+              },
+            },
           },
         },
         deletingProject: {
@@ -89,21 +119,97 @@ const dialogState = createState({
     },
     saveProjectName(data) {
       const { project, currentName } = data.project
-      saveProjectName(project.id, project.ownerId, currentName)
+      return db
+        .collection("users")
+        .doc(project.ownerId)
+        .collection("projects")
+        .doc(project.id)
+        .update({
+          name: currentName,
+          lastModified: new Date().toUTCString(),
+        })
     },
-    duplicateProject(data) {
-      const { project, currentName } = data.project
-      duplicateProjectAndPush(project.id, project.ownerId, currentName)
-    },
+
     deleteProject(data) {
       const { project } = data.project
-      deleteProject(project.id)
+
+      const { user } = authState.data
+
+      if (!user) {
+        throw Error("No signed in user.")
+      }
+
+      db.collection("users")
+        .doc(user.id)
+        .collection("projects")
+        .doc(project.id)
+        .delete()
     },
-    createNewProject(data) {
-      const { currentName } = data.project
-      createNewProject(currentName)
+    clearError(data) {
+      data.error = ""
+    },
+  },
+  asyncs: {
+    async createNewProject(data) {
+      const dateString = new Date().toUTCString()
+
+      const { user } = authState.data
+
+      if (!user) {
+        throw Error("No signed in user.")
+      }
+
+      const docRef = await db
+        .collection("users")
+        .doc(user.id)
+        .collection("projects")
+        .add(getNewProject(user.id, dateString, data.project.currentName))
+
+      await router.push(`/u/${user.id}/p/${docRef.id}`)
+
+      return
+    },
+    async duplicateProject(data) {
+      const { project, currentName } = data.project
+
+      const source = await db
+        .collection("users")
+        .doc(project.ownerId)
+        .collection("projects")
+        .doc(project.id)
+        .get()
+
+      if (!source.exists) {
+        throw Error("That project does not exist.")
+      }
+
+      const dateString = new Date().toUTCString()
+
+      const { user } = authState.data
+
+      if (!user) {
+        throw Error("No signed in user.")
+      }
+
+      const sourceData = source.data()
+
+      const newDoc = await db
+        .collection("users")
+        .doc(user.id)
+        .collection("projects")
+        .add({
+          ...sourceData,
+          dateCreated: dateString,
+          lastModified: dateString,
+          owner: user.id,
+          name: currentName || sourceData.name,
+        })
+
+      router.push(`/u/${project.ownerId}/p/${newDoc.id}`)
     },
   },
 })
 
 export default dialogState
+
+// dialogState.onUpdate((d) => console.log(d.active, d.log[0]))

@@ -12,7 +12,7 @@ interface TitleProps {
 }
 
 export default function Title({ oid, pid, readOnly }: TitleProps) {
-  const project = useProject(pid, oid)
+  const { project } = useProject(pid, oid)
 
   return (
     <TitleContainer>

@@ -26,11 +26,11 @@ const projectState = createState({
     loading: {
       on: {
         SOURCE_UPDATED: [
+          { unless: "hasSource", break: true },
           {
             do: [
               "updateFromDatabase",
               "updateCodePanelState",
-              "resetConsole",
               "createStatic",
               "createCaptiveState",
               "setEventMap",
@@ -56,13 +56,15 @@ const projectState = createState({
               "setEventMap",
             ],
           },
-          "resetConsole",
         ],
         UNLOADED: { to: "loading" },
       },
     },
   },
   conditions: {
+    hasSource(data, { source }) {
+      return !!source
+    },
     captiveHasChanged(data, { source }) {
       const { code } = data
       return code.state !== source.code.state
@@ -201,3 +203,5 @@ export function collectEventsFromState(
 
   return acc
 }
+
+// projectState.onUpdate((d) => console.log(d.active, d.log[0]))

@@ -16,7 +16,6 @@ select {
 body {
   position: fixed;
   width: 100%;
-  overflow: hidden;
   overscroll-behavior: none;
   -webkit-overflow-scrolling: none;
   margin: 0;
