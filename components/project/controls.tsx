@@ -37,7 +37,7 @@ interface ControlsProps {
 }
 
 export default function Controls({ oid, pid, uid }: ControlsProps) {
-  const project = useProject(pid, oid)
+  const { project } = useProject(pid, oid)
 
   async function openCodeSandbox() {
     const link = await getCodeSandboxUrl(oid, pid).catch((e) => {})
@@ -67,7 +67,7 @@ export default function Controls({ oid, pid, uid }: ControlsProps) {
 
   return (
     <ControlsContainer>
-      {!(oid === uid) && (
+      {uid && !(oid === uid) && (
         <IconButton
           title="Copy Project"
           onClick={() =>

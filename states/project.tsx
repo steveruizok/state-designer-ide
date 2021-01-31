@@ -31,7 +31,6 @@ const projectState = createState({
             do: [
               "updateFromDatabase",
               "updateCodePanelState",
-              "resetConsole",
               "createStatic",
               "createCaptiveState",
               "setEventMap",
@@ -57,7 +56,6 @@ const projectState = createState({
               "setEventMap",
             ],
           },
-          "resetConsole",
         ],
         UNLOADED: { to: "loading" },
       },
@@ -89,8 +87,6 @@ const projectState = createState({
       data.name = name
       data.oid = oid
       data.pid = pid
-
-      console.log("loaded, notifying code panel state")
 
       codePanelState.send("SOURCE_LOADED", {
         state: stateCode,
@@ -208,4 +204,4 @@ export function collectEventsFromState(
   return acc
 }
 
-projectState.onUpdate((d) => console.log(d.active, d.log[0]))
+// projectState.onUpdate((d) => console.log(d.active, d.log[0]))

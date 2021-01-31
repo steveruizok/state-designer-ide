@@ -11,6 +11,7 @@ export const printFrom = function printFrom(
     .map((m) => (typeof m === "string" ? m : JSON.stringify(m, null, 2)))
     .join(", ")
 
+  console.log(...messages)
   consoleState.send("LOGGED", { source, message })
 }
 

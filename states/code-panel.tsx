@@ -555,4 +555,4 @@ const codePanelState = createState({
 
 export default codePanelState
 
-codePanelState.onUpdate((d) => console.log(d.active, d.log[0]))
+// codePanelState.onUpdate((d) => console.log(d.active, d.log[0]))

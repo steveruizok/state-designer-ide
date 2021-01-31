@@ -57,7 +57,6 @@ const dialogState = createState({
               },
             },
             loading: {
-              onEnter: () => console.log("let's goo!"),
               async: {
                 await: "createNewProject",
                 onResolve: { to: "closed" },
@@ -79,7 +78,7 @@ const dialogState = createState({
             confirmingNewDuplicate: {
               on: {
                 CHANGED_PROJECT_NAME: "setProjectName",
-                CONFIRMED: { to: "duplicateProject" },
+                CONFIRMED: { to: "duplicatingProject.loading" },
               },
             },
             loading: {
@@ -170,14 +169,14 @@ const dialogState = createState({
 
       return
     },
-    async duplicateProject(data, { oid, pid }) {
+    async duplicateProject(data) {
       const { project, currentName } = data.project
 
       const source = await db
         .collection("users")
-        .doc(oid)
+        .doc(project.ownerId)
         .collection("projects")
-        .doc(pid)
+        .doc(project.id)
         .get()
 
       if (!source.exists) {
@@ -212,3 +211,5 @@ const dialogState = createState({
 })
 
 export default dialogState
+
+// dialogState.onUpdate((d) => console.log(d.active, d.log[0]))

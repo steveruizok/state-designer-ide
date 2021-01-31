@@ -158,11 +158,15 @@ function UserPage({}: UserPageProps) {
                       Rename
                     </DropdownItem>
                     <DropdownItem
-                      onSelect={() =>
+                      onSelect={() => {
+                        console.log(
+                          "finding project",
+                          projects.find((p) => p.id === id),
+                        )
                         dialogState.send("OPENED_PROJECT_DUPLICATE_DIALOG", {
                           project: projects.find((p) => p.id === id),
                         })
-                      }
+                      }}
                     >
                       Duplicate
                     </DropdownItem>
