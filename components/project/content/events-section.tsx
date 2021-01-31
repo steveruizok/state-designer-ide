@@ -6,7 +6,7 @@ import { EventDetails } from "types"
 import { getFlatStates } from "utils"
 
 import EventItem from "./event-item"
-import { ContentSection, ContentTitle } from "./shared"
+import { ContentWrapper, ContentSection, ContentTitle } from "./shared"
 
 const AUTOEVENT_NAMES = ["onEnter", "onExit", "onEvent"]
 
@@ -21,7 +21,7 @@ export default function EventsSection({}: StatesSectionProps) {
   const [zap, setZap] = React.useState(false)
 
   return (
-    <>
+    <ContentWrapper>
       <ContentTitle>Events</ContentTitle>
       <ContentSection
         onMouseLeave={(e) => {
@@ -32,6 +32,6 @@ export default function EventsSection({}: StatesSectionProps) {
           <EventItem key={i} eventName={eventName} event={event} zap={zap} />
         ))}
       </ContentSection>
-    </>
+    </ContentWrapper>
   )
 }

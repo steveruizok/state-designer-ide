@@ -94,7 +94,7 @@ export default function Payloads({}: PayloadsProps) {
 
   return (
     <PayloadsContainer>
-      <ContentTitle>
+      <ContentTitle onDoubleClick={toggleExpanded}>
         <Text variant="ui">Event Payloads</Text>
         <IconButton
           title={expanded ? "Collapse panel" : "Expand panel"}
@@ -180,15 +180,17 @@ const ContentTitle = styled.div({
   display: "flex",
   fontSize: "$1",
   alignItems: "center",
+  justifyContent: "space-between",
   bg: "$muted",
   p: "$1",
   pr: "$0",
   height: 40,
+  width: "100%",
   color: "$text",
   borderBottom: "1px solid $shadow",
   whiteSpace: "nowrap",
   "& p": {
-    flexGrow: 1,
+    flexGrow: 2,
   },
 })
 
