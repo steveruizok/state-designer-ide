@@ -1,9 +1,11 @@
 import * as React from "react"
 import * as Types from "types"
+import { useAuthUser } from "next-firebase-auth"
 
-import ContentPanel, { CONTENT_COL_WIDTH } from "./content-panel"
+import ProjectMeta from "components/project-meta"
+import ContentPanel from "./content-panel"
 import DetailsPanel, { DETAILS_ROW_HEIGHT } from "./details-panel"
-import { checkAuth, setCustomToken, subscribeToProject } from "lib/database"
+import { checkAuth, subscribeToProject } from "lib/database"
 import { motionValues, loadPanelOffsets } from "lib/local-data"
 
 import ChartView from "./chart-view"
@@ -24,16 +26,12 @@ export const CODE_COL_WIDTH = 320
 interface ProjectViewProps {
   oid: string
   pid: string
-  uid?: string
-  user: Types.User
-  token?: string
-  isOwner?: boolean
-  projectData: Types.ProjectData
 }
 
-function ProjectView({ oid, pid, uid, user, token }: ProjectViewProps) {
+function ProjectView({ oid, pid }: ProjectViewProps) {
   const rMainContainer = React.useRef<HTMLDivElement>(null)
   const rUnsub = React.useRef<any>()
+  const user = useAuthUser()
 
   React.useEffect(() => {
     function handleRouteChange() {
@@ -41,8 +39,6 @@ function ProjectView({ oid, pid, uid, user, token }: ProjectViewProps) {
       codePanelState.send("UNLOADED")
       rUnsub.current?.()
     }
-
-    setCustomToken(token)
 
     // Subscribe to the firebase document on mount.
     subscribeToProject(pid, oid, (source) => {
@@ -52,9 +48,6 @@ function ProjectView({ oid, pid, uid, user, token }: ProjectViewProps) {
         pid,
       })
     }).then((unsub) => (rUnsub.current = unsub))
-
-    // Consider removing this—we'll get the custom token when we need it.
-    checkAuth()
 
     // Let's make sure that the panels are set up right, too.
     loadPanelOffsets()
@@ -71,10 +64,11 @@ function ProjectView({ oid, pid, uid, user, token }: ProjectViewProps) {
 
   return (
     <Layout>
+      <ProjectMeta oid={oid} pid={pid} />
       <TitleRow>
-        <Menu user={user} />
-        <Title pid={pid} oid={oid} readOnly={oid !== uid} />
-        <Controls oid={oid} pid={pid} uid={uid} />
+        <Menu />
+        <Title pid={pid} oid={oid} readOnly={oid !== user.id} />
+        <Controls oid={oid} pid={pid} uid={user.id} />
       </TitleRow>
       <BodyRow>
         <ContentPanel />
@@ -92,7 +86,7 @@ function ProjectView({ oid, pid, uid, user, token }: ProjectViewProps) {
             offset="main"
           />
         </MainContainer>
-        <CodePanel oid={oid} pid={pid} uid={uid} />
+        <CodePanel oid={oid} pid={pid} uid={user.id} />
       </BodyRow>
     </Layout>
   )

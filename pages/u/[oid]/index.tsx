@@ -202,7 +202,7 @@ export const getServerSideProps = withAuthUserSSR({
 export default withAuthUser({
   whenUnauthedAfterInit: AuthAction.REDIRECT_TO_LOGIN,
   whenUnauthedBeforeInit: AuthAction.SHOW_LOADING,
-  whenAuthed: AuthAction.SHOW_LOADING,
+  whenAuthed: AuthAction.RENDER,
   LoaderComponent: Loading,
 })(UserPage)
 

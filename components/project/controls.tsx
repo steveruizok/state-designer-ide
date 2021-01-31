@@ -20,13 +20,14 @@ import IconDropdown, {
 
 import codePanelState from "states/code-panel"
 import dialogState from "states/dialog"
-import { ui, resetOffsets } from "lib/local-data"
+import { resetOffsets } from "lib/local-data"
 import { getCodeSandboxUrl } from "lib/database"
 import toastState from "states/toast"
 import useProject from "hooks/useProject"
 import useTheme from "hooks/useTheme"
-import projectState from "states/project"
 import uiState from "states/ui"
+import { useAuthUser } from "next-firebase-auth"
+import { useRouter } from "next/router"
 
 interface ControlsProps {
   oid: string
@@ -124,6 +125,8 @@ const ControlsContainer = styled.div({
 })
 
 function Settings() {
+  const router = useRouter()
+  const user = useAuthUser()
   const {
     data: { minimap, fontSize, wordWrap },
   } = useStateDesigner(codePanelState)
@@ -222,6 +225,26 @@ function Settings() {
       >
         Reset Font Size
       </DropdownItem>
+      <DropdownSeparator />
+      <DropdownLabel>Account</DropdownLabel>
+      {user.id ? (
+        <DropdownItem
+          onSelect={(e) => {
+            e.preventDefault()
+            user.signOut()
+          }}
+        >
+          Sign Out
+        </DropdownItem>
+      ) : (
+        <DropdownItem
+          onSelect={(e) => {
+            router.push("/auth")
+          }}
+        >
+          Sign In
+        </DropdownItem>
+      )}
     </IconDropdown>
   )
 }

@@ -1,4 +1,6 @@
+import { useStateDesigner } from "@state-designer/react"
 import Head from "next/head"
+import projectState from "states/project"
 
 interface Props {
   name: string
@@ -6,8 +8,10 @@ interface Props {
   pid: string
 }
 
-export default function ProjectMeta({ name, oid, pid }: Props) {
-  const title = `${name} - State Designer`
+export default function ProjectMeta({ oid, pid }: Props) {
+  const { data } = useStateDesigner(projectState)
+
+  const title = data.name ? `${data.name} - State Designer` : `Loading...`
   const DESCRIPTION = "Prototype with an interactive state chart."
   const IMAGE = `https://app.state-designer.com/api/u/${oid}/p/${pid}/screenshot`
   const URL = "https://app.state-designer.com"
