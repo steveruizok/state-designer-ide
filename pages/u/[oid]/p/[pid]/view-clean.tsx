@@ -1,11 +1,10 @@
 import * as React from "react"
-
+import db from "utils/firestore"
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 import LiveView from "components/project/live-view"
 import LiveViewControls from "components/project/react-view"
 
 import Head from "next/head"
-import { getProjectData } from "lib/database"
 import { single } from "utils"
 import { styled } from "components/theme"
 
@@ -43,25 +42,27 @@ export async function getServerSideProps(
 ): Promise<GetServerSidePropsResult<PageProps>> {
   const { oid, pid, console } = context.query
 
-  const projectData = await getProjectData(single(pid), single(oid))
+  const project = await db
+    .collection("users")
+    .doc(single(oid))
+    .collection("projects")
+    .doc(single(pid))
+    .get()
 
-  if (!projectData) {
+  if (!project.exists) {
     context.res.setHeader("Location", `/u/${oid}/p/${pid}/not-found`)
     context.res.statusCode = 307
     return {
       props: { isProject: false },
     }
   }
-
-  ;(projectData as any).timestamp = null
-
   return {
     props: {
       oid: single(oid),
       pid: single(pid),
-      name: projectData.name,
+      name: project.data().name,
       isProject: true,
-      showConsole: console === "true",
+      showConsole: single(console) === "true",
     },
   }
 }
@@ -84,18 +85,4 @@ const Layout = styled.div({
   [`& ${LiveViewControls}`]: {
     visibility: "hidden",
   },
-})
-
-const NavContainer = styled.nav({
-  position: "absolute",
-  top: 0,
-  left: 0,
-  display: "flex",
-  zIndex: 999999,
-  width: "100%",
-  height: 40,
-})
-
-const Spacer = styled.div({
-  flexGrow: 2,
 })

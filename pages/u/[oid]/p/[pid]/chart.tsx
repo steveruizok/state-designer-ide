@@ -1,5 +1,5 @@
 import * as React from "react"
-
+import db from "utils/firestore"
 import { Button, IconButton, styled } from "components/theme"
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 
@@ -7,7 +7,6 @@ import ChartView from "components/project/chart-view"
 import Head from "next/head"
 import Link from "next/link"
 import { Sun } from "react-feather"
-import { getProjectData } from "lib/database"
 import { single } from "utils"
 import useTheme from "hooks/useTheme"
 
@@ -56,23 +55,25 @@ export async function getServerSideProps(
 ): Promise<GetServerSidePropsResult<PageProps>> {
   const { oid, pid } = context.query
 
-  const projectData = await getProjectData(single(pid), single(oid))
+  const project = await db
+    .collection("users")
+    .doc(single(oid))
+    .collection("projects")
+    .doc(single(pid))
+    .get()
 
-  if (!projectData) {
+  if (!project.exists) {
     context.res.setHeader("Location", `/u/${oid}/p/${pid}/not-found`)
     context.res.statusCode = 307
     return {
       props: { isProject: false },
     }
   }
-
-  ;(projectData as any).timestamp = null
-
   return {
     props: {
       oid: single(oid),
       pid: single(pid),
-      name: projectData.name,
+      name: project.data().name,
       isProject: true,
     },
   }

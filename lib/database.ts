@@ -135,33 +135,3 @@ export default function App() {
     },
   }
 }
-
-export async function getProjectData(
-  pid: string,
-  oid: string,
-): Promise<Types.ProjectData> {
-  const doc = await db
-    .collection("users")
-    .doc(oid)
-    .collection("projects")
-    .doc(pid)
-    .get()
-
-  if (doc.exists) {
-    return { id: doc.id, ...doc.data() } as Types.ProjectData
-  } else {
-    return undefined
-  }
-}
-
-export async function getCodeSandboxUrl(oid: string, pid: string) {
-  var path = `/api/sandbox`
-  var url = process.env.NEXT_PUBLIC_BASE_API_URL + path
-  return await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ oid, pid }),
-  }).then((d) => d.json())
-}

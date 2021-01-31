@@ -21,7 +21,6 @@ import IconDropdown, {
 import codePanelState from "states/code-panel"
 import dialogState from "states/dialog"
 import { resetOffsets } from "lib/local-data"
-import { getCodeSandboxUrl } from "lib/database"
 import toastState from "states/toast"
 import useProject from "hooks/useProject"
 import useTheme from "hooks/useTheme"
@@ -40,7 +39,14 @@ export default function Controls({ oid, pid, uid }: ControlsProps) {
   const { project } = useProject(pid, oid)
 
   async function openCodeSandbox() {
-    const link = await getCodeSandboxUrl(oid, pid).catch((e) => {})
+    var path = `/api/sandbox`
+    var url = process.env.NEXT_PUBLIC_BASE_API_URL + path
+
+    const link = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ oid, pid }),
+    }).then((d) => d.json())
 
     if (!link) {
       toastState.send("ADDED_TOAST", {
