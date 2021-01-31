@@ -82,7 +82,7 @@ const codePanelState = createState({
     },
   },
   on: {
-    UNLOADED: { do: "cleanup", to: ["loading"] },
+    UNLOADED: { do: "cleanup", to: ["stageB"] },
     SOURCE_UPDATED: ["updateFromDatabase", "notifyLiveViewClean"],
     CHANGED_CODE: ["updateDirtyCode", "highlightBlockTitles"],
     RESET_CODE: [

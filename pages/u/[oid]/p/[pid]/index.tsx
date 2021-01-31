@@ -4,12 +4,10 @@ import ProjectMeta from "components/project-meta"
 import { getCurrentUser } from "lib/auth-server"
 import { getProjectData, getProjectExists } from "lib/database"
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next"
-import dynamic from "next/dynamic"
 import * as React from "react"
 import * as Types from "types"
 import { single } from "utils"
-
-// const ProjectView = dynamic(() => import("components/project"))
+import MonacoProvider from "components/monaco-provider"
 
 interface ProjectFoundPageProps {
   oid: string
@@ -40,15 +38,17 @@ export default function ProjectPage(props: ProjectPageProps) {
   return isMounted ? (
     <>
       <ProjectMeta name={projectData.name || ""} oid={oid} pid={pid} />
-      <ProjectView
-        oid={oid}
-        pid={pid}
-        uid={uid}
-        user={user}
-        token={token}
-        isOwner={isOwner}
-        projectData={projectData}
-      />
+      <MonacoProvider>
+        <ProjectView
+          oid={oid}
+          pid={pid}
+          uid={uid}
+          user={user}
+          token={token}
+          isOwner={isOwner}
+          projectData={projectData}
+        />
+      </MonacoProvider>
     </>
   ) : (
     <Loading />

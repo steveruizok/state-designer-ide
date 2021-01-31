@@ -1,32 +1,30 @@
 import * as React from "react"
 import "../styles/globals.css"
 
-import MonacoProvider from "components/monaco-provider"
 import Head from "next/head"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/router"
-// import codePanelState from "states/code-panel"
+import codePanelState from "states/code-panel"
 
 const Dialog = dynamic(() => import("components/dialog"))
 const Toast = dynamic(() => import("components/toast"))
 
 const TITLE = "State Designer"
 const DESCRIPTION = "Prototype with an interactive state chart."
-const OG_IMAGE = "https://app.state-designer.com/sd-social-og.jpg"
 const TW_IMAGE = "https://app.state-designer.com/sd-social-og.jpg"
 const URL = "https://app.state-designer.com"
 
 function MyApp({ Component, pageProps }) {
   const { asPath, events } = useRouter()
 
-  // React.useEffect(() => {
-  //   function handleRouteChange() {
-  //     codePanelState.send("UNLOADED")
-  //   }
+  React.useEffect(() => {
+    function handleRouteChange() {
+      codePanelState.send("UNLOADED")
+    }
 
-  //   events.on("routeChangeStart", handleRouteChange)
-  //   return () => events.off("routeChangeStart", handleRouteChange)
-  // }, [])
+    events.on("routeChangeStart", handleRouteChange)
+    return () => events.off("routeChangeStart", handleRouteChange)
+  }, [])
 
   const isProjectPath =
     asPath.includes("/p/") &&
@@ -55,13 +53,7 @@ function MyApp({ Component, pageProps }) {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@statedesigner" />
       </Head>
-      {isProjectPath ? (
-        <MonacoProvider>
-          <Component {...pageProps} />
-        </MonacoProvider>
-      ) : (
-        <Component {...pageProps} />
-      )}
+      <Component {...pageProps} />
       <Toast />
       <Dialog />
     </>
