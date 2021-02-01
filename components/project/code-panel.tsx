@@ -70,6 +70,7 @@ export default function CodePanel({ uid, pid, oid }: CodePanelProps) {
   // Setup save action and load up the state machine
 
   React.useEffect(() => {
+    console.log(monaco, editor)
     if (!(monaco && editor)) return
 
     editor.onKeyDown((e) => {

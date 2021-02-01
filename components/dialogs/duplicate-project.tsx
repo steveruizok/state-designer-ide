@@ -39,7 +39,6 @@ export default function RenameProjectDialog({}: RenameProjectDialogProps) {
         <StyledClose
           onClick={() => {
             dialogState.send("CONFIRMED")
-            projectState.send("UNLOADED")
           }}
           disabled={currentName.length === 0}
         >

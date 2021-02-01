@@ -17,7 +17,6 @@ import Menu from "./menu"
 import Title from "./title"
 import projectState from "states/project"
 import { styled } from "components/theme"
-import MonacoProvider from "components/monaco-provider"
 
 export const CODE_COL_WIDTH = 320
 
@@ -40,35 +39,39 @@ function ProjectView({ oid, pid }: ProjectViewProps) {
     })
   }, [project])
 
+  React.useEffect(() => {
+    return () => {
+      projectState.send("CHANGED_SOURCE")
+    }
+  }, [oid, pid])
+
   return (
-    <MonacoProvider>
-      <Layout>
-        <ProjectMeta oid={oid} pid={pid} />
-        <TitleRow>
-          <Menu />
-          <Title pid={pid} oid={oid} readOnly={oid !== user.id} />
-          <Controls oid={oid} pid={pid} uid={user.id} />
-        </TitleRow>
-        <BodyRow>
-          <ContentPanel />
-          <MainContainer>
-            <ChartView />
-            <MainDragArea ref={rMainContainer} />
-            <LiveViewContainer>
-              <LiveView />
-              <Console />
-            </LiveViewContainer>
-            <DetailsPanel />
-            <DragHandleHorizontalRelative
-              motionValue={motionValues.main}
-              containerRef={rMainContainer}
-              offset="main"
-            />
-          </MainContainer>
-          <CodePanel oid={oid} pid={pid} uid={user.id} />
-        </BodyRow>
-      </Layout>
-    </MonacoProvider>
+    <Layout>
+      <ProjectMeta oid={oid} pid={pid} />
+      <TitleRow>
+        <Menu />
+        <Title pid={pid} oid={oid} readOnly={oid !== user.id} />
+        <Controls oid={oid} pid={pid} uid={user.id} />
+      </TitleRow>
+      <BodyRow>
+        <ContentPanel />
+        <MainContainer>
+          <ChartView />
+          <MainDragArea ref={rMainContainer} />
+          <LiveViewContainer>
+            <LiveView />
+            <Console />
+          </LiveViewContainer>
+          <DetailsPanel />
+          <DragHandleHorizontalRelative
+            motionValue={motionValues.main}
+            containerRef={rMainContainer}
+            offset="main"
+          />
+        </MainContainer>
+        <CodePanel oid={oid} pid={pid} uid={user.id} />
+      </BodyRow>
+    </Layout>
   )
 }
 

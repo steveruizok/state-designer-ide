@@ -58,6 +58,7 @@ const projectState = createState({
           },
         ],
         UNLOADED: { to: "loading" },
+        CHANGED_SOURCE: { to: "loading" },
       },
     },
   },
