@@ -1,0 +1,1 @@
+import 'monaco-json/monaco';

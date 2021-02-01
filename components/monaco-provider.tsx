@@ -1,6 +1,6 @@
 import * as React from "react"
 
-import { MonacoProvider, plugins } from "use-monaco/dist/cjs/use-monaco"
+import { MonacoProvider, plugins } from "lib/use-monaco/cjs/use-monaco"
 
 import useTheme from "hooks/useTheme"
 

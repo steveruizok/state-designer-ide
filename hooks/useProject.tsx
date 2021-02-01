@@ -30,6 +30,7 @@ export default function useProject(pid: string, oid: string) {
     })
 
     return () => {
+      setProject(null)
       unsub?.()
     }
   }, [pid, oid])

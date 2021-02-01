@@ -1,0 +1,1 @@
+{"version":3,"file":"withMonaco.js","sourceRoot":"","sources":["../../../src/react/withMonaco.tsx"],"names":[],"mappings":";;;;AAAA,0DAA0B;AAC1B,0BAGY;AAEZ,SAAgB,UAAU,CAAC,MAAwB,EAAE,SAAmB;IACtE,OAAO,CAAC,EAAE,GAAG,KAAK,EAAE,EAAE,EAAE;QACtB,OAAO,CACL,8BAAC,kBAAc,oBAAK,MAAM;YACxB,8BAAC,SAAS,oBAAK,KAAK,EAAI,CACT,CAClB,CAAC;IACJ,CAAC,CAAC;AACJ,CAAC;AARD,gCAQC"}

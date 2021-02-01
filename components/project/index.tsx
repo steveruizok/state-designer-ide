@@ -21,12 +21,12 @@ import MonacoProvider from "components/monaco-provider"
 
 export const CODE_COL_WIDTH = 320
 
-interface ProjectViewProps {
+interface ProjectProps {
   oid: string
   pid: string
 }
 
-function ProjectView({ oid, pid }: ProjectViewProps) {
+function Project({ oid, pid }: ProjectProps) {
   const rMainContainer = React.useRef<HTMLDivElement>(null)
   const user = useUser()
 
@@ -144,4 +144,4 @@ const LiveViewContainer = styled.div({
   },
 })
 
-export default React.memo(ProjectView)
+export default React.memo(Project)
