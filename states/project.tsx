@@ -46,7 +46,6 @@ const projectState = createState({
           do: ["createStatic", "resetCaptiveState", "resetView"],
         },
         SOURCE_UPDATED: [
-          { unless: "hasSource", to: "loading" },
           {
             ifAny: ["captiveHasChanged", "staticHasChanged"],
             do: [
@@ -89,7 +88,7 @@ const projectState = createState({
       data.oid = oid
       data.pid = pid
 
-      codePanelState.send("SOURCE_UPDATED", {
+      codePanelState.send("SOURCE_LOADED", {
         state: stateCode,
         view: viewCode,
         static: staticCode,

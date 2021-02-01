@@ -2,7 +2,7 @@ import * as React from "react"
 
 import debounce from "lodash/debounce"
 import mergeRefs from "react-merge-refs"
-import { useEditor } from "lib/use-monaco/cjs/use-monaco"
+import { useEditor } from "use-monaco"
 import useMotionResizeObserver from "use-motion-resize-observer"
 import useTheme from "./useTheme"
 

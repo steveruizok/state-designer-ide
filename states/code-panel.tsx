@@ -81,12 +81,8 @@ const codePanelState = createState({
     },
   },
   on: {
-    SOURCE_UPDATED: {
-      if: "projectIsNull",
-      do: "cleanup",
-      to: "loading",
-      else: ["updateFromDatabase", "notifyLiveViewClean"],
-    },
+    UNLOADED: { do: "cleanup", to: "loading" },
+    SOURCE_UPDATED: ["updateFromDatabase", "notifyLiveViewClean"],
     CHANGED_CODE: ["updateDirtyCode", "highlightBlockTitles", "clearViewError"],
     RESET_CODE: [
       "resetCode",
@@ -155,9 +151,7 @@ const codePanelState = createState({
             stageB: {
               on: {
                 LOADED: { to: "stageC" },
-                SOURCE_UPDATED: {
-                  to: "stageC",
-                },
+                SOURCE_UPDATED: { to: "stageC" },
               },
             },
             stageC: {
@@ -187,7 +181,6 @@ const codePanelState = createState({
           ],
           onExit: "saveCurrentViewState",
           on: {
-            UNLOADED: { do: "cleanup", to: "loading" },
             SELECTED_VIEW_TAB: { to: "tab.view" },
             SELECTED_STATIC_TAB: { to: "tab.static" },
           },
@@ -200,7 +193,6 @@ const codePanelState = createState({
           ],
           onExit: "saveCurrentViewState",
           on: {
-            UNLOADED: { do: "cleanup", to: "loading" },
             CHANGED_CODE: { secretlyDo: "notifyLiveViewDirty" },
             SELECTED_STATE_TAB: { to: "tab.state" },
             SELECTED_STATIC_TAB: { to: "tab.static" },
@@ -214,7 +206,6 @@ const codePanelState = createState({
           ],
           onExit: "saveCurrentViewState",
           on: {
-            UNLOADED: { do: "cleanup", to: "loading" },
             SELECTED_STATE_TAB: { to: "tab.state" },
             SELECTED_VIEW_TAB: { to: "tab.view" },
           },
@@ -223,9 +214,6 @@ const codePanelState = createState({
     },
   },
   conditions: {
-    projectIsNull(data, { source }) {
-      return source === null
-    },
     initialTabIsState(_, payload) {
       return ui.code.activeTab === "state"
     },

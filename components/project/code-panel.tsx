@@ -3,7 +3,10 @@ import * as React from "react"
 import { AlertCircle, RefreshCcw, Save } from "react-feather"
 import { IconButton, TabButton, styled } from "components/theme"
 import { motionValues, ui } from "lib/local-data"
-import { useMonacoContext, useTextModel } from "lib/use-monaco/cjs/use-monaco"
+import {
+  useMonacoContext,
+  useTextModel,
+} from "node_modules/use-monaco/dist/cjs/use-monaco"
 
 import { CODE_COL_WIDTH } from "./index"
 import { DragHandleHorizontal } from "./drag-handles"
