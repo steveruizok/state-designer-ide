@@ -49,87 +49,87 @@ export function getNewProject(
     },
     code: {
       state: `export default createState({
-	data: {
-		count: 0,
-	},
-	initial: 'turnedOff',
-	states: {
-		turnedOff: {
-			on: {
-				TOGGLED: {
-					to: 'turnedOn',
-				},
-			},
-		},
-		turnedOn: {
-			on: {
-				TOGGLED: {
-					to: 'turnedOff',
-				},
-				DECREMENTED: {
-					unless: 'atMin',
-					do: 'decrement',
-				},
-				INCREMENTED: {
-					unless: 'atMax',
-					do: 'increment',
-				},
-			},
-		},
-	},
-	conditions: {
-		atMin(data) {
-			return data.count <= 0;
-		},
-		atMax(data) {
-			return data.count >= 10;
-		},
-	},
-	actions: {
-		increment(data) {
-			data.count++;
-		},
-		decrement(data) {
-			data.count--;
-		},
-	},
+  data: {
+    count: 0,
+  },
+  initial: 'turnedOff',
+  states: {
+    turnedOff: {
+      on: {
+        TOGGLED: {
+          to: 'turnedOn',
+        },
+      },
+    },
+    turnedOn: {
+      on: {
+        TOGGLED: {
+          to: 'turnedOff',
+        },
+        DECREMENTED: {
+          unless: 'atMin',
+          do: 'decrement',
+        },
+        INCREMENTED: {
+          unless: 'atMax',
+          do: 'increment',
+        },
+      },
+    },
+  },
+  conditions: {
+    atMin(data) {
+      return data.count <= 0;
+    },
+    atMax(data) {
+      return data.count >= 10;
+    },
+  },
+  actions: {
+    increment(data) {
+      data.count++;
+    },
+    decrement(data) {
+      data.count--;
+    },
+  },
 });
 `,
       view: `import state from './state';
 
 export default function App() {
-	const local = useStateDesigner(state);
+  const local = useStateDesigner(state);
 
-	return (
-		<View>
-			<Container>
-				<Flex>
-					<Heading>{local.data.count}</Heading>
-				</Flex>
-				<IconButton
-					disabled={!local.can('DECREMENTED')}
-					onClick={() => state.send('DECREMENTED')}
-				>
-					<Icons.Minus />
-				</IconButton>
-				<IconButton
-					disabled={!local.can('INCREMENTED')}
-					onClick={() => state.send('INCREMENTED')}
-				>
-					<Icons.Plus />
-				</IconButton>
-				<Button onClick={() => state.send('TOGGLED')}>
-					Turn {local.whenIn({ turnedOff: 'On', turnedOn: 'Off' })}
-				</Button>
-			</Container>
-		</View>
-	);
+  return (
+    <View>
+      <Container>
+        <Flex>
+          <Heading>{local.data.count}</Heading>
+        </Flex>
+        <IconButton
+          disabled={!local.can('DECREMENTED')}
+          onClick={() => state.send('DECREMENTED')}
+        >
+          <Icons.Minus />
+        </IconButton>
+        <IconButton
+          disabled={!local.can('INCREMENTED')}
+          onClick={() => state.send('INCREMENTED')}
+        >
+          <Icons.Plus />
+        </IconButton>
+        <Button onClick={() => state.send('TOGGLED')}>
+          Turn {local.whenIn({ turnedOff: 'On', turnedOn: 'Off' })}
+        </Button>
+      </Container>
+    </View>
+  );
 }
 `,
       static: `export default function getStatic() {
-	return {
-		title: 'Counter',
-	};
+  return {
+    title: 'Counter',
+  };
 }
 `,
     },
