@@ -180,21 +180,22 @@ const StyledCheckbox = styled(_Checkbox.Root, {
   },
 })
 
-export const Checkbox = React.forwardRef<
-  HTMLInputElement,
-  _Checkbox.CheckboxOwnProps
->((props: _Checkbox.CheckboxOwnProps, ref) => (
-  <StyledCheckbox
-    defaultChecked
-    {...props}
-    onCheckedChange={props.onChange}
-    ref={ref}
-  >
-    <_Checkbox.Indicator>
-      <Check strokeWidth={4} />
-    </_Checkbox.Indicator>
-  </StyledCheckbox>
-))
+interface CheckboxProps extends Partial<_Checkbox.CheckboxOwnProps> {}
+
+export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
+  (props, ref) => (
+    <StyledCheckbox
+      defaultChecked
+      {...props}
+      onCheckedChange={props.onCheckedChange || props.onChange}
+      ref={ref}
+    >
+      <_Checkbox.Indicator>
+        <Check strokeWidth={4} />
+      </_Checkbox.Indicator>
+    </StyledCheckbox>
+  ),
+)
 
 export const Label = styled.label({
   fontSize: "$1",

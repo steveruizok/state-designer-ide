@@ -6,6 +6,7 @@ import codePanelState from "./code-panel"
 import consoleState from "./console"
 import { findFirstTransitionTarget } from "utils"
 import liveViewState from "./live-view"
+import uiState from "./ui"
 
 const projectState = createState({
   data: {
@@ -110,11 +111,40 @@ const projectState = createState({
       }
     },
     createCaptiveState(data) {
+      let prevCaptive = data.captive
+
       try {
         data.captive = getCaptiveState(data.code.state, data.code.static)
       } catch (err) {
         console.error("Error building captive state!", err.message)
       }
+
+      if (!prevCaptive) return
+      if (!uiState.data.captive.attemptRestore) return
+
+      // Attempt to restore the previously active state nodes.
+      forLeaves(data.captive.stateTree, (node) => {
+        const path = node.path.match(/root\.(.*)/)?.[1]
+        if (path) {
+          const prevNode = getNodeByPath(prevCaptive.stateTree, path)
+          if (prevNode) {
+            if (
+              node.isInitial !== node.isInitial ||
+              node.active === prevNode.active
+            )
+              return
+            try {
+              data.captive.forceTransition(path)
+            } catch (e) {
+              console.log("could not force transition to", node.name)
+            }
+          }
+        }
+
+        // In order to restore the previous active data, we would need to
+        // verify that the data section of the state's source code has not
+        // changed, otherwise no new data could be added or removed.
+      })
     },
     resetConsole(data) {
       consoleState.send("RESET")
@@ -206,3 +236,40 @@ export function collectEventsFromState(
 }
 
 // projectState.onUpdate((d) => console.log(d.active, d.log[0]))
+
+function getNodeByPath(root: S.State<any, any>, path: string) {
+  const steps = path.split(".")
+  return steps.reduce(
+    // @ts-ignore
+    (acc, cur) => acc?.states[cur],
+    root,
+  )
+}
+
+function forLeaves(
+  node: S.State<any, any>,
+  callback: (node: S.State<any, any>) => void,
+) {
+  if (!node.states) {
+    console.log(node.name)
+    return
+  }
+  const children = Object.values(node.states)
+  if (children.length > 0) {
+    for (let child of children) {
+      forLeaves(child, callback)
+    }
+  } else {
+    callback(node)
+  }
+}
+
+function walk(
+  node: S.State<any, any>,
+  callback: (node: S.State<any, any>) => void,
+) {
+  callback(node)
+  for (let childId in node.states) {
+    walk(node.states[childId], callback)
+  }
+}

@@ -1,7 +1,7 @@
 import * as React from "react"
 
 import { AnimateSharedLayout } from "framer-motion"
-import { Button, IconButton, styled } from "components/theme"
+import { Button, IconButton, Label, Checkbox, styled } from "components/theme"
 import { Compass, RotateCcw } from "react-feather"
 import { S, useStateDesigner } from "@state-designer/react"
 import { useAnimation, useMotionValue } from "framer-motion"
@@ -11,6 +11,7 @@ import StateNode from "./state-node"
 import highlightsState from "states/highlights"
 import { motion } from "framer-motion"
 import projectState from "states/project"
+import uiState from "states/ui"
 import debounce from "lodash/debounce"
 import useMotionResizeObserver from "use-motion-resize-observer"
 import usePreventZooming from "hooks/usePreventZooming"
@@ -193,15 +194,18 @@ function Chart({ state, zoomedPath }: ChartProps) {
         </StateNodeContainer>
       </ChartCanvas>
       <CanvasControls>
-        <Button
-          data-hidey="true"
-          title="Reset Canvas"
-          variant="iconLeft"
-          disabled={captive.log.length === 0}
-          onClick={() => projectState.send("RESET_STATE")}
-        >
-          <RotateCcw size={14} strokeWidth={3} /> Reset State
-        </Button>
+        <CanvasControlButtons>
+          <Button
+            data-hidey="true"
+            title="Reset Canvas"
+            variant="iconLeft"
+            disabled={captive.log.length === 0}
+            onClick={() => projectState.send("RESET_STATE")}
+          >
+            <RotateCcw size={14} strokeWidth={3} /> Reset State
+          </Button>
+          <PreserveStateButton />
+        </CanvasControlButtons>
         <IconButton data-hidey="true" title="Reset Canvas" onClick={resetView}>
           <Compass />
         </IconButton>
@@ -211,6 +215,19 @@ function Chart({ state, zoomedPath }: ChartProps) {
 }
 
 export default React.memo(Chart)
+
+function PreserveStateButton() {
+  const local = useStateDesigner(uiState)
+  return (
+    <FlexLabel data-hidey="true">
+      <Checkbox
+        checked={local.data.captive.attemptRestore}
+        onCheckedChange={() => uiState.send("TOGGLED_ATTEMPT_RESTORE_STATE")}
+      />
+      Preserve State
+    </FlexLabel>
+  )
+}
 
 const RootNodeWrapper = styled(motion.div, {})
 
@@ -245,6 +262,23 @@ export const CanvasControls = styled.div({
   display: "flex",
   justifyContent: "space-between",
   bg: "$scrim",
+})
+
+const CanvasControlButtons = styled.div({
+  display: "flex",
+  "& > *": {
+    mr: "$1",
+  },
+})
+
+const FlexLabel = styled.label({
+  display: "flex",
+  fontSize: "$1",
+  alignItems: "center",
+  button: {
+    mr: "$1",
+  },
+  cursor: "pointer",
 })
 
 /* --------------------- Helpers -------------------- */

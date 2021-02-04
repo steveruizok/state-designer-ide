@@ -1,9 +1,8 @@
-import { S } from "@state-designer/react"
-import { IconButton, styled } from "components/theme"
+import { styled } from "components/theme"
 import { Disc, MoreHorizontal } from "react-feather"
-
-// import IconSelect from "../icon-select"
-import ProjectState from "../../../states/project"
+import IconDropdown, { DropdownItem } from "components/icon-dropdown"
+import projectState from "states/project"
+import { S } from "@state-designer/react"
 
 const NodeHeading: React.FC<{
   node: S.State<any, any>
@@ -14,23 +13,14 @@ const NodeHeading: React.FC<{
         <Disc strokeWidth={3} size={12} style={{ marginRight: 2 }} />
       )}
       <h3>{node.name}</h3>
-      <IconButton data-hidey="true">
-        <MoreHorizontal />
-      </IconButton>
-      {/* <IconSelect
-        data-hidey="true"
-        icon={<MoreVertical />}
-        title="State"
-        options={{
-          "Zoom to State": () => UI.send("ZOOMED_TO_NODE", { path: node.path }),
-          "Force Transition": () =>
-            ProjectState.data.captive.forceTransition(node.name),
-          "Force Previous Transition": () =>
-            ProjectState.data.captive.forceTransition(node.name + ".previous"),
-          "Force Restore Transition": () =>
-            ProjectState.data.captive.forceTransition(node.name + ".restore"),
-        }}
-      /> */}
+      <IconDropdown icon={<MoreHorizontal size={16} />}>
+        <DropdownItem
+          disabled={node.active}
+          onSelect={() => projectState.data.captive?.forceTransition(node.name)}
+        >
+          Force Transition
+        </DropdownItem>
+      </IconDropdown>
     </NodeHeadingContainer>
   )
 }

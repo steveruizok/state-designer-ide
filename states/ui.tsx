@@ -1,6 +1,10 @@
 import { createState } from "@state-designer/react"
 
 let INITIAL = {
+  version: 0,
+  captive: {
+    attemptRestore: true,
+  },
   details: {
     activeTab: "data",
     wrap: false,
@@ -34,7 +38,9 @@ if (typeof window !== "undefined") {
   const savedUI = window.localStorage.getItem(`sd_ui`)
   if (savedUI !== null) {
     const saved = JSON.parse(savedUI)
-    INITIAL = { ...INITIAL, ...saved }
+    if (saved.version === INITIAL.version) {
+      INITIAL = { ...INITIAL, ...saved }
+    }
   }
 }
 
@@ -42,10 +48,14 @@ const uiState = createState({
   data: INITIAL,
   on: {
     TOGGLED_CONTENT_PANEL: ["toggleContentPanel"],
+    TOGGLED_ATTEMPT_RESTORE_STATE: "toggleAttemptRestoreState",
   },
   actions: {
     toggleContentPanel(data) {
       data.content.visible = !data.content.visible
+    },
+    toggleAttemptRestoreState(data) {
+      data.captive.attemptRestore = !data.captive.attemptRestore
     },
   },
 })
