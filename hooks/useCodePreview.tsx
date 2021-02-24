@@ -57,7 +57,7 @@ export default function useCodePreview({
     }
 
     if (inline) {
-      transformed = `function App() { return ${transformed} }`
+      transformed = `function App() { return <ErrorBoundary>${transformed}</ErrorBoundary> }`
     } else {
       if (!/App/.test(transformed)) {
         setError("Your code must include a component named App.")

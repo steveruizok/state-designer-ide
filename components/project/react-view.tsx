@@ -34,6 +34,7 @@ import useCodePreview from "hooks/useCodePreview"
 import { useStateDesigner } from "@state-designer/react"
 import useTheme from "hooks/useTheme"
 import codePanelState from "states/code-panel"
+import ErrorBoundary from "components/project/error-boundary"
 
 const Components = {
   Box,
@@ -202,6 +203,7 @@ function ReactView({
       rLiveView,
       usePointer,
       useKeyboardInputs,
+      ErrorBoundary,
     },
     deps: [staticResults, state, resets],
   })

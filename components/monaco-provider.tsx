@@ -95,11 +95,11 @@ export default function CustomMonacoProvider({ children }) {
             ?.loadTypes("react", "17.0.1")
           monaco.languages.typescript?.loadTypes(
             "@state-designer/react",
-            "1.3.35",
+            "1.5.2",
           )
           monaco.languages.typescript?.loadTypes(
             "@state-designer/core",
-            "1.3.35",
+            "1.5.2",
           )
           monaco.languages.typescript?.loadTypes("react-feather", "2.0.9")
           monaco.languages.typescript?.loadTypes("framer-motion", "3.1.1")
