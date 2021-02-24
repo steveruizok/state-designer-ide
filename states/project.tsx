@@ -134,7 +134,7 @@ const projectState = createState({
 export default projectState
 
 function processEventFromState(
-  state: S.State<any, any>,
+  state: S.State<any>,
   data: any,
   eventName: string,
   event: S.EventHandler<any>,
@@ -185,7 +185,7 @@ function processEventFromState(
 }
 
 export function collectEventsFromState(
-  state: S.State<any, any>,
+  state: S.State<any>,
   data: any,
   acc: Record<string, EventDetails> = {},
 ) {

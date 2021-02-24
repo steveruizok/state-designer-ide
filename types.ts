@@ -91,10 +91,10 @@ export interface HighlightData {
 
 export interface EventDetails {
   eventName: string
-  states: Set<S.State<any, any>>
+  states: Set<S.State<any>>
   targets: {
-    from: S.State<any, any>
-    to: S.State<any, any>
+    from: S.State<any>
+    to: S.State<any>
     isConditional: boolean
     isSecondary: boolean
   }[]

@@ -186,11 +186,11 @@ const highlightsState = createState({
 
 // Helper (copied from @state-designer/core)
 
-export function findTransitionTargets<D = any>(
-  state: S.State<D, any>,
+export function findTransitionTargets<G extends S.DesignedState<any, any>>(
+  state: S.State<G>,
   path: string,
-): S.State<D, any>[] {
-  const acc: S.State<D, any>[] = []
+): S.State<G>[] {
+  const acc: S.State<G>[] = []
 
   let safePath = path.startsWith(".") ? path : "." + path
 

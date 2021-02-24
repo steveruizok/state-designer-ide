@@ -6,7 +6,7 @@ import { Disc, MoreHorizontal } from "react-feather"
 import ProjectState from "../../../states/project"
 
 const NodeHeading: React.FC<{
-  node: S.State<any, any>
+  node: S.State<any>
 }> = ({ node }) => {
   return (
     <NodeHeadingContainer data-isactive={node.active} type={node.type}>

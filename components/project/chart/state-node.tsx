@@ -11,7 +11,7 @@ import NodeHeading from "./node-heading"
 
 interface StateNodeProps {
   layoutId?: string
-  node: S.State<any, any>
+  node: S.State<any>
 }
 
 export default function StateNode({ layoutId, node }: StateNodeProps) {
@@ -27,7 +27,7 @@ export default function StateNode({ layoutId, node }: StateNodeProps) {
 
   const childNodes = sortBy(
     Object.values(node.states || {}),
-    (n: S.State<any, any>) => !n.isInitial,
+    (n: S.State<any>) => !n.isInitial,
   )
 
   // For parallel nodes, find out which children are highlighted
@@ -52,7 +52,9 @@ export default function StateNode({ layoutId, node }: StateNodeProps) {
   // Send ref to highlights state and canvas on mount
   React.useEffect(() => {
     highlightsState.send("MOUNTED_NODE", { path: node.path, ref: rContainer })
-    return () => highlightsState.send("UNMOUNTED_NODE", { path: node.path })
+    return () => {
+      highlightsState.send("UNMOUNTED_NODE", { path: node.path })
+    }
   }, [node])
 
   return (

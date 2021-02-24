@@ -4,11 +4,11 @@ export function single<T>(item: T | T[]) {
   return Array.isArray(item) ? item[0] : item
 }
 
-export function findTransitionTargets<D = any>(
-  state: S.State<D, any>,
+export function findTransitionTargets<G extends S.DesignedState<any, any>>(
+  state: S.State<G>,
   path: string,
-): S.State<D, any>[] {
-  const acc: S.State<D, any>[] = []
+): S.State<G>[] {
+  const acc: S.State<G>[] = []
 
   let safePath = path.startsWith(".") ? path : "." + path
 
@@ -31,14 +31,14 @@ export function findTransitionTargets<D = any>(
   return acc
 }
 
-export function findFirstTransitionTarget<D = any>(
-  rootState: S.State<D, any>,
+export function findFirstTransitionTarget<G extends S.DesignedState<any, any>>(
+  rootState: S.State<G>,
   path: string,
-): S.State<D, any> {
+): S.State<G> {
   return findTransitionTargets(rootState, path)[0]
 }
 
-export function getNodeEvents(node: S.State<any, any>) {
+export function getNodeEvents(node: S.State<any>) {
   const events = Object.entries(node.on)
 
   if (node.onEvent) {
@@ -56,6 +56,6 @@ export function getNodeEvents(node: S.State<any, any>) {
   return events
 }
 
-export function getFlatStates(state: S.State<any, any>): S.State<any, any>[] {
+export function getFlatStates(state: S.State<any>): S.State<any>[] {
   return [state, ...Object.values(state.states).flatMap(getFlatStates)]
 }

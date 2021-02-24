@@ -8,7 +8,7 @@ import projectState from "states/project"
 import { Button, ContentItem } from "./shared"
 
 interface StateItemProps {
-  node: S.State<any, any>
+  node: S.State<any>
   zap: boolean
 }
 

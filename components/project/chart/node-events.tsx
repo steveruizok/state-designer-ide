@@ -7,7 +7,7 @@ import projectState from "states/project"
 import { EventDetails } from "types"
 
 interface NodeEventsProps {
-  node: S.State<any, any>
+  node: S.State<any>
   events: [string, S.EventHandler<any>][]
 }
 
@@ -57,7 +57,7 @@ export default NodeEvents
 
 const EventButton: React.FC<{
   eventName: string
-  node: S.State<any, any>
+  node: S.State<any>
   payload: any
   isHighlit: boolean
   canBeHandled: boolean
@@ -80,11 +80,13 @@ const EventButton: React.FC<{
       id: node.path + "_" + eventName,
       ref: rButton,
     })
-    return () =>
+
+    return () => {
       highlightsState.send("UNMOUNTED_EVENT_BUTTON", {
         id: node.path + "_" + eventName,
         ref: rButton,
       })
+    }
   }, [])
 
   function sendHighlightEvent(shiftKey = false) {
