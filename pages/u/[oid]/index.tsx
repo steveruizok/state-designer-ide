@@ -159,10 +159,6 @@ function UserPage({}: UserPageProps) {
                     </DropdownItem>
                     <DropdownItem
                       onSelect={() => {
-                        console.log(
-                          "finding project",
-                          projects.find((p) => p.id === id),
-                        )
                         dialogState.send("OPENED_PROJECT_DUPLICATE_DIALOG", {
                           project: projects.find((p) => p.id === id),
                         })

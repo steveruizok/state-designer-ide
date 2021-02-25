@@ -2,7 +2,7 @@ import { createState } from "@state-designer/react"
 
 const consoleState = createState({
   data: {
-    logs: [] as string[],
+    logs: [] as { source: string; message: string }[],
     error: null as string | null,
   },
   on: {
@@ -23,7 +23,7 @@ const consoleState = createState({
   },
   actions: {
     addLog(data, payload: { source: string; message: string }) {
-      data.logs.push("› " + payload.message)
+      data.logs.push(payload)
     },
     clearLogs(data) {
       data.logs = []
@@ -38,7 +38,7 @@ const consoleState = createState({
   values: {
     value(data) {
       const { logs } = data
-      return logs.join("\n")
+      return logs.slice(-20)
     },
   },
 })

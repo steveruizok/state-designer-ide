@@ -2,6 +2,7 @@ import { createState } from "@state-designer/react"
 import Colors from "components/static/colors"
 import * as Utils from "components/static/utils"
 import consoleState from "states/console"
+import codePanelState from "states/code-panel"
 
 export const printFrom = function printFrom(
   source: string,
@@ -51,10 +52,32 @@ export function getCaptiveState(
   staticCode: string,
   print = printFromState,
 ) {
+  const onError = (err: Error) => {
+    consoleState.send("LOGGED", { source: "error", message: err.message })
+    codePanelState.send("FOUND_STATE_ERROR", {
+      error: err.message,
+    })
+  }
   try {
     let Static = getStaticValues(staticCode)
-    const code = stateCode.replace("export default ", "")
-    const scope = { createState, Static, Colors, Utils, print, log: print }
+    let code = stateCode.replace("export default ", "")
+    code = code.replace(
+      "});",
+      `  options: { 
+    suppressErrors: true, 
+    onError 
+  }
+});`,
+    )
+    const scope = {
+      createState,
+      Static,
+      Colors,
+      Utils,
+      print,
+      log: print,
+      onError,
+    }
     return Function(...Object.keys(scope), `return ${code}`).call(
       null,
       ...Object.values(scope),

@@ -58,7 +58,7 @@ const rLiveView = React.createRef<HTMLDivElement>()
 // Typed as any because the unions here were choking TS
 const WithMotionComponents: any = Object.fromEntries(
   Object.entries(Components).map(([k, v]) => {
-    return [k, motion.custom(v as any)]
+    return [k, motion(v as any)]
   }),
 )
 
@@ -169,8 +169,8 @@ function ReactView({
   const local = useStateDesigner(projectState)
   const localEditor = useStateDesigner(liveViewState)
   const theme = useTheme()
-  const [resets, setResets] = React.useState(0)
 
+  const resets = localEditor.data.resets
   const state = local.data.captive
   const staticResults = local.data.static
   const dirtyViewCode = localEditor.data.code
@@ -206,15 +206,12 @@ function ReactView({
       ErrorBoundary,
     },
     deps: [staticResults, state, resets],
-  })
-
-  React.useEffect(() => {
-    if (error) {
+    onError: (err) => {
       codePanelState.send("FOUND_VIEW_ERROR", {
-        error: error.replace(/\(.*\)/, ""),
+        error: err.replace(/\(.*\)/, ""),
       })
-    }
-  }, [error])
+    },
+  })
 
   return (
     <LiveViewWrapper showConsole={showConsole}>
@@ -287,7 +284,10 @@ function Controls({ showResetState }: { showResetState: boolean }) {
           title="Reset State"
           variant="iconLeft"
           disabled={localCaptive.log.length === 0}
-          onClick={() => projectState.send("RESET_STATE")}
+          onClick={() => {
+            codePanelState.send("CLEARED_STATE_ERROR")
+            projectState.send("RESET_STATE")
+          }}
         >
           <RotateCcw size={14} strokeWidth={3} /> Reset State
         </Button>
@@ -296,7 +296,10 @@ function Controls({ showResetState }: { showResetState: boolean }) {
         data-hidey="true"
         title="Reset Canvas"
         variant="iconLeft"
-        onClick={() => liveViewState.send("RESET_VIEW")}
+        onClick={() => {
+          codePanelState.send("CLEARED_STATE_ERROR")
+          liveViewState.send("RESET_VIEW")
+        }}
       >
         <RotateCcw size={14} strokeWidth={3} /> Reset View
       </Button>

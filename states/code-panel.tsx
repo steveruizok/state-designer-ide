@@ -97,6 +97,8 @@ const codePanelState = createState({
     TOGGLED_WORD_WRAP: "toggleWordWrap",
     TOGGLED_MINIMAP: "toggleMinimap",
     FOUND_VIEW_ERROR: "setViewError",
+    FOUND_STATE_ERROR: "setStateError",
+    CLEARED_STATE_ERROR: "clearStateError",
   },
   states: {
     editor: {
@@ -346,6 +348,12 @@ const codePanelState = createState({
     },
     setViewError(data, { error }) {
       data.code.view.error = error
+    },
+    setStateError(data, { error }) {
+      data.code.state.error = error
+    },
+    clearStateError(data) {
+      data.code.state.error = ""
     },
     clearViewError(data) {
       data.code.view.error = ""

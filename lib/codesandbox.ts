@@ -862,7 +862,7 @@ const {
   Select,
 } = Object.fromEntries(
   Object.entries(components).map(([k, v]) => {
-    return [k, motion.custom(v)]
+    return [k, motion(v)]
   })
 )
 

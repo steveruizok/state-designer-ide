@@ -705,9 +705,9 @@
   integrity sha512-IaKIopbvaq9EgpZ0kUZCU1sCvUmZUMNaJBJxpG3zAaMzhPdf08xmwtn79yzI3Zs0vKjsu2zpGLoM1+d75esFuw==
 
 "@state-designer/core@latest":
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/@state-designer/core/-/core-1.5.2.tgz#e8af2ebbde206030fcb6f3345451f22224f6bb51"
-  integrity sha512-mgsltCh0OZHGpnZ/GLpmTIva3uQU4LT8WTfotP/s2KsyOI5+wtKmTUM/MelQEQWV7w1OmkxP83xcbdsKMrhong==
+  version "1.5.6"
+  resolved "https://registry.yarnpkg.com/@state-designer/core/-/core-1.5.6.tgz#b7aa6784b9263927fe241139459f787e4373e187"
+  integrity sha512-twQiLk5+sixSrlB+/OtLaiqFdiEH3MY8mHnWAijF4KKYLjqddSI+u/ahdtpzPHUQeFw5YzW6ooKNYyvBHOaJzQ==
   dependencies:
     immer "^8.0.1"
     lodash "^4.17.20"
@@ -715,10 +715,10 @@
     object.entries "^1.1.1"
     object.fromentries "^2.0.2"
 
-"@state-designer/react@^1.5.2":
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/@state-designer/react/-/react-1.5.2.tgz#1a5738561745d9915e353c44f5243407eb4f8be9"
-  integrity sha512-aq1bfe0UrZnRZucFBO73XtorIh9tWAul2aINvwTAacsoF87xtzaB4enyHZUUDm/NfYSwcKwVpDnifMKRniEfmg==
+"@state-designer/react@^1.5.5":
+  version "1.5.6"
+  resolved "https://registry.yarnpkg.com/@state-designer/react/-/react-1.5.6.tgz#c13483646689a4565a6a82054ea6c2e60da3fbb2"
+  integrity sha512-6/ICOt5lJKZn/V7C/AeWsbe64gjor3Ddn2hE/NblViYvFmWokUrLF1lMTa+RnKIvZGkE+KUAv8GGCWvjy5H6zQ==
   dependencies:
     "@state-designer/core" latest
     lodash "^4.17.20"
@@ -1479,9 +1479,9 @@ camelcase@^6.0.0:
   integrity sha512-c7wVvbw3f37nuobQNtgsgG9POC9qMbNuMQmTCqZv23b6MIz0fcYpBiOlv9gEN/hdLdnZTDQhg6e9Dq5M1vKvfg==
 
 caniuse-lite@^1.0.30001093, caniuse-lite@^1.0.30001113, caniuse-lite@^1.0.30001154:
-  version "1.0.30001191"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001191.tgz#bacb432b6701f690c8c5f7c680166b9a9f0843d9"
-  integrity sha512-xJJqzyd+7GCJXkcoBiQ1GuxEiOBCLQ0aVW9HMekifZsAVGdj5eJ4mFB9fEhSHipq9IOk/QXFJUiIr9lZT+EsGw==
+  version "1.0.30001192"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001192.tgz#b848ebc0ab230cf313d194a4775a30155d50ae40"
+  integrity sha512-63OrUnwJj5T1rUmoyqYTdRWBqFFxZFlyZnRRjDR8NSUQFB6A+j/uBORU/SyJ5WzDLg4SPiZH40hQCBNdZ/jmAw==
 
 chalk@2.4.2, chalk@^2.0.0, chalk@^2.4.2:
   version "2.4.2"
@@ -2583,7 +2583,7 @@ fragment-cache@^0.2.1:
   dependencies:
     map-cache "^0.2.2"
 
-framer-motion@^3.1.1:
+framer-motion@^3.1.1, framer-motion@^3.7.0:
   version "3.7.0"
   resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-3.7.0.tgz#57f4c4899223e1a9d76092a865b1245b48806d6c"
   integrity sha512-sEmI/1a0vG91aFV7zW9vGHJ0O7IO+V/KAUWpuGFmXYbE7WojAomRMOgz7EkeOMgSm408jewf8/KNEzWK5b2N5g==

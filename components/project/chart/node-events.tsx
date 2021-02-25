@@ -34,7 +34,9 @@ function NodeEvents({ node, events }: NodeEventsProps) {
         try {
           canBeHandled = local.data.captive.can(name, payload)
         } catch (e) {
-          throw new Error("error while testing event")
+          console.warn(
+            `Error while testing event (${name}). This might be expected.`,
+          )
         }
 
         return (

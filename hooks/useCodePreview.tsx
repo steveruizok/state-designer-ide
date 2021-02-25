@@ -57,7 +57,7 @@ export default function useCodePreview({
     }
 
     if (inline) {
-      transformed = `function App() { return <ErrorBoundary>${transformed}</ErrorBoundary> }`
+      transformed = `function App() { return ${transformed} }`
     } else {
       if (!/App/.test(transformed)) {
         setError("Your code must include a component named App.")
@@ -65,7 +65,7 @@ export default function useCodePreview({
       }
     }
 
-    transformed += `; render(<App/>, elm);`
+    transformed += `; try { render(<App/>, elm) } catch (e) { console.error(e) };`
 
     rWorkerAPI.current
       ?.transpile(transformed, ["jsx"])

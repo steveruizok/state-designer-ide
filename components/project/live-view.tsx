@@ -16,9 +16,7 @@ export default function LiveView({
 }: LiveViewProps) {
   const local = useStateDesigner(projectState)
   return local.isIn("ready") ? (
-    <ErrorBoundary>
-      <ReactView showResetState={showResetState} showConsole={showConsole} />
-    </ErrorBoundary>
+    <ReactView showResetState={showResetState} showConsole={showConsole} />
   ) : (
     <Loading />
   )

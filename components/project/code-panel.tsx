@@ -265,13 +265,14 @@ const CodeEditorControls = styled.div({
 
 const ErrorMessage = styled.div({
   px: "$1",
+  overflow: "auto",
   flexGrow: 2,
   display: "flex",
   alignItems: "center",
   fontSize: "$0",
   color: "$accent",
-  overflow: "hidden",
   whiteSpace: "nowrap",
+  userSelect: "all",
   borderRadius: 4,
   svg: {
     mr: "$1",

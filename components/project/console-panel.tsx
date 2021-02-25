@@ -40,7 +40,10 @@ export default function Console({}: ConsoleProps) {
   function copyCurrent() {
     const elm = document.createElement("textarea")
     document.body.appendChild(elm)
-    elm.value = value
+    elm.value = value.reduce((acc, cur) => {
+      acc += `› ${cur.message}\n`
+      return acc
+    }, "")
     elm.select()
     document.execCommand("copy")
     document.body.removeChild(elm)
@@ -120,7 +123,18 @@ export default function Console({}: ConsoleProps) {
       </TitleRow>
       <CodeWrapper ref={rCodeScroll}>
         <pre>
-          <code>{activeTab === "console" ? value : error}</code>
+          <code>
+            {activeTab === "console"
+              ? value.map((cur, i) => (
+                  <LogMessage
+                    key={i}
+                    variant={cur.source === "error" ? "error" : "log"}
+                  >
+                    › {cur.message}
+                  </LogMessage>
+                ))
+              : error}
+          </code>
         </pre>
       </CodeWrapper>
       <DragHandleVertical
@@ -169,6 +183,19 @@ const CodeWrapper = styled.div({
         "& pre": {
           whiteSpace: "pre-wrap",
         },
+      },
+    },
+  },
+})
+
+const LogMessage = styled.div({
+  variants: {
+    variant: {
+      error: {
+        color: "$accent",
+      },
+      log: {
+        color: "$text",
       },
     },
   },
