@@ -186,6 +186,22 @@ function UserPage({}: UserPageProps) {
             </ProjectLink>
           )}
         </ul>
+        <ListControls>
+          <h2>Examples</h2>
+        </ListControls>
+        <ul>
+          {examples.map(({ title, url }, i) => (
+            <li key={i}>
+              <ProjectLink>
+                <Link href={url}>
+                  <a>
+                    <h4>{title}</h4>
+                  </a>
+                </Link>
+              </ProjectLink>
+            </li>
+          ))}
+        </ul>
       </MainContainer>
     </Layout>
   )
@@ -330,3 +346,61 @@ const ProjectLink = styled.div({
     opacity: 1,
   },
 })
+
+const examples = [
+  {
+    title: "Counter",
+    url:
+      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/PDsNtr48pHqLtcsbzWTE",
+  },
+  {
+    title: "Accordion",
+    url:
+      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/WgGcAy3AsVvgOO5rlLH9",
+  },
+  {
+    title: "Todo",
+    url:
+      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/1xOz5othHd9hTNZduXMH",
+  },
+  {
+    title: "Kitchen Timer",
+    url:
+      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/FE1tiNpYfwU3uDhnpqy1",
+  },
+  {
+    title: "Stopwatch",
+    url:
+      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/aUSjG1PlYsJBbUji9JlX",
+  },
+  {
+    title: "Photo Fetcher",
+    url:
+      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/EoxPbgC5jweHrxg0ft8t",
+  },
+  {
+    title: "Tiles Game",
+    url:
+      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/1EDm1xD40yPOMlaxM7PA",
+  },
+  {
+    title: "Calculator",
+    url:
+      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/kHqYy2SaJyxIMCLpxtLL",
+  },
+  {
+    title: "Snake Game",
+    url:
+      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/53rAL1FzSQp2PAG04e0E",
+  },
+  {
+    title: "Drawing App",
+    url:
+      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/XDXeCbHZCJujK4V9M8xe",
+  },
+  {
+    title: "Tetris",
+    url:
+      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/WRlltvFYeLgczbuxcBni",
+  },
+]

@@ -54,11 +54,11 @@ const Components = {
 
 const rLiveView = React.createRef<HTMLDivElement>()
 
-// Wrap Theme-UI components in Framer Motion
+// Wrap components in Framer Motion
 // Typed as any because the unions here were choking TS
-const WithMotionComponents: any = Object.fromEntries(
+const WithMotionComponents = Object.fromEntries(
   Object.entries(Components).map(([k, v]) => {
-    return [k, motion(v as any)]
+    return [k, motion.custom(v as any)]
   }),
 )
 
