@@ -30,7 +30,7 @@
     "react-use-gesture": "^9.0.0-beta.11",
     "sucrase-browser": "^3.16.0",
     "use-monaco": "^0.0.40",
-    "use-motion-resize-observer": "^2.0.0",
+    "use-motion-resize-observer": "^3.0.1",
     "worker-plugin": "^5.0.0"
   },
   "devDependencies": {
