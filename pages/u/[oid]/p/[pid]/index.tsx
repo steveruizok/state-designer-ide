@@ -11,6 +11,7 @@ interface ProjectFoundPageProps {
   oid: string
   pid: string
   isProject: true
+  isAuthenticated: boolean
 }
 
 interface ProjectNotFoundPageProps {
@@ -20,22 +21,26 @@ interface ProjectNotFoundPageProps {
 type ProjectPageProps = ProjectFoundPageProps | ProjectNotFoundPageProps
 
 function ProjectPage(props: ProjectPageProps) {
-  const user = useAuthUser()
-
   if (!props.isProject) return null
 
   const { oid, pid } = props
 
+  const user = useAuthUser()
   const [mounted, setMounted] = React.useState(false)
-
   React.useEffect(() => setMounted(true))
 
-  return mounted ? <ProjectView oid={oid} pid={pid} /> : <Loading />
+  return mounted ? (
+    <ProjectView oid={oid} pid={pid} readOnly={!props.isAuthenticated} />
+  ) : (
+    <Loading />
+  )
 }
 
 export const getServerSideProps = withAuthUserSSR({
-  whenUnauthed: AuthAction.REDIRECT_TO_LOGIN,
-})(async function getServerSideProps(context: GetServerSidePropsContext) {
+  whenUnauthed: AuthAction.RENDER,
+})(async function getServerSideProps(
+  context: GetServerSidePropsContext & { AuthUser: any },
+) {
   const { oid, pid } = context.query
 
   const project = await db
@@ -54,15 +59,18 @@ export const getServerSideProps = withAuthUserSSR({
   }
 
   return {
-    oid: single(oid),
-    pid: single(pid),
-    isProject: true,
+    props: {
+      oid: single(oid),
+      pid: single(pid),
+      isProject: true,
+      isAuthenticated: !!context.AuthUser.id,
+    },
   }
 })
 
-export default withAuthUser({
+export default withAuthUser<ProjectPageProps>({
   whenUnauthedAfterInit: AuthAction.RENDER,
-  whenUnauthedBeforeInit: AuthAction.SHOW_LOADING,
+  whenUnauthedBeforeInit: AuthAction.RENDER,
   whenAuthed: AuthAction.RENDER,
   LoaderComponent: Loading,
 })(ProjectPage)

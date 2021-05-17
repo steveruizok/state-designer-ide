@@ -78,7 +78,7 @@ function UserPage({}: UserPageProps) {
   return (
     <Layout>
       <Head>
-        <title>{user.name} - State Designer</title>
+        <title>{user.displayName} - State Designer</title>
       </Head>
       <MenuContainer>
         <Link href={user ? `/u/${user.id}` : "/"}>
@@ -94,7 +94,7 @@ function UserPage({}: UserPageProps) {
           </Link>
         )}
       </MenuContainer>
-      <Title>{user.name}</Title>
+      <Title>{user.displayName}</Title>
       <ControlsContainer>
         <IconButton onClick={toggle}>
           <Sun />
@@ -213,7 +213,7 @@ export const getServerSideProps = withAuthUserSSR({
 
 export default withAuthUser({
   whenUnauthedAfterInit: AuthAction.REDIRECT_TO_LOGIN,
-  whenUnauthedBeforeInit: AuthAction.SHOW_LOADING,
+  whenUnauthedBeforeInit: AuthAction.SHOW_LOADER,
   whenAuthed: AuthAction.RENDER,
   LoaderComponent: Loading,
 })(UserPage)
@@ -350,57 +350,46 @@ const ProjectLink = styled.div({
 const examples = [
   {
     title: "Counter",
-    url:
-      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/PDsNtr48pHqLtcsbzWTE",
+    url: "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/PDsNtr48pHqLtcsbzWTE",
   },
   {
     title: "Accordion",
-    url:
-      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/WgGcAy3AsVvgOO5rlLH9",
+    url: "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/WgGcAy3AsVvgOO5rlLH9",
   },
   {
     title: "Todo",
-    url:
-      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/1xOz5othHd9hTNZduXMH",
+    url: "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/1xOz5othHd9hTNZduXMH",
   },
   {
     title: "Kitchen Timer",
-    url:
-      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/FE1tiNpYfwU3uDhnpqy1",
+    url: "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/FE1tiNpYfwU3uDhnpqy1",
   },
   {
     title: "Stopwatch",
-    url:
-      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/aUSjG1PlYsJBbUji9JlX",
+    url: "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/aUSjG1PlYsJBbUji9JlX",
   },
   {
     title: "Photo Fetcher",
-    url:
-      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/EoxPbgC5jweHrxg0ft8t",
+    url: "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/EoxPbgC5jweHrxg0ft8t",
   },
   {
     title: "Tiles Game",
-    url:
-      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/1EDm1xD40yPOMlaxM7PA",
+    url: "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/1EDm1xD40yPOMlaxM7PA",
   },
   {
     title: "Calculator",
-    url:
-      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/kHqYy2SaJyxIMCLpxtLL",
+    url: "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/kHqYy2SaJyxIMCLpxtLL",
   },
   {
     title: "Snake Game",
-    url:
-      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/53rAL1FzSQp2PAG04e0E",
+    url: "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/53rAL1FzSQp2PAG04e0E",
   },
   {
     title: "Drawing App",
-    url:
-      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/XDXeCbHZCJujK4V9M8xe",
+    url: "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/XDXeCbHZCJujK4V9M8xe",
   },
   {
     title: "Tetris",
-    url:
-      "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/WRlltvFYeLgczbuxcBni",
+    url: "https://app.state-designer.com/u/B2ykVQlWDRhhr0UX8YCygoKZAQ92/p/WRlltvFYeLgczbuxcBni",
   },
 ]

@@ -23,10 +23,7 @@ function Home() {
 }
 
 export const getServerSideProps = withAuthUserSSR({
-  whenAuthed: AuthAction.Render,
-})(async ({ AuthUser }) => {
-  // Redirect to user page?
-  return { uid: AuthUser.id }
-})
+  whenAuthed: AuthAction.RENDER,
+})()
 
 export default withAuthUser()(Home)

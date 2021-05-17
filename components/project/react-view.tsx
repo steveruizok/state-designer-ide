@@ -58,7 +58,7 @@ const rLiveView = React.createRef<HTMLDivElement>()
 // Typed as any because the unions here were choking TS
 const WithMotionComponents = Object.fromEntries(
   Object.entries(Components).map(([k, v]) => {
-    return [k, motion.custom(v as any)]
+    return [k, motion(v as any)]
   }),
 )
 

@@ -19,7 +19,7 @@
     "framer-motion": "^3.10.3",
     "lodash-es": "^4.17.20",
     "next": "10.0.3",
-    "next-firebase-auth": "^0.10.0",
+    "next-firebase-auth": "^0.13.1",
     "perfect-arrows": "^0.3.3",
     "playwright-aws-lambda": "^0.6.0",
     "react": "17.0.1",

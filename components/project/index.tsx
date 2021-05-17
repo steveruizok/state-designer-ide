@@ -23,9 +23,10 @@ export const CODE_COL_WIDTH = 320
 interface ProjectViewProps {
   oid: string
   pid: string
+  readOnly: boolean
 }
 
-function ProjectView({ oid, pid }: ProjectViewProps) {
+function ProjectView({ oid, pid, readOnly }: ProjectViewProps) {
   const rMainContainer = React.useRef<HTMLDivElement>(null)
   const user = useUser()
 

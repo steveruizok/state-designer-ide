@@ -1,5 +1,6 @@
 import * as React from "react"
 import useUser from "hooks/useUser"
+import { useRouter } from "next/router"
 
 import { Button, IconButton, styled } from "components/theme"
 
@@ -10,6 +11,7 @@ interface MenuProps {}
 
 export default function Menu({}: MenuProps) {
   const user = useUser()
+  const router = useRouter()
 
   return (
     <MenuContainer>
@@ -18,8 +20,8 @@ export default function Menu({}: MenuProps) {
           <Home />
         </IconButton>
       </Link>
-      {!user && (
-        <Link href="/login">
+      {!user.id && (
+        <Link href={`/auth?mode=select&signInSuccessUrl=${router.asPath}`}>
           <Button title="Log In">Log in</Button>
         </Link>
       )}

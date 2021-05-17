@@ -14,7 +14,9 @@ const firebaseAuthConfig = {
   signInSuccessUrl: "/",
   credentialHelper: "none",
   callbacks: {
-    signInSuccessWithAuthResult: () => false,
+    signInSuccessWithAuthResult: () => {
+      return true
+    },
   },
 }
 
